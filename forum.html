@@ -147,11 +147,29 @@
 <script>
   // Popuni ime i avatar iz URL parametara (?name=...&avatar=...&id=...)
   // koje /api/auth/discord može da prosledi kad preusmeri ovamo.
-  const params = new URLSearchParams(window.location.search);
-  const name = params.get('name');
-  const avatar = params.get('avatar');
-  if (name) document.getElementById('accountName').textContent = name;
-  if (avatar) document.getElementById('accountAvatar').src = avatar;
+const params = new URLSearchParams(window.location.search);
+
+const nameFromUrl = params.get('name');
+const avatarFromUrl = params.get('avatar');
+
+if (nameFromUrl) {
+  localStorage.setItem('discordName', nameFromUrl);
+}
+
+if (avatarFromUrl) {
+  localStorage.setItem('discordAvatar', avatarFromUrl);
+}
+
+const savedName = localStorage.getItem('discordName');
+const savedAvatar = localStorage.getItem('discordAvatar');
+
+if (savedName) {
+  document.getElementById('accountName').textContent = savedName;
+}
+
+if (savedAvatar) {
+  document.getElementById('accountAvatar').src = savedAvatar;
+}
 </script>
 </body>
 </html>
