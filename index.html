@@ -320,19 +320,13 @@
 
 <script>
   /*
-   * ── DISCORD OAUTH — NAPOMENE ZA POVEZIVANJE ─────────────────────
-   * Dugme ispod je vizuelni "okidač" — za pravu prijavu preko Discorda
-   * treba:
-   *   1. Napraviti Discord aplikaciju na discord.com/developers/applications
-   *      i uzeti CLIENT_ID i CLIENT_SECRET.
-   *   2. Ovaj href zameniti pravim OAuth2 linkom, npr.:
-   *      https://discord.com/api/oauth2/authorize?client_id=CLIENT_ID
-   *      &redirect_uri=REDIRECT_URI&response_type=code&scope=identify%20email
-   *   3. Na svom serveru (mali Node/PHP/Python backend) primiti "code",
-   *      zameniti ga za token kod Discorda, i napraviti sesiju/nalog
-   *      za korisnika na forumu.
-   * Sve ovo mora da radi na pravom serveru — statičan sajt sam po sebi
-   * ne može bezbedno da čuva CLIENT_SECRET ni da izdaje sesije.
+   * ── DISCORD OAUTH — POVEZANO ─────────────────────────────────────
+   * Dugme vodi na /api/auth/discord (Vercel serverless funkcija) koja
+   * preusmerava na Discord, prima "code" nazad, menja ga za token i
+   * učitava korisnikov Discord profil. Ako se sajt hostuje van
+   * flamingo-roleplay.vercel.app domena, treba samo ažurirati
+   * REDIRECT_URI u toj funkciji i u Discord Developer Portal-u da se
+   * poklapaju.
    * ──────────────────────────────────────────────────────────────────
    */
   window.addEventListener('load', () => {
