@@ -319,6 +319,11 @@
 </div>
 
 <script>
+  const savedDiscordName = localStorage.getItem('discordName');
+
+if (savedDiscordName) {
+  window.location.href = '/forum.html';
+}
   /*
    * ── DISCORD OAUTH — POVEZANO ─────────────────────────────────────
    * Dugme vodi na /api/auth/discord (Vercel serverless funkcija) koja
