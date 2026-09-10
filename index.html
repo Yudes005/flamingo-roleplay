@@ -319,10 +319,16 @@
 </div>
 
 <script>
-  const savedDiscordName = localStorage.getItem('discordName');
+const savedDiscordName = localStorage.getItem('discordName');
 
 if (savedDiscordName) {
-  window.location.href = '/forum.html';
+  const discordButton = document.getElementById('discordConnectBtn');
+
+  if (discordButton) {
+    discordButton.href = '/forum.html';
+    discordButton.innerHTML =
+      '<i class="fa-solid fa-comments"></i> OTVORI FORUM';
+  }
 }
   /*
    * ── DISCORD OAUTH — POVEZANO ─────────────────────────────────────
