@@ -87,6 +87,60 @@
   .forum-row-text p{color:var(--muted); font-size:13px;}
   .forum-row-arrow{color:var(--muted); font-size:14px; transition:transform .3s ease, color .3s ease;}
   .forum-row:hover .forum-row-arrow{transform:translateX(4px); color:var(--pink-2);}
+
+  /* ---------- PRAVILA — MODAL ---------- */
+  .rules-overlay{position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; overflow-y:auto; padding:6vh 5vw;}
+  .rules-overlay.open{display:flex;}
+  .rules-backdrop{position:fixed; inset:0; background:rgba(4,4,5,.88); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);}
+  .rules-panel{
+    position:relative; width:100%; max-width:520px;
+    background:linear-gradient(165deg, rgba(22,22,25,.95), rgba(7,7,8,.98));
+    border:1px solid rgba(255,255,255,.08); border-radius:24px;
+    padding:40px 34px 34px; box-shadow:0 40px 100px -20px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06);
+    transform:translateY(22px) scale(.97); opacity:0; transition:transform .45s cubic-bezier(.2,.8,.2,1), opacity .4s ease;
+  }
+  .rules-overlay.open .rules-panel{transform:translateY(0) scale(1); opacity:1;}
+  .rules-close{
+    position:absolute; top:18px; right:18px; width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#fff;
+    display:flex; align-items:center; justify-content:center; transition:background .25s ease, transform .25s ease;
+  }
+  .rules-close:hover{background:var(--pink); transform:rotate(90deg);}
+  .rules-head{margin-bottom:22px;}
+  .rules-head h2{font-family:'Unbounded',sans-serif; font-weight:700; font-size:20px; color:#fff; margin-top:6px;}
+  .rules-list{display:flex; flex-direction:column; gap:12px;}
+
+  /* ---------- FORUM PRAVILA — SADRŽAJ ---------- */
+  .rules-panel-lg{max-width:720px; max-height:82vh; overflow-y:auto; text-align:left; padding-top:56px;}
+  .rules-back{
+    position:absolute; top:18px; left:18px; display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#fff;
+    padding:8px 14px; border-radius:999px; font-size:12px; font-weight:600;
+    transition:background .25s ease, border-color .25s ease;
+  }
+  .rules-back:hover{background:rgba(255,79,163,.14); border-color:rgba(255,79,163,.4);}
+  .rules-doc-head{text-align:center; margin-bottom:28px;}
+  .rules-doc-icon{font-size:34px; margin-bottom:10px;}
+  .rules-doc-head h2{font-family:'Unbounded',sans-serif; font-weight:700; font-size:21px; color:#fff; margin-bottom:10px;}
+  .rules-doc-head p{color:var(--muted); font-size:13.5px; line-height:1.6; max-width:480px; margin:0 auto;}
+  .rules-doc-list{list-style:none; display:flex; flex-direction:column; gap:14px; margin-bottom:26px;}
+  .rules-doc-list li{
+    display:flex; align-items:flex-start; gap:14px; padding:16px 18px; border-radius:14px;
+    background:linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,.012));
+    border:1px solid rgba(255,255,255,.07);
+  }
+  .rules-doc-emoji{font-size:19px; flex-shrink:0; line-height:1.3;}
+  .rules-doc-list h4{font-family:'Unbounded',sans-serif; font-weight:600; font-size:14px; color:#fff; margin-bottom:4px;}
+  .rules-doc-list p{color:var(--muted); font-size:13px; line-height:1.55;}
+  .rules-doc-warn{
+    background:rgba(255,79,163,.07); border:1px solid rgba(255,79,163,.28); border-radius:14px;
+    padding:18px 20px; margin-bottom:22px;
+  }
+  .rules-doc-warn h4{font-family:'Unbounded',sans-serif; font-weight:600; font-size:14px; color:var(--pink-2); margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .rules-doc-warn p{color:var(--muted); font-size:13px; line-height:1.55; margin-bottom:6px;}
+  .rules-doc-warn p:last-child{margin-bottom:0;}
+  .rules-doc-footer{color:var(--muted); font-size:12.5px; line-height:1.7; text-align:center;}
+  .rules-doc-footer strong{color:#fff;}
 </style>
 </head>
 <body>
@@ -133,7 +187,7 @@
   <div class="category-group">
     <div class="category-head"><i class="fa-solid fa-scale-balanced"></i> Flamingo Roleplay</div>
 
-    <a href="#" class="forum-row">
+    <a href="#" id="rulesLink" class="forum-row">
       <div class="forum-row-icon"><i class="fa-solid fa-link"></i></div>
       <div class="forum-row-text">
         <h3>Pravila servera i foruma</h3>
@@ -141,6 +195,82 @@
       </div>
       <i class="fa-solid fa-chevron-right forum-row-arrow"></i>
     </a>
+  </div>
+</div>
+
+<!-- ================= PRAVILA — MODAL ================= -->
+<div id="rulesModal" class="rules-overlay">
+  <div class="rules-backdrop" data-rules-close></div>
+  <div class="rules-panel">
+    <button class="rules-close" data-rules-close aria-label="Zatvori"><i class="fa-solid fa-xmark"></i></button>
+
+    <div class="rules-head">
+      <div class="welcome-eyebrow">PRAVILA</div>
+      <h2>Izaberi šta čitaš</h2>
+    </div>
+
+    <div class="rules-list">
+      <a href="#" id="forumRulesLink" class="forum-row">
+        <div class="forum-row-icon"><i class="fa-solid fa-comments"></i></div>
+        <div class="forum-row-text">
+          <h3>Forum Pravila</h3>
+          <p>Ponašanje, postovi i komunikacija na forumu.</p>
+        </div>
+        <i class="fa-solid fa-chevron-right forum-row-arrow"></i>
+      </a>
+
+      <a href="#" class="forum-row">
+        <div class="forum-row-icon"><i class="fa-solid fa-server"></i></div>
+        <div class="forum-row-text">
+          <h3>Server Pravila</h3>
+          <p>Roleplay standardi i pravila unutar Flamingo grada.</p>
+        </div>
+        <i class="fa-solid fa-chevron-right forum-row-arrow"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FORUM PRAVILA — SADRŽAJ ================= -->
+<div id="forumRulesModal" class="rules-overlay">
+  <div class="rules-backdrop" data-forumrules-close></div>
+  <div class="rules-panel rules-panel-lg">
+    <button class="rules-close" data-forumrules-close aria-label="Zatvori"><i class="fa-solid fa-xmark"></i></button>
+    <button class="rules-back" data-forumrules-back aria-label="Nazad"><i class="fa-solid fa-arrow-left"></i> Nazad</button>
+
+    <div class="rules-content">
+      <div class="rules-doc-head">
+        <div class="rules-doc-icon">📜</div>
+        <h2>Pravila foruma</h2>
+        <p>Dobrodošli na naš forum! Kako bi zajednica ostala prijatna, uređena i bezbedna za sve članove, molimo vas da poštujete sledeća pravila.</p>
+      </div>
+
+      <ol class="rules-doc-list">
+        <li><span class="rules-doc-emoji">🤝</span><div><h4>Poštovanje članova</h4><p>Budite ljubazni i korektni prema drugim korisnicima. Lične svađe, provociranje, vređanje i namerno izazivanje konflikata nisu dozvoljeni.</p></div></li>
+        <li><span class="rules-doc-emoji">💬</span><div><h4>Kvalitetna komunikacija</h4><p>Trudite se da vaše poruke budu jasne, korisne i povezane sa temom. Besmisleno spamovanje, nepotrebno ponavljanje poruka i namerno zatrpavanje tema nije dozvoljeno.</p></div></li>
+        <li><span class="rules-doc-emoji">🚫</span><div><h4>Zabranjen spam</h4><p>Nije dozvoljeno slanje reklamnog sadržaja, promotivnih poruka ili linkova ka drugim projektima bez prethodne dozvole administracije.</p></div></li>
+        <li><span class="rules-doc-emoji">🔐</span><div><h4>Bezbednost naloga</h4><p>Svaki korisnik je odgovoran za svoj nalog. Nemojte deliti lozinku, pristupne podatke ili nalog sa drugim osobama.</p></div></li>
+        <li><span class="rules-doc-emoji">🛡️</span><div><h4>Poštovanje odluka osoblja</h4><p>Odluke administratora i moderatora moraju se poštovati. Ukoliko smatrate da je neka odluka nepravedna, koristite predviđeni kanal za žalbe umesto javnog raspravljanja.</p></div></li>
+        <li><span class="rules-doc-emoji">🎭</span><div><h4>Korisničko ime i profil</h4><p>Korisnička imena, avatari i potpisi ne smeju sadržati uvredljiv, nepristojan, diskriminatoran ili neprikladan sadržaj.</p></div></li>
+        <li><span class="rules-doc-emoji">📢</span><div><h4>Bez lažnih informacija</h4><p>Nemojte namerno širiti netačne informacije, lažne objave ili glasine koje mogu dovesti druge korisnike u zabludu.</p></div></li>
+        <li><span class="rules-doc-emoji">⚖️</span><div><h4>Zabranjena diskriminacija</h4><p>Nisu dozvoljeni rasizam, govor mržnje, diskriminacija, pretnje ili napadi na osobe zbog njihovog porekla, izgleda, uverenja ili bilo koje druge lične osobine.</p></div></li>
+        <li><span class="rules-doc-emoji">🧩</span><div><h4>Korišćenje odgovarajućih tema</h4><p>Objavljujte sadržaj u odgovarajućim kategorijama i temama. Moderatori mogu premestiti, zaključati ili ukloniti sadržaj koji nije objavljen na odgovarajućem mestu.</p></div></li>
+        <li><span class="rules-doc-emoji">📝</span><div><h4>Zabranjeno lažno predstavljanje</h4><p>Nije dozvoljeno predstavljanje kao druga osoba, član osoblja ili drugi korisnik sa ciljem obmane ili sticanja koristi.</p></div></li>
+        <li><span class="rules-doc-emoji">🐞</span><div><h4>Prijava problema</h4><p>Uočene greške, zloupotrebe ili probleme prijavite administraciji. Nemojte namerno iskorišćavati greške sistema niti ih širiti među korisnicima.</p></div></li>
+        <li><span class="rules-doc-emoji">🦠</span><div><h4>Bez štetnog sadržaja</h4><p>Zabranjeno je postavljanje virusa, malvera, sumnjivih fajlova ili bilo kakvog sadržaja koji može ugroziti druge korisnike ili forum.</p></div></li>
+        <li><span class="rules-doc-emoji">📑</span><div><h4>Poštujte autorska prava</h4><p>Nemojte objavljivati tuđi sadržaj bez odgovarajuće dozvole ili navođenja izvora kada je to potrebno.</p></div></li>
+        <li><span class="rules-doc-emoji">🔄</span><div><h4>Nema zaobilaženja kazni</h4><p>Ako vam je nalog privremeno ili trajno sankcionisan, nije dozvoljeno pravljenje novih naloga radi zaobilaženja kazne.</p></div></li>
+        <li><span class="rules-doc-emoji">❤️</span><div><h4>Čuvajmo zajednicu</h4><p>Cilj foruma je da bude mesto za druženje, razmenu iskustava i korisne diskusije. Pomozite nam da zajedno održimo pozitivnu atmosferu.</p></div></li>
+      </ol>
+
+      <div class="rules-doc-warn">
+        <h4><span class="rules-doc-emoji">⚠️</span> Sankcije</h4>
+        <p>Kršenje pravila može rezultirati upozorenjem, brisanjem sadržaja, privremenom zabranom pristupa ili trajnim uklanjanjem naloga, u zavisnosti od težine prekršaja.</p>
+        <p>Administracija zadržava pravo da reaguje i u situacijama koje nisu izričito navedene u pravilima ukoliko je ponašanje očigledno štetno po zajednicu.</p>
+      </div>
+
+      <p class="rules-doc-footer">Registracijom i korišćenjem foruma potvrđujete da ste pročitali i prihvatili ova pravila.<br><strong>🌟 Hvala što doprinosite boljoj zajednici!</strong></p>
+    </div>
   </div>
 </div>
 
@@ -170,6 +300,37 @@ if (savedName) {
 if (savedAvatar) {
   document.getElementById('accountAvatar').src = savedAvatar;
 }
+
+const rulesModal = document.getElementById('rulesModal');
+document.getElementById('rulesLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  rulesModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+});
+function closeRules(){
+  rulesModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+rulesModal.querySelectorAll('[data-rules-close]').forEach(el => el.addEventListener('click', closeRules));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeRules(); });
+
+const forumRulesModal = document.getElementById('forumRulesModal');
+document.getElementById('forumRulesLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  rulesModal.classList.remove('open');
+  forumRulesModal.classList.add('open');
+  forumRulesModal.querySelector('.rules-panel').scrollTop = 0;
+});
+function closeForumRules(){
+  forumRulesModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+forumRulesModal.querySelectorAll('[data-forumrules-close]').forEach(el => el.addEventListener('click', closeForumRules));
+forumRulesModal.querySelectorAll('[data-forumrules-back]').forEach(el => el.addEventListener('click', () => {
+  forumRulesModal.classList.remove('open');
+  rulesModal.classList.add('open');
+}));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeForumRules(); });
 </script>
 </body>
 </html>
