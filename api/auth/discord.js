@@ -30,7 +30,7 @@ export default async function handler(req, res) {
           client_id: CLIENT_ID,
           client_secret: CLIENT_SECRET,
           grant_type: "authorization_code",
-          code: code,
+          code,
           redirect_uri: REDIRECT_URI,
         }),
       }
