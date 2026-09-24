@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<title>Flamingo Tablet</title>
+<!-- FIX: FontAwesome se ucitavao sa spoljnog CDN-a (cdnjs.cloudflare.com).
+     Kod dosta servera je taj domen blokiran firewall-om, pa ikonica (npr.
+     kamion u statusnoj traci) nije mogla da se ucita - browser je umesto nje
+     crtao prazan/taman "fallback" kvadratic, sto je izgledalo kao dodatna
+     crna pozadina oko ikonice. Sad je font (samo "solid" stil, jedini koji
+     ovaj tablet koristi) ubacen LOKALNO u resurs, ne zavisi vise ni od kakve
+     spoljne mreze/CDN-a. -->
+<link rel="stylesheet" href="fontawesome/css/fontawesome.min.css">
+<link rel="stylesheet" href="fontawesome/css/solid.min.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="kuce.css">
+<link rel="stylesheet" href="market.css">
+<link rel="stylesheet" href="fmdt.css">
+</head>
+<body>
+
+  <div id="tablet-wrapper" class="hidden">
+    <div id="tablet-frame">
+
+      <!-- prednja kamerica, kao kod pravih tableta -->
+      <div class="front-camera"></div>
+
+      <!-- Dekorativni bočni tasteri (power / jačina zvuka) - samo za izgled,
+           kao na pravom tabletu, ne rade ništa na klik. -->
+      <div class="side-button side-power"></div>
+      <div class="side-button side-volume-up"></div>
+      <div class="side-button side-volume-down"></div>
+
+      <div id="tablet">
+
+        <!-- ============ STATUSNA TRAKA (uvek vidljiva, kao pravi tablet) ============ -->
+        <div id="tablet-statusbar">
+          <span></span>
+          <div class="statusbar-right">
+            <span id="statusbar-date">--</span>
+            <span class="statusbar-dot"></span>
+            <span id="statusbar-clock">--:--</span>
+            <span class="statusbar-icons">
+              <i class="fa-solid fa-wifi"></i>
+              <i class="fa-solid fa-battery-three-quarters"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- ============ TOAST OBAVEŠTENJA ============ -->
+        <div id="toast-stack" class="toast-stack"></div>
+
+        <!-- ============ LOCK SCREEN (prikazuje se svaki put kad se tablet otvori) ============ -->
+        <div id="lock-screen">
+          <div class="lock-center">
+            <div class="lock-clock" id="lock-clock">--:--</div>
+            <div class="lock-date" id="lock-date">--</div>
+          </div>
+
+          <div class="lock-bottom-hint">
+            <div class="lock-swipe-arrow"><i class="fa-solid fa-chevron-up"></i></div>
+            <div class="lock-hint">
+              <i class="fa-solid fa-lock"></i>
+              <span>Dodirnite ekran za otključavanje</span>
+            </div>
+          </div>
+
+          <div class="lock-bottom-dots">
+            <span class="lock-dot active"></span>
+            <span class="lock-dot"></span>
+          </div>
+        </div>
+
+        <!-- ============ HOME EKRAN ============ -->
+        <div id="home-screen">
+          <div id="app-grid">
+            <div class="app-icon hidden" id="app-bolnica">
+              <div class="app-icon-glyph bolnica"><i class="fa-solid fa-truck-medical"></i></div>
+              <span class="app-icon-label">Bolnica</span>
+              <span class="app-badge hidden" id="bolnica-badge">0</span>
+            </div>
+            <div class="app-icon hidden" id="app-supply">
+              <div class="app-icon-glyph supply"><i class="fa-solid fa-truck-fast"></i></div>
+              <span class="app-icon-label">Dostava Medkita</span>
+              <span class="app-badge badge-supply hidden" id="supply-badge">–</span>
+            </div>
+            <!-- FLAMINGO_LIFEINVADER: app ikonica koja otvara panel Lifeinvader-a
+                 (drugi resurs, flamingo_lifeinvader - vidi njegov INSTALACIJA.md).
+                 Prikazuje se svima (skida se "hidden" u script.js kad server potvrdi
+                 da je igrac zaposlen preko flamingo_ds:server:getMyPermissions). -->
+            <div class="app-icon hidden" id="app-lifeinvader">
+              <div class="app-icon-glyph bolnica" style="background:linear-gradient(135deg,#ff3d81,#ff70a6);"><i class="fa-solid fa-bullhorn"></i></div>
+              <span class="app-icon-label">Lifeinvader</span>
+              <span class="app-badge hidden" id="lifeinvader-badge">0</span>
+            </div>
+            <div class="app-icon hidden" id="app-organizacija">
+              <div class="app-icon-glyph organizacija" id="app-organizacija-glyph"><i class="fa-solid fa-hospital" id="app-organizacija-icon"></i></div>
+              <span class="app-icon-label">Organizacija</span>
+            </div>
+            <!-- MDT (Vlada): ikonica se prikazuje tek kad server potvrdi pristup ('mdtAccess') -->
+            <div class="app-icon hidden" id="app-mdt">
+              <div class="app-icon-glyph mdt"><i class="fa-solid fa-landmark"></i></div>
+              <span class="app-icon-label">MDT Vlada</span>
+            </div>
+            <!-- MDT (Policija): samo policajac - pristup potvrđuje flamingo_policija ('pdAccess') -->
+            <div class="app-icon hidden" id="app-pdmdt">
+              <div class="app-icon-glyph pdmdt"><i class="fa-solid fa-shield-halved"></i></div>
+              <span class="app-icon-label">Policija</span>
+            </div>
+            <!-- FLAMINGO_KUCE: Nekretnine - uvek vidljiva, prikazuje kuće gde si vlasnik ili stanar -->
+            <!-- FLAMINGO_MARKET: Market - oglasi za vozila, nekretnine, predmete i usluge -->
+            <div class="app-icon" id="app-market">
+              <div class="app-icon-glyph market"><i class="fa-solid fa-store"></i></div>
+              <span class="app-icon-label">Market</span>
+            </div>
+            <div class="app-icon" id="app-kuce">
+              <div class="app-icon-glyph kuce"><i class="fa-solid fa-house-chimney"></i></div>
+              <span class="app-icon-label">Nekretnine</span>
+            </div>
+          </div>
+
+          <div id="home-quickstats" class="home-quickstats hidden">
+            <div class="quickstat-card">
+              <span class="quickstat-icon calls"><i class="fa-solid fa-phone-volume"></i></span>
+              <div class="quickstat-text">
+                <span class="quickstat-value" id="quickstat-calls">0</span>
+                <span class="quickstat-label">Aktivnih poziva</span>
+              </div>
+            </div>
+            <div class="quickstat-card">
+              <span class="quickstat-icon medkit"><i class="fa-solid fa-suitcase-medical"></i></span>
+              <div class="quickstat-text">
+                <span class="quickstat-value" id="quickstat-medkits">–</span>
+                <span class="quickstat-label">MedKit u zalihi</span>
+              </div>
+            </div>
+          </div>
+          <div id="home-dock" class="home-dock hidden">
+            <button class="dock-icon dock-organizacija hidden" id="dock-organizacija" title="Organizacija"><i class="fa-solid fa-hospital" id="dock-organizacija-icon"></i></button>
+            <button class="dock-icon dock-bolnica hidden" id="dock-bolnica" title="Bolnica"><i class="fa-solid fa-truck-medical"></i></button>
+          </div>
+        </div>
+
+        <!-- ============ APLIKACIJA: BOLNICA (pozivi) ============ -->
+        <div id="app-screen-bolnica" class="app-screen hidden">
+          <div class="app-topbar">
+            <button class="app-back" id="bolnica-back"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="app-icon-mini bolnica"><i class="fa-solid fa-truck-medical"></i></span>
+            <span class="app-title">Pozivi za Hitnu Pomoć</span>
+            <span class="app-title-spacer"></span>
+            <span class="calls-count-pill" id="calls-count-pill">0</span>
+          </div>
+
+          <div class="duty-status-bar" id="duty-status-bar">
+            <span class="duty-status-icon"><i class="fa-solid fa-user-doctor"></i></span>
+            <span class="duty-status-text" id="duty-status-text">Proveravam dežurne doktore...</span>
+          </div>
+
+          <div id="calls-list" class="calls-list">
+            <div class="calls-empty" id="calls-empty">
+              <i class="fa-solid fa-inbox"></i>
+              <span>Trenutno nema poziva.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ APLIKACIJA: DOSTAVA MEDKITA ============ -->
+        <div id="app-screen-supply" class="app-screen hidden">
+          <div class="app-topbar">
+            <button class="app-back" id="supply-back"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="app-icon-mini supply"><i class="fa-solid fa-truck-fast"></i></span>
+            <span class="app-title">Dostava Medkita</span>
+            <span class="app-title-spacer"></span>
+          </div>
+
+          <div id="supply-content" class="supply-content">
+            <!-- Popunjava se dinamički u JS-u -->
+          </div>
+        </div>
+
+        <!-- ============ APLIKACIJA: LIFEINVADER ============
+             Sav UI i logika su ovde, unutar tableta - ne otvara se vise
+             posebna NUI stranica iz flamingo_lifeinvader resursa.
+             Dva taba: Oglasi (feed, svima), Zahtevi (samo zaposlenima
+             u drzavnoj sluzbi - odobravanje oglasa). Objavljivanje novog
+             oglasa se radi iskljucivo preko telefona (flamingo_telefon),
+             ne preko tableta. -->
+        <div id="app-screen-lifeinvader" class="app-screen li-app hidden">
+          <div class="app-topbar">
+            <button class="app-back" id="lifeinvader-back"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="app-icon-mini lifeinvader"><i class="fa-solid fa-bullhorn"></i></span>
+            <span class="app-title">Lifeinvader</span>
+            <span class="app-title-spacer"></span>
+            <span class="li-rank-label" id="li-rank-label"></span>
+          </div>
+
+          <div class="li-tabbar" id="li-tabbar">
+            <button class="li-tab active" id="li-tab-feed" data-li-tab="feed">
+              <i class="fa-solid fa-house-signal"></i><span>Oglasi</span>
+            </button>
+            <button class="li-tab hidden" id="li-tab-staff" data-li-tab="staff">
+              <i class="fa-solid fa-shield-halved"></i><span>Zahtevi</span>
+              <span class="li-tab-badge hidden" id="li-staff-badge">0</span>
+            </button>
+          </div>
+
+          <!-- ---- TAB: FEED (oglasi svih, filtrirani po kategoriji) ---- -->
+          <div class="li-pane" id="li-pane-feed">
+            <div class="li-chip-row" id="li-chip-row"></div>
+            <div id="li-feed-body" class="li-body">
+              <div class="li-empty">Učitavanje...</div>
+            </div>
+          </div>
+
+          <!-- ---- TAB: ZAHTEVI (staff - odobravanje/odbijanje) ---- -->
+          <div class="li-pane hidden" id="li-pane-staff">
+            <div id="li-staff-body" class="li-body">
+              <div class="li-empty">Učitavanje...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ APLIKACIJA: ORGANIZACIJA (Lider / Član) ============
+             Zajednicka za Bolnicu I Lifeinvader - koji resurs napaja panel
+             (flamingo_hospital ili flamingo_lifeinvader) odredjuje se u
+             client.lua na osnovu trenutnog posla igraca (vidi ORG_TYPE
+             komentare tamo). Sam HTML ispod je potpuno generican, ne
+             pominje nijednu konkretnu organizaciju. -->
+        <div id="app-screen-organizacija" class="app-screen hidden">
+          <div class="app-topbar">
+            <button class="app-back" id="organizacija-back"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="app-icon-mini organizacija"><i class="fa-solid fa-hospital" id="app-icon-mini-organizacija-icon"></i></span>
+            <span class="app-title" id="organizacija-title">Organizacija</span>
+            <span class="app-title-spacer"></span>
+            <div class="org-mode-switch hidden" id="org-mode-switch">
+              <button class="org-mode-btn" data-org-mode="lider" id="org-mode-lider">Uprava</button>
+              <button class="org-mode-btn" data-org-mode="clan" id="org-mode-clan">Moja Organizacija</button>
+            </div>
+          </div>
+
+          <div id="orgCategoryBody" class="org-category-body">
+            <!-- Sadrzaj generise renderOrganizacija() / renderOrgMemberHub() u script.js -->
+          </div>
+        </div>
+
+        <!-- ============ APLIKACIJA: MDT (Vlada) - redizajn ============
+             Crta mdt_vlada.js (dizajn fmdt.css), podatke daje flamingo_vlada. -->
+        <div id="app-screen-mdt" class="app-screen fm-app hidden">
+          <div class="fm gov" id="gvm">
+            <aside class="fm-side">
+              <div class="fm-brand"><div class="fm-brand-ico"><i class="fa-solid fa-landmark"></i></div><div><b>MDT Vlada</b><span>Registar građana</span></div></div>
+              <nav class="fm-nav" id="gvm-nav"></nav>
+              <div class="fm-me" id="gvm-me"></div>
+              <button class="fm-exit" id="gvm-exit"><i class="fa-solid fa-arrow-right-from-bracket"></i> Izađi iz MDT-a</button>
+            </aside>
+            <main class="fm-main">
+              <header class="fm-head">
+                <button class="fm-back hidden" id="gvm-back"><i class="fa-solid fa-chevron-left"></i></button>
+                <div class="fm-head-t"><b id="gvm-head-title"></b><span id="gvm-head-sub"></span></div>
+              </header>
+              <section class="fm-content" id="gvm-content"></section>
+            </main>
+          </div>
+        </div>
+
+        <!-- ============ APLIKACIJA: MDT (Policija) ============
+             Crta mdt_policija.js (dizajn fmdt.css), podatke daje flamingo_policija. -->
+        <div id="app-screen-pdmdt" class="app-screen fm-app hidden">
+          <div class="fm pd" id="pdm">
+            <aside class="fm-side">
+              <div class="fm-brand"><div class="fm-brand-ico"><i class="fa-solid fa-shield-halved"></i></div><div><b>LSPD MDT</b><span>Policija</span></div></div>
+              <nav class="fm-nav" id="pdm-nav"></nav>
+              <div class="fm-me" id="pdm-me"></div>
+              <button class="fm-exit" id="pdm-exit"><i class="fa-solid fa-arrow-right-from-bracket"></i> Izađi iz MDT-a</button>
+            </aside>
+            <main class="fm-main">
+              <header class="fm-head">
+                <button class="fm-back hidden" id="pdm-back"><i class="fa-solid fa-chevron-left"></i></button>
+                <div class="fm-head-t"><b id="pdm-head-title"></b><span id="pdm-head-sub"></span></div>
+              </header>
+              <section class="fm-content" id="pdm-content"></section>
+            </main>
+          </div>
+        </div>
+
+        <!-- ============ APLIKACIJA: MARKET (flamingo_market) ============
+             Oglasi za vozila, nekretnine, predmete i usluge.
+             Sadržaj crta market.js, podatke i provere daje flamingo_market. -->
+        <div id="app-screen-market" class="app-screen hidden">
+          <div class="app-topbar">
+            <button class="app-back" id="market-back"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="app-icon-mini market"><i class="fa-solid fa-store"></i></span>
+            <span class="app-title">Market</span>
+            <span class="app-title-spacer"></span>
+          </div>
+          <div class="mk-shell">
+            <div class="mk-side" id="mk-side"></div>
+            <div class="mk-main" id="mk-main"></div>
+          </div>
+        </div>
+
+        <!-- ============ APLIKACIJA: NEKRETNINE (flamingo_kuce) ============
+             Upravljanje kućama: vrata, stanari, navigacija, prodaja/iseljenje.
+             Sadržaj crta kuce.js, podatke i sve provere daje flamingo_kuce. -->
+        <div id="app-screen-kuce" class="app-screen hidden">
+          <div class="app-topbar">
+            <button class="app-back" id="kuce-back"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="app-icon-mini kuce"><i class="fa-solid fa-house-chimney"></i></span>
+            <span class="app-title">Nekretnine</span>
+            <span class="app-title-spacer"></span>
+          </div>
+          <div class="kc-shell">
+            <div class="kc-side" id="kc-side"></div>
+            <div class="kc-main" id="kc-main"></div>
+          </div>
+        </div>
+
+        <div class="home-indicator" title="Zatvori"></div>
+      </div>
+
+    </div>
+  </div>
+
+<script src="script.js"></script>
+<script src="kuce.js"></script>
+<script src="market.js"></script>
+<script src="mdt_core.js"></script>
+<script src="mdt_vlada.js"></script>
+<script src="mdt_policija.js"></script>
+</body>
+</html>
