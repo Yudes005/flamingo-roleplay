@@ -47,6 +47,7 @@ end
 
 local function bizName(b)
     if b.label and b.label ~= '' then return b.label end
+    if b.type == 'market' then return ('%s #%d'):format(b.shopLabel or Config.Market.label, b.id) end
     return ('%s #%d'):format(Config.ATM.label, b.id)
 end
 
@@ -88,10 +89,10 @@ end
 -- ============================================================
 --  Baza
 -- ============================================================
-local function logTx(bizId, txType, amount, fee, tier, actor)
+local function logTx(bizId, txType, amount, fee, tier, actor, note)
     MySQL.insert(
-        'INSERT INTO flamingo_biznisi_log (biz_id, type, amount, fee, tier, actor) VALUES (?, ?, ?, ?, ?, ?)',
-        { bizId, txType, math.floor(amount or 0), math.floor(fee or 0), tier, actor }
+        'INSERT INTO flamingo_biznisi_log (biz_id, type, amount, fee, tier, actor, note) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        { bizId, txType, math.floor(amount or 0), math.floor(fee or 0), tier, actor, note }
     )
 end
 
@@ -110,6 +111,7 @@ local function rowToBiz(r)
     return {
         id        = r.id,
         type      = r.type,
+        seedKey   = r.seed_key,
         label     = r.label,
         coords    = vector3(r.x + 0.0, r.y + 0.0, r.z + 0.0),
         price     = r.price,
@@ -120,6 +122,9 @@ local function rowToBiz(r)
         earned    = tonumber(r.earned) or 0,
         boughtAt  = r.bought_ts,
         disabled  = r.disabled == 1 or r.disabled == true,
+        stock     = {},   -- marketi: [item] = komada
+        pending   = {},   -- marketi: [item] = komada u dolasku
+        items     = nil,  -- marketi: lista artikala iz flamingo_supermarket
         calibrated = r.calibrated == 1 or r.calibrated == true
     }
 end
@@ -232,9 +237,42 @@ MySQL.ready(function()
                 `fee`        INT NOT NULL DEFAULT 0,
                 `tier`       VARCHAR(20) NULL,
                 `actor`      VARCHAR(64) NULL,
+                `note`       VARCHAR(120) NULL,
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (`id`),
                 INDEX `idx_biz_time` (`biz_id`, `created_at`)
+            )
+        ]])
+
+        -- kolona "note" za bazu napravljenu pre marketa
+        local hasNote = MySQL.scalar.await(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'flamingo_biznisi_log' AND COLUMN_NAME = 'note'"
+        )
+        if not hasNote or tonumber(hasNote) == 0 then
+            MySQL.query.await('ALTER TABLE `flamingo_biznisi_log` ADD COLUMN `note` VARCHAR(120) NULL AFTER `actor`')
+        end
+
+        -- Marketi: zalihe po artiklu i narudzbine robe
+        MySQL.query.await([[
+            CREATE TABLE IF NOT EXISTS `flamingo_biznisi_stock` (
+                `biz_id` INT NOT NULL,
+                `item`   VARCHAR(64) NOT NULL,
+                `stock`  INT NOT NULL DEFAULT 0,
+                PRIMARY KEY (`biz_id`, `item`)
+            )
+        ]])
+        MySQL.query.await([[
+            CREATE TABLE IF NOT EXISTS `flamingo_biznisi_orders` (
+                `id`           INT NOT NULL AUTO_INCREMENT,
+                `biz_id`       INT NOT NULL,
+                `item`         VARCHAR(64) NOT NULL,
+                `amount`       INT NOT NULL,
+                `cost`         INT NOT NULL,
+                `status`       VARCHAR(16) NOT NULL DEFAULT 'pending',
+                `created_at`   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `delivered_at` TIMESTAMP NULL DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                INDEX `idx_biz_status` (`biz_id`, `status`)
             )
         ]])
 
@@ -253,9 +291,19 @@ MySQL.ready(function()
             BIZ[r.id] = rowToBiz(r)
         end
 
+        for _, r in ipairs(MySQL.query.await('SELECT biz_id, item, stock FROM flamingo_biznisi_stock') or {}) do
+            local b = BIZ[r.biz_id]
+            if b then b.stock[r.item] = r.stock end
+        end
+        for _, r in ipairs(MySQL.query.await("SELECT biz_id, item, SUM(amount) AS n FROM flamingo_biznisi_orders WHERE status = 'pending' GROUP BY biz_id, item") or {}) do
+            local b = BIZ[r.biz_id]
+            if b then b.pending[r.item] = tonumber(r.n) or 0 end
+        end
+
         ready = true
         print(('[flamingo_biznisi] Ucitano biznisa: %d'):format(#rows))
         syncAll()
+        TriggerEvent('flamingo_biznisi:ready')
     end)
 end)
 
@@ -283,6 +331,41 @@ local function ownedBy(identifier)
     for _, b in pairs(BIZ) do
         if b.owner == identifier and not b.disabled then return b end
     end
+end
+
+-- ============================================================
+--  Marketi: zalihe
+-- ============================================================
+local function marketItem(b, name)
+    for _, it in ipairs(b.items or {}) do
+        if it.name == name then return it end
+    end
+end
+
+local function orderPrice(it)
+    return math.max(1, math.floor(it.price * Config.Market.orderRatio + 0.5))
+end
+
+local function addStock(b, item, delta)
+    local new = math.max(0, (b.stock[item] or 0) + delta)
+    b.stock[item] = new
+    MySQL.update(
+        'INSERT INTO flamingo_biznisi_stock (biz_id, item, stock) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE stock = GREATEST(0, stock + ?)',
+        { b.id, item, new, delta }
+    )
+    return new
+end
+
+local function marketProducts(b)
+    local list = {}
+    for _, it in ipairs(b.items or {}) do
+        list[#list + 1] = {
+            name = it.name, label = it.label, price = it.price, orderPrice = orderPrice(it),
+            stock = b.stock[it.name] or 0, pending = b.pending[it.name] or 0,
+            max = Config.Market.maxStock, low = (b.stock[it.name] or 0) < Config.Market.lowStock
+        }
+    end
+    return list
 end
 
 -- ============================================================
@@ -413,7 +496,7 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:list', function(src, cb)
         local dayRows = MySQL.query.await(([[
             SELECT biz_id, DATEDIFF(CURDATE(), DATE(created_at)) AS ago, COALESCE(SUM(fee), 0) AS f, COUNT(*) AS c
             FROM flamingo_biznisi_log
-            WHERE biz_id IN (%s) AND type = 'withdraw' AND created_at >= CURDATE() - INTERVAL 6 DAY
+            WHERE biz_id IN (%s) AND type IN ('withdraw', 'sale') AND created_at >= CURDATE() - INTERVAL 6 DAY
             GROUP BY biz_id, ago
         ]]):format(ph), ids) or {}
         for _, r in ipairs(dayRows) do
@@ -436,7 +519,7 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:list', function(src, cb)
     local out = {}
     for _, b in ipairs(owned) do
         local logs = MySQL.query.await(
-            'SELECT type, amount, fee, tier, actor, UNIX_TIMESTAMP(created_at) AS ts FROM flamingo_biznisi_log WHERE biz_id = ? ORDER BY id DESC LIMIT ?',
+            'SELECT type, amount, fee, tier, actor, note, UNIX_TIMESTAMP(created_at) AS ts FROM flamingo_biznisi_log WHERE biz_id = ? ORDER BY id DESC LIMIT ?',
             { b.id, Config.LogLimit }
         ) or {}
 
@@ -467,12 +550,15 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:list', function(src, cb)
             count7   = count7,
             chart    = chart,
             tiers    = tiers[b.id] or {},
-            logs     = logs
+            logs     = logs,
+            products = b.type == 'market' and marketProducts(b) or nil
         }
     end
 
     cb({
         ok         = true,
+        orderRatio = Config.Market.orderRatio,
+        supply     = Config.Supply.resource ~= nil and GetResourceState(Config.Supply.resource) == 'started',
         businesses = out,
         cards      = cardTiers(),
         stateCut   = Config.StateCut,
@@ -543,6 +629,48 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:action', function(src, cb, p
         MySQL.update('UPDATE flamingo_biznisi SET label = ? WHERE id = ?', { label, b.id })
         syncAll()
         return cb({ ok = true, message = label and ('Biznis se sada zove "%s".'):format(label) or 'Vraćen je podrazumevani naziv.' })
+
+    elseif action == 'order' or action == 'orderFill' then
+        if b.type ~= 'market' then return fail('Ovaj biznis nema robu.') end
+        local it = marketItem(b, payload.item)
+        if not it then return fail('Nepoznat artikal.') end
+
+        local room = Config.Market.maxStock - (b.stock[it.name] or 0) - (b.pending[it.name] or 0)
+        local amount = action == 'orderFill' and room or toAmount(payload.amount)
+        if not amount or amount < 1 then
+            return fail(room <= 0 and 'Magacin za ovaj artikal je pun.' or 'Unesi koliko komada naručuješ.')
+        end
+        if amount > room then return fail(('Može još najviše %d kom. (magacin %d).'):format(math.max(0, room), Config.Market.maxStock)) end
+
+        local unit = orderPrice(it)
+        local cost = unit * amount
+        if cost > b.balance then
+            return fail(('Narudžbina košta %s, a u kasi ima %s. Uloži novac u kasu.'):format(fmt(cost), fmt(b.balance)))
+        end
+
+        b.balance = b.balance - cost
+        addMoney(b, { balance = -cost })
+        local note = ('%dx %s'):format(amount, it.label)
+        logTx(b.id, 'order', cost, 0, nil, name, note)
+
+        local supply = Config.Supply.resource
+        if supply and GetResourceState(supply) == 'started' then
+            local orderId = MySQL.insert.await(
+                "INSERT INTO flamingo_biznisi_orders (biz_id, item, amount, cost, status) VALUES (?, ?, ?, ?, 'pending')",
+                { b.id, it.name, amount, cost }
+            )
+            b.pending[it.name] = (b.pending[it.name] or 0) + amount
+            TriggerEvent('flamingo_biznisi:orderCreated', src, orderId, b.id, it.name, amount)
+            return cb({ ok = true, message = ('Naručeno %s za %s. Roba stiže transportom.'):format(note, fmt(cost)) })
+        end
+
+        -- nema transporta: roba stize odmah
+        MySQL.insert(
+            "INSERT INTO flamingo_biznisi_orders (biz_id, item, amount, cost, status, delivered_at) VALUES (?, ?, ?, ?, 'delivered', NOW())",
+            { b.id, it.name, amount, cost }
+        )
+        addStock(b, it.name, amount)
+        return cb({ ok = true, message = ('Naručeno i stiglo %s za %s.'):format(note, fmt(cost)) })
 
     elseif action == 'sellState' then
         local value = math.floor(b.price * Config.SellToStateRatio)
@@ -908,4 +1036,161 @@ AddEventHandler('playerDropped', function()
             TriggerClientEvent('flamingo_biznisi:client:offerClosed', buyer, o.id)
         end
     end
+end)
+
+
+-- ============================================================
+--  Supermarketi (flamingo_supermarket)
+--  flamingo_supermarket na startu posalje listu marketa (pozicija prodavca,
+--  naziv, artikli). Svaki market postaje poseban biznis (type = 'market').
+--  Market bez vlasnika radi kao i ranije (bez ogranicenja zaliha).
+-- ============================================================
+local marketQueue = {}
+
+local function marketKey(coords)
+    return 'm_' .. seedKey(coords)
+end
+
+local function findMarket(coords)
+    if not coords then return nil end
+    local key = marketKey(vector3(coords.x + 0.0, coords.y + 0.0, coords.z + 0.0))
+    for _, b in pairs(BIZ) do
+        if b.type == 'market' and b.seedKey == key and not b.disabled then return b end
+    end
+end
+
+local function registerMarkets(list)
+    for _, m in ipairs(list) do
+        local c = vector3(m.coords.x + 0.0, m.coords.y + 0.0, m.coords.z + 0.0)
+        local key = marketKey(c)
+        local price = toAmount(m.price) or Config.Market.defaultPrice
+
+        MySQL.query.await([[
+            INSERT INTO flamingo_biznisi (type, seed_key, x, y, z, price, atm_cash, calibrated)
+            VALUES ('market', ?, ?, ?, ?, ?, 0, 1)
+            ON DUPLICATE KEY UPDATE price = IF(owner IS NULL, VALUES(price), price)
+        ]], { key, c.x, c.y, c.z, price })
+
+        local row = MySQL.single.await('SELECT *, UNIX_TIMESTAMP(bought_at) AS bought_ts FROM flamingo_biznisi WHERE seed_key = ?', { key })
+        if row then
+            local b = BIZ[row.id]
+            if not b then
+                b = rowToBiz(row)
+                BIZ[row.id] = b
+            elseif not b.owner then
+                b.price = row.price
+            end
+            b.seedKey   = key
+            b.shopLabel = m.label
+
+            -- artikli iz configa; svaki novi artikal dobija pocetnu zalihu
+            b.items = {}
+            for _, it in ipairs(m.items or {}) do
+                local p = toAmount(it.price)
+                if type(it.name) == 'string' and p then
+                    b.items[#b.items + 1] = { name = it.name, label = it.label or it.name, price = p }
+                    if b.stock[it.name] == nil then
+                        b.stock[it.name] = Config.Market.startStock
+                        MySQL.insert.await('INSERT IGNORE INTO flamingo_biznisi_stock (biz_id, item, stock) VALUES (?, ?, ?)',
+                            { b.id, it.name, Config.Market.startStock })
+                    end
+                end
+            end
+        end
+    end
+    print(('[flamingo_biznisi] Registrovano marketa: %d'):format(#list))
+    syncAll()
+end
+
+-- exports['flamingo_biznisi']:RegisterMarkets({ { coords = vector3, label = 'Flamingo Market', price = 750000, items = { {name, label, price} } } })
+exports('RegisterMarkets', function(list)
+    if type(list) ~= 'table' then return false end
+    marketQueue[#marketQueue + 1] = list
+    CreateThread(function()
+        while not ready do Wait(250) end
+        local q = marketQueue
+        marketQueue = {}
+        for _, l in ipairs(q) do registerMarkets(l) end
+    end)
+    return true
+end)
+
+-- Podaci za meni marketa: vlasnik, cena, zalihe (samo ako market ima vlasnika)
+exports('GetMarketInfo', function(coords, src)
+    local b = findMarket(coords)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not b or not xPlayer then return nil end
+    local info = publicInfo(b, xPlayer)
+    info.stock = b.owner and b.stock or nil
+    info.maxStock = Config.Market.maxStock
+    return info
+end)
+
+-- Da li market ima dovoljno robe. basket = { { name, count } }
+exports('MarketCheck', function(coords, basket)
+    local b = findMarket(coords)
+    if not b or not b.owner then return true end
+    for _, it in ipairs(basket or {}) do
+        local have = b.stock[it.name] or 0
+        if have < (it.count or 0) then
+            local item = marketItem(b, it.name)
+            local label = item and item.label or it.name
+            if have <= 0 then return false, ('%s trenutno nema na stanju.'):format(label) end
+            return false, ('Na stanju je samo %d kom. artikla %s.'):format(have, label)
+        end
+    end
+    return true
+end)
+
+-- Prodaja je prosla: roba izlazi iz magacina, novac ide u kasu. basket = { { name, count, price } }
+exports('MarketSale', function(coords, basket, total, actor)
+    local b = findMarket(coords)
+    if not b or not b.owner then return false end
+
+    local parts, low = {}, {}
+    for _, it in ipairs(basket or {}) do
+        local item = marketItem(b, it.name)
+        local left = addStock(b, it.name, -(it.count or 0))
+        parts[#parts + 1] = ('%dx %s'):format(it.count or 0, item and item.label or it.name)
+        if left < Config.Market.lowStock and left + (it.count or 0) >= Config.Market.lowStock then
+            low[#low + 1] = ('%s (%d kom.)'):format(item and item.label or it.name, left)
+        end
+    end
+
+    total = math.floor(tonumber(total) or 0)
+    local revenue = math.floor(total * (100 - (Config.Market.stateCut or 0)) / 100)
+    b.balance = b.balance + revenue
+    b.earned  = b.earned + revenue
+    addMoney(b, { balance = revenue, earned = revenue })
+    logTx(b.id, 'sale', total, revenue, nil, actor, table.concat(parts, ', '):sub(1, 120))
+
+    if #low > 0 then
+        local xOwner = ESX.GetPlayerFromIdentifier(b.owner)
+        if xOwner then
+            notify(xOwner.source, ('%s: ponestaje robe - %s. Naruči na tabletu.'):format(bizName(b), table.concat(low, ', ')), 'error')
+        end
+    end
+    return true, revenue
+end)
+
+-- Transport: roba je dovezena. exports['flamingo_biznisi']:DeliverOrder(orderId, 'Ime vozaca')
+exports('DeliverOrder', function(orderId, actor)
+    local row = MySQL.single.await("SELECT * FROM flamingo_biznisi_orders WHERE id = ? AND status = 'pending'", { tonumber(orderId) or -1 })
+    if not row then return false end
+    local b = BIZ[row.biz_id]
+    MySQL.update.await("UPDATE flamingo_biznisi_orders SET status = 'delivered', delivered_at = NOW() WHERE id = ?", { row.id })
+    if not b then return false end
+    b.pending[row.item] = math.max(0, (b.pending[row.item] or 0) - row.amount)
+    addStock(b, row.item, row.amount)
+    local item = marketItem(b, row.item)
+    logTx(b.id, 'delivery', row.amount, 0, nil, actor or 'Transport', ('%dx %s'):format(row.amount, item and item.label or row.item))
+    return true
+end)
+
+-- Transport: narudzbine koje cekaju dostavu (bizId = nil -> sve)
+exports('GetPendingOrders', function(bizId)
+    if bizId then
+        return MySQL.query.await("SELECT * FROM flamingo_biznisi_orders WHERE status = 'pending' AND biz_id = ? ORDER BY id", { bizId }) or {}
+    end
+    return MySQL.query.await("SELECT * FROM flamingo_biznisi_orders WHERE status = 'pending' ORDER BY id") or {}
 end)

@@ -78,7 +78,7 @@ CreateThread(function()
     while true do
         local pos = GetEntityCoords(PlayerPedId())
         for id, b in pairs(businesses) do
-            if not b.calibrated and not reported[id] then
+            if b.type == 'atm' and not b.calibrated and not reported[id] then
                 local c = vector3(b.x, b.y, b.z)
                 if #(pos - c) < 60.0 then
                     local obj = closestAtm(c, Config.ATM.snapRadius)

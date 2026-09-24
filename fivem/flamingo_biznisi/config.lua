@@ -81,6 +81,29 @@ Config.CardFallback = {
 }
 
 -- ============================================================
+--  Supermarketi (flamingo_supermarket)
+--  Marketi se registruju sami iz flamingo_supermarket configa (svaki market = poseban biznis).
+-- ============================================================
+Config.Market = {
+    label        = 'Market',
+    defaultPrice = 750000,   -- cena marketa ako u flamingo_supermarket configu nema bizPrice
+    startStock   = 100,      -- svaki artikal krece sa ovoliko komada (i svaki novi artikal dodat u config)
+    maxStock     = 100,      -- najvise komada jednog artikla u magacinu
+    lowStock     = 10,       -- ispod ovoga vlasnik dobija upozorenje
+    orderRatio   = 0.5,      -- narudzbina kosta ovaj deo prodajne cene (0.5 = pola: 1000$ u marketu -> 500$)
+    stateCut     = 0,        -- % od prodaje koji ide drzavi (0 = sve ide u kasu)
+}
+
+-- Dostava robe (transport) - TVOJA skripta
+-- resource = nil  -> narucena roba stize odmah (za test)
+-- resource = 'ime_skripte' -> narudzbina ceka dostavu:
+--     AddEventHandler('flamingo_biznisi:orderCreated', function(src, orderId, bizId, item, amount) ... end)
+--     exports['flamingo_biznisi']:DeliverOrder(orderId, 'Ime vozaca')   -- kad je roba dovezena
+Config.Supply = {
+    resource = nil,
+}
+
+-- ============================================================
 --  Dopuna bankomata (transport) - TVOJA skripta
 --  Kad vlasnik na tabletu klikne "Dopuni bankomat", poziva se na serveru:
 --      TriggerEvent('flamingo_biznisi:refillRequested', src, bizId, nedostaje)
