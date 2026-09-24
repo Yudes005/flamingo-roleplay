@@ -1,0 +1,688 @@
+/* =========================================================
+   flamingo_pumpa — NUI terminal
+   Redizajn: miran, neutralan tamni panel, bez neon/glow efekata.
+   Roze se koristi samo kao akcenat (glavno dugme, dolivanje).
+   ========================================================= */
+
+:root {
+    --bg:         rgba(20, 20, 23, 0.94);
+    --surface:    #1C1C20;
+    --surface-2:  #232328;
+    --surface-3:  #2B2B31;
+    --border:     rgba(255, 255, 255, 0.07);
+    --border-2:   rgba(255, 255, 255, 0.12);
+
+    --text:       #F2F2F4;
+    --text-2:     #A9A9B2;
+    --text-3:     #6E6E78;
+
+    --accent:     #EE7AA3;
+    --accent-2:   #F59BBB;
+    --accent-ink: #2A0D19;
+    --accent-bg:  rgba(238, 122, 163, 0.12);
+
+    --ok:         #6FCF97;
+    --bad:        #F07171;
+
+    --r-xl: 22px;
+    --r-lg: 16px;
+    --r-md: 12px;
+    --r-sm: 9px;
+
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+}
+
+.hidden { display: none !important; }
+
+button { font: inherit; }
+
+#root {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(120% 100% at 50% 50%, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.65) 100%);
+}
+
+/* ---------------- Panel ---------------- */
+
+.terminal {
+    width: 980px;
+    max-width: 94vw;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    box-shadow:
+        0 30px 80px -20px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+}
+
+#root.is-open .terminal {
+    animation: enter 0.32s var(--ease) both;
+}
+
+@keyframes enter {
+    from { opacity: 0; transform: translateY(12px) scale(0.99); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #root.is-open .terminal { animation: none; }
+    * { transition: none !important; animation: none !important; }
+}
+
+/* ---------------- Zaglavlje ---------------- */
+
+.bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.bar__id {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.bar__mark {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 17px;
+}
+
+/* mala tacka statusa: zelena kad je vozilo spremno */
+.bar__mark::after {
+    content: '';
+    position: absolute;
+    right: -3px;
+    bottom: -3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--text-3);
+    border: 2px solid #17171A;
+    transition: background 0.25s;
+}
+
+.bar__mark.is-live::after { background: var(--ok); }
+
+.bar h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--text);
+}
+
+.bar p {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-3);
+    margin-top: 2px;
+}
+
+.bar__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wallet {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+}
+
+.wallet small {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+}
+
+.wallet strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.iconbtn {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.iconbtn:hover {
+    background: var(--surface-3);
+    color: var(--text);
+}
+
+/* ---------------- Raspored ---------------- */
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+}
+
+.dispenser {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* ---------------- Ocitavanje ---------------- */
+
+.lcd {
+    position: relative;
+    padding: 22px 24px 18px;
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.lcd__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.lcd__cell + .lcd__cell {
+    padding-left: 24px;
+    border-left: 1px solid var(--border);
+}
+
+.lcd__label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 8px;
+}
+
+.lcd__value {
+    display: block;
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.lcd__value i {
+    font-style: normal;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--text-3);
+    margin-left: 4px;
+}
+
+.lcd__cell--price .lcd__value { color: var(--accent-2); }
+
+.lcd__foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+}
+
+#lcdPlate {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--surface-3);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text);
+    font-size: 12px;
+}
+
+.lcd__veil {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 30px;
+    text-align: center;
+    background: var(--surface);
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.lcd__veil i {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--surface-3);
+    font-size: 20px;
+    color: var(--text-2);
+}
+
+/* ---------------- Rezervoar ---------------- */
+
+.tank__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 10px;
+}
+
+.tank__num {
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+}
+
+.tank__num b {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.tank__bar {
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    overflow: hidden;
+}
+
+.tank__fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    border-radius: 999px;
+    transition: width 0.35s var(--ease), background 0.25s;
+}
+
+.tank__fill--now { background: #E4E4E9; }
+.tank__fill--add { background: var(--accent); }
+
+.tank--low .tank__fill--now { background: var(--bad); }
+
+.tank__legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+}
+
+.tank__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dot--now { background: #E4E4E9; }
+.dot--add { background: var(--accent); }
+
+/* ---------------- Kontrole ---------------- */
+
+.controls {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: opacity 0.2s;
+}
+
+.controls.is-off {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+#slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 22px;
+    background: transparent;
+    cursor: pointer;
+}
+
+#slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        var(--accent) 0%,
+        var(--accent) var(--val, 0%),
+        var(--surface-3) var(--val, 0%),
+        var(--surface-3) 100%
+    );
+}
+
+#slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -7px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 4px solid var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.12s;
+}
+
+#slider:active::-webkit-slider-thumb { transform: scale(1.12); }
+
+#slider:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 4px; border-radius: 6px; }
+
+.presets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) 1.4fr;
+    gap: 8px;
+}
+
+.preset {
+    height: 40px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.preset:hover:not(:disabled) {
+    background: var(--surface-3);
+    border-color: var(--border-2);
+    color: var(--text);
+}
+
+.preset--wide { color: var(--text); }
+
+.preset:disabled { opacity: 0.4; cursor: default; }
+
+.cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 54px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.08s;
+}
+
+.cta:hover:not(:disabled) { background: var(--accent-2); }
+
+.cta:active:not(:disabled) { transform: scale(0.99); }
+
+.cta:disabled {
+    background: var(--surface-2);
+    color: var(--text-3);
+    cursor: default;
+}
+
+/* ---------------- Prodavnica ---------------- */
+
+.shop {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.015);
+    border-left: 1px solid var(--border);
+}
+
+.shop__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2px;
+}
+
+.shop__head h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.shop__head span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+}
+
+.item {
+    padding: 14px;
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 0.15s;
+}
+
+.item:hover { border-color: var(--border-2); }
+
+.item__top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.item__thumb {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-md);
+    background: var(--surface-3);
+}
+
+.item__thumb img {
+    max-width: 32px;
+    max-height: 32px;
+    object-fit: contain;
+}
+
+.item__text { flex: 1; min-width: 0; }
+
+.item__text h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.item__text p {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-3);
+    margin-top: 2px;
+}
+
+.item__price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.item__bottom {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.stepper {
+    display: flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 3px;
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+}
+
+.stepper button {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 7px;
+    background: none;
+    color: var(--text-2);
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.stepper button:hover:not(:disabled) {
+    background: var(--surface-3);
+    color: var(--text);
+}
+
+.stepper button:disabled { opacity: 0.3; cursor: default; }
+
+.stepper span {
+    min-width: 24px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.buy {
+    flex: 1;
+    height: 38px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.buy:hover:not(:disabled) {
+    background: var(--accent-bg);
+    border-color: rgba(238, 122, 163, 0.35);
+    color: var(--accent-2);
+}
+
+.buy:disabled {
+    background: transparent;
+    color: var(--text-3);
+    cursor: default;
+}
+
+.shop__foot {
+    margin-top: auto;
+    padding-top: 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+}
+
+kbd {
+    display: inline-block;
+    padding: 2px 7px;
+    margin-right: 4px;
+    border-radius: 5px;
+    background: var(--surface-3);
+    border: 1px solid var(--border-2);
+    border-bottom-width: 2px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-2);
+}
+
+/* ---------------- Manji ekrani ---------------- */
+
+@media (max-height: 800px) {
+    .terminal { width: 900px; }
+    .lcd__value { font-size: 38px; }
+    .dispenser, .shop { padding: 20px; }
+    .bar { padding: 16px 20px; }
+}
+
+@media (max-width: 1000px) {
+    .grid { grid-template-columns: 1fr; }
+    .shop { border-left: none; border-top: 1px solid var(--border); }
+}

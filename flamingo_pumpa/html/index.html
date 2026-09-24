@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <title>Pumpa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="root" class="hidden">
+    <div class="terminal" id="terminal">
+
+        <header class="bar">
+            <div class="bar__id">
+                <span class="bar__mark" id="mark"><i class="fa-solid fa-gas-pump"></i></span>
+                <div>
+                    <h1>Benzinska stanica</h1>
+                    <p id="barSub">Samoposlužni terminal</p>
+                </div>
+            </div>
+
+            <div class="bar__right">
+                <div class="wallet">
+                    <small>Stanje</small>
+                    <strong id="money">$0</strong>
+                </div>
+                <button id="close" class="iconbtn" type="button" aria-label="Zatvori">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="grid">
+
+            <!-- ======================= GORIVO ======================= -->
+            <section class="dispenser">
+
+                <div class="lcd" id="lcd">
+                    <div class="lcd__row">
+                        <div class="lcd__cell">
+                            <span class="lcd__label">Litara</span>
+                            <span class="lcd__value" id="lcdLiters">0<i>L</i></span>
+                        </div>
+                        <div class="lcd__cell lcd__cell--price">
+                            <span class="lcd__label">Za naplatu</span>
+                            <span class="lcd__value" id="lcdPrice">$0</span>
+                        </div>
+                    </div>
+
+                    <div class="lcd__foot">
+                        <span id="lcdPlate">Nema vozila</span>
+                        <span id="lcdRate">$20 / litar</span>
+                    </div>
+
+                    <div class="lcd__veil" id="lcdVeil">
+                        <i class="fa-solid fa-car-side"></i>
+                        <span>Uđi u vozilo ili mu priđi da bi sipao gorivo</span>
+                    </div>
+                </div>
+
+                <div class="tank">
+                    <div class="tank__head">
+                        <span>Rezervoar</span>
+                        <span class="tank__num"><b id="tankNow">0</b> / <span id="tankMax">0</span> L</span>
+                    </div>
+                    <div class="tank__bar" id="tankBars">
+                        <div class="tank__fill tank__fill--add" id="tankAdd"></div>
+                        <div class="tank__fill tank__fill--now" id="tankFill"></div>
+                    </div>
+                    <div class="tank__legend">
+                        <span><i class="dot dot--now"></i>trenutno</span>
+                        <span><i class="dot dot--add"></i>dolivaš</span>
+                    </div>
+                </div>
+
+                <div class="controls" id="controls">
+                    <input type="range" id="slider" min="0" max="0" value="0" step="1" aria-label="Količina goriva">
+
+                    <div class="presets">
+                        <button type="button" class="preset" data-add="10">+10</button>
+                        <button type="button" class="preset" data-add="25">+25</button>
+                        <button type="button" class="preset" data-add="50">+50</button>
+                        <button type="button" class="preset preset--wide" data-add="max">Do vrha</button>
+                    </div>
+
+                    <button id="refuel" class="cta" type="button" disabled>
+                        <i class="fa-solid fa-gas-pump"></i><span id="refuelText">Sipaj gorivo</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ======================= PRODAVNICA ======================= -->
+            <aside class="shop">
+                <div class="shop__head">
+                    <h2>Dodatna oprema</h2>
+                    <span id="shopHint">Uzmi uz gorivo</span>
+                </div>
+
+                <article class="item" id="canisterItem">
+                    <div class="item__top">
+                        <div class="item__thumb"><img src="kanister.png" alt=""></div>
+                        <div class="item__text">
+                            <h3>Kanister goriva</h3>
+                            <p id="canisterSub">Rezerva goriva u gepeku</p>
+                        </div>
+                        <span class="item__price" id="canisterPrice">$0</span>
+                    </div>
+                    <div class="item__bottom">
+                        <div class="stepper" id="canisterStepper">
+                            <button type="button" id="canisterMinus" aria-label="Manje"><i class="fa-solid fa-minus"></i></button>
+                            <span id="canisterQty">1</span>
+                            <button type="button" id="canisterPlus" aria-label="Više"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <button class="buy" id="canisterBuy" type="button"><span id="canisterBuyText">Kupi</span></button>
+                    </div>
+                </article>
+
+                <article class="item hidden" id="repairItem">
+                    <div class="item__top">
+                        <div class="item__thumb"><img src="repairkit.png" alt=""></div>
+                        <div class="item__text">
+                            <h3>Repair kit</h3>
+                            <p>Popravka vozila na putu</p>
+                        </div>
+                        <span class="item__price" id="repairPrice">$0</span>
+                    </div>
+                    <div class="item__bottom">
+                        <div class="stepper">
+                            <button type="button" id="repairMinus" aria-label="Manje"><i class="fa-solid fa-minus"></i></button>
+                            <span id="repairQty">1</span>
+                            <button type="button" id="repairPlus" aria-label="Više"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <button class="buy" id="repairBuy" type="button"><span id="repairBuyText">Kupi</span></button>
+                    </div>
+                </article>
+
+                <p class="shop__foot"><kbd>Esc</kbd> zatvara terminal</p>
+            </aside>
+
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
