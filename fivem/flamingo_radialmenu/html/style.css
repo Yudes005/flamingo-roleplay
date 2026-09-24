@@ -1,0 +1,1036 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: transparent;
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+}
+
+.hidden {
+    display: none !important;
+}
+
+:root {
+    --bg: rgba(17, 17, 19, 0.94);
+    --bg-soft: rgba(255, 255, 255, 0.05);
+    --bg-softer: rgba(255, 255, 255, 0.025);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.55);
+    --text-faint: rgba(255, 255, 255, 0.32);
+    --green: #3ddc97;
+    --green-bg: #163828;
+    --red: #f2545b;
+    --red-bg: #3a1c1e;
+    --amber: #f2c14e;
+    --amber-bg: #3a3016;
+    --blue: #6aa9ff;
+    --blue-bg: #17273f;
+    --pink-muted: #d98aa8;
+    --pink-muted-dark: #35131c;
+    /* backdrop-filter/blur pravi poznat FiveM CEF bug (blur elementi se
+       spoje u jedan pun crn pravougaonik) - zato je iskljucen; "glass" izgled
+       se sada pravi samo providnoscu + gradijent sjajem, bez pravog blura. */
+    --glass-blur: none;
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    background: transparent;
+}
+
+/* ============================================
+   RADIAL MENU (v3 - pravi krug)
+   Bez backdrop-filter (FiveM CEF bug), sve je providnost + gradijent.
+   ============================================ */
+
+@property --sweep-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
+#radial-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Manrope', sans-serif;
+}
+
+.radial-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 50%, rgba(8, 8, 10, 0.55) 0%, rgba(8, 8, 10, 0.25) 38%, transparent 70%);
+    animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+#radial-menu {
+    --r: 200px;
+    position: relative;
+    width: calc(var(--r) * 2 + 120px);
+    height: calc(var(--r) * 2 + 120px);
+}
+
+/* tanka staza kruga */
+.radial-track {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(var(--r) * 2);
+    height: calc(var(--r) * 2);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 0 60px rgba(255, 47, 126, 0.05);
+    pointer-events: none;
+}
+
+/* roze luk koji prati stavku na koju pokazuješ */
+.radial-sweep {
+    --sweep-angle: 0deg;
+    --sweep-size: 60deg;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(var(--r) * 2 + 6px);
+    height: calc(var(--r) * 2 + 6px);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    background: conic-gradient(from calc(var(--sweep-angle) - var(--sweep-size) / 2),
+        rgba(255, 47, 126, 0) 0deg,
+        rgba(255, 47, 126, 0.55) calc(var(--sweep-size) / 2),
+        rgba(255, 47, 126, 0) var(--sweep-size),
+        transparent var(--sweep-size));
+    -webkit-mask: radial-gradient(circle closest-side, transparent calc(100% - 7px), #000 calc(100% - 6px), #000 calc(100% - 1px), transparent 100%);
+    mask: radial-gradient(circle closest-side, transparent calc(100% - 7px), #000 calc(100% - 6px), #000 calc(100% - 1px), transparent 100%);
+    transition: --sweep-angle 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+.radial-sweep.on { opacity: 1; }
+
+#radial-ring { position: absolute; inset: 0; }
+
+/* ---------- stavka ---------- */
+.radial-item {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    transform: translate(var(--x), var(--y));
+    animation: itemIn 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--delay);
+}
+
+@keyframes itemIn {
+    from { transform: translate(0, 0) scale(0.4); opacity: 0; }
+    to   { transform: translate(var(--x), var(--y)) scale(1); opacity: 1; }
+}
+
+.radial-tile {
+    position: absolute;
+    left: -38px;
+    top: -38px;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%),
+        rgba(14, 14, 17, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 21px;
+    cursor: pointer;
+    transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.radial-num {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 21px;
+    height: 21px;
+    padding: 0 5px;
+    border-radius: 11px;
+    background: #1d1d21;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 10.5px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.radial-more {
+    position: absolute;
+    bottom: 7px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 3px;
+}
+.radial-more i { width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 47, 126, 0.8); }
+
+.radial-label {
+    position: absolute;
+    top: 46px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 130px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.82);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+    pointer-events: none;
+    transition: color 0.16s ease;
+}
+
+.radial-item.hover .radial-tile {
+    transform: scale(1.12);
+    background: radial-gradient(circle at 30% 25%, #ff6a9e, #ff2f7e 45%, #b8134f);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 16px 34px rgba(255, 47, 126, 0.42), 0 0 0 6px rgba(255, 47, 126, 0.14);
+}
+.radial-item.hover .radial-num { background: #fff; color: #b8134f; border-color: #fff; }
+.radial-item.hover .radial-more i { background: #fff; }
+.radial-item.hover .radial-label { color: #fff; }
+
+/* ---------- centar ---------- */
+#radial-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 168px;
+    height: 168px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(255, 47, 126, 0.16), transparent 60%),
+        rgba(12, 12, 15, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 0 8px rgba(255, 255, 255, 0.025);
+    cursor: pointer;
+    z-index: 2;
+    animation: hubIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+@keyframes hubIn {
+    from { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
+    to   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+#radial-center:hover { border-color: rgba(255, 47, 126, 0.55); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 0 8px rgba(255, 47, 126, 0.08); }
+
+.hub-photo {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1d1d21;
+    border: 2px solid rgba(255, 47, 126, 0.7);
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 20px;
+}
+.hub-photo img { width: 100%; height: 100%; object-fit: cover; }
+.hub-photo.icon { background: linear-gradient(145deg, #ff2f7e, #b8134f); border-color: rgba(255, 255, 255, 0.3); color: #fff; }
+
+.hub-title {
+    max-width: 136px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.hub-sub {
+    max-width: 136px;
+    min-height: 15px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.hub-back {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.55);
+}
+.hub-back i { font-size: 9px; }
+#radial-center:hover .hub-back { background: #ff2f7e; color: #fff; }
+
+.radial-hint {
+    position: absolute;
+    bottom: 7%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.55);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    animation: fadeIn 0.4s ease;
+}
+.radial-hint .key {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(14, 14, 17, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-weight: 800;
+    font-size: 10.5px;
+    margin-left: 6px;
+}
+.radial-hint .key:first-child { margin-left: 0; }
+
+/* ============================================
+   DOKUMENTA - zajednicki okvir
+   ============================================ */
+
+.doc-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doc-card {
+    position: relative;
+    width: 440px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+    animation: popIn 0.2s ease;
+    overflow: hidden;
+}
+
+.doc-card.wide {
+    width: 500px;
+}
+
+/* Diskretna "gilos" tekstura kakvu imaju pravi dokumenti */
+.doc-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        repeating-linear-gradient(115deg, rgba(255,255,255,0.022) 0 1px, transparent 1px 7px),
+        repeating-linear-gradient(-115deg, rgba(255,255,255,0.016) 0 1px, transparent 1px 9px);
+}
+
+.doc-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-softer);
+}
+
+.doc-crest {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    font-size: 16px;
+}
+
+.doc-crest.medical { color: var(--green); }
+.doc-crest.small {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+.doc-header-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.doc-country {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doc-kind {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.doc-status {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 20px;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+.doc-status.ok   { color: var(--green); background: var(--green-bg); }
+.doc-status.warn { color: var(--amber); background: var(--amber-bg); }
+.doc-status.bad  { color: var(--red);   background: var(--red-bg); }
+.doc-status.dim  { color: var(--text-dim); background: var(--bg-soft); }
+
+.doc-body {
+    position: relative;
+    padding: 18px;
+}
+
+/* ---------- fotografija + osnovni podaci ---------- */
+
+.doc-top {
+    display: flex;
+    gap: 16px;
+}
+
+.doc-photo {
+    flex-shrink: 0;
+    width: 84px;
+    height: 104px;
+    border-radius: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 30px;
+    color: var(--text-faint);
+}
+
+.doc-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 22%;
+}
+
+.doc-photo i {
+    margin-bottom: 26px;
+}
+
+.doc-identity {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    min-width: 0;
+}
+
+.doc-name {
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 14px;
+}
+
+.doc-grid.three { grid-template-columns: repeat(3, 1fr); }
+
+/* polje preko cele širine (npr. "Izdao/la" na ličnoj karti) */
+.doc-field.span-all { grid-column: 1 / -1; }
+
+.doc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.doc-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-faint);
+    font-weight: 700;
+}
+
+.doc-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doc-value.mono {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.4px;
+}
+
+.doc-value.bad  { color: var(--red); }
+.doc-value.warn { color: var(--amber); }
+
+/* ---------- donja traka sa podacima o izdavanju ---------- */
+
+.doc-issue {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border-strong);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 14px;
+}
+
+/* ---------- MRZ traka ---------- */
+
+.doc-mrz {
+    position: relative;
+    padding: 10px 18px 12px 18px;
+    background: rgba(255, 255, 255, 0.045);
+    border-top: 1px solid var(--border);
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.72);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* ---------- akcije ---------- */
+
+.doc-actions {
+    position: relative;
+    display: flex;
+    border-top: 1px solid var(--border);
+}
+
+.doc-btn {
+    padding: 14px;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.doc-btn-main {
+    flex: 1;
+    border-right: 1px solid var(--border);
+}
+
+.doc-btn-close {
+    width: 64px;
+    color: var(--text-dim);
+    font-size: 15px;
+}
+
+.doc-btn:hover {
+    background: var(--bg-soft);
+    color: var(--text);
+}
+
+/* ---------- prazno stanje (nemas dokument) ---------- */
+
+.doc-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 26px 18px;
+}
+
+.doc-empty i {
+    font-size: 26px;
+    color: var(--text-faint);
+}
+
+.doc-empty h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.doc-empty p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-dim);
+    max-width: 300px;
+}
+
+/* ============================================
+   DOZVOLE - mreza kategorija
+   ============================================ */
+
+.lic-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.lic-tile {
+    position: relative;
+    padding: 10px 6px 9px 6px;
+    border-radius: 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    text-align: center;
+    opacity: 0.38;
+}
+
+.lic-tile.active {
+    opacity: 1;
+    border-color: rgba(61, 220, 151, 0.45);
+    background: rgba(61, 220, 151, 0.09);
+}
+
+.lic-tile.flagged {
+    opacity: 1;
+    border-color: rgba(242, 84, 91, 0.45);
+    background: rgba(242, 84, 91, 0.08);
+}
+
+.lic-tile.pending {
+    opacity: 1;
+    border-color: rgba(242, 193, 78, 0.45);
+    background: rgba(242, 193, 78, 0.08);
+}
+
+.lic-code {
+    display: block;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+.lic-name {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lic-mark {
+    position: absolute;
+    top: 5px;
+    right: 6px;
+    font-size: 9px;
+}
+
+.lic-mark.ok   { color: var(--green); }
+.lic-mark.bad  { color: var(--red); }
+.lic-mark.warn { color: var(--amber); }
+
+/* ---------- detalji po dozvoli ---------- */
+
+.lic-details {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border-strong);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 210px;
+    overflow-y: auto;
+}
+
+.lic-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.lic-row-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 13px;
+}
+
+.lic-row-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.lic-row-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.lic-row-meta {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    font-family: 'Roboto Mono', monospace;
+    letter-spacing: 0.2px;
+}
+
+.lic-row-note {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.lic-row-note.ok   { color: var(--green); }
+.lic-row-note.bad  { color: var(--red); }
+.lic-row-note.warn { color: var(--amber); }
+
+.lic-points {
+    flex-shrink: 0;
+    width: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+}
+
+.lic-points span {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+}
+
+.lic-points-bar {
+    width: 100%;
+    height: 4px;
+    border-radius: 3px;
+    background: var(--bg-soft);
+    overflow: hidden;
+}
+
+.lic-points-fill {
+    height: 100%;
+    background: var(--amber);
+    border-radius: 3px;
+}
+
+.lic-points-fill.high { background: var(--red); }
+
+/* ============================================
+   LEKARSKO - traka preostalog roka
+   ============================================ */
+
+.mc-validity {
+    margin-top: 16px;
+}
+
+.mc-validity-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 7px;
+}
+
+.mc-validity-head span:first-child {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-faint);
+    font-weight: 700;
+}
+
+.mc-validity-head span:last-child {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.mc-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: var(--bg-soft);
+    overflow: hidden;
+}
+
+.mc-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--green);
+}
+
+.mc-bar-fill.warn { background: var(--amber); }
+.mc-bar-fill.bad  { background: var(--red); }
+
+.mc-findings {
+    margin-top: 14px;
+    padding: 11px 13px;
+    border-radius: 9px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--text);
+}
+
+.mc-findings strong {
+    display: block;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-faint);
+    margin-bottom: 4px;
+}
+
+/* ============================================
+   POKAZANI DOKUMENT (desni donji ugao)
+   ============================================ */
+
+#received-wrapper {
+    position: absolute;
+    right: 26px;
+    bottom: 64px;
+}
+
+#received-card {
+    position: relative;
+    width: 340px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: cardSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes cardSlideIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.rc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.rc-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rc-top {
+    display: flex;
+    gap: 12px;
+}
+
+.rc-photo {
+    flex-shrink: 0;
+    width: 62px;
+    height: 76px;
+    border-radius: 7px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--text-faint);
+}
+
+.rc-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 22%;
+}
+
+.received-timer {
+    height: 3px;
+    width: 100%;
+    background: var(--bg-soft);
+    overflow: hidden;
+}
+
+.received-timer-fill {
+    height: 100%;
+    width: 100%;
+    background: var(--text);
+    opacity: 0.6;
+    transform-origin: left;
+}
+
+/* ============================================
+   UPOZNAJ SE
+   ============================================ */
+
+#introduce-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#introduce-box {
+    position: relative;
+    width: 340px;
+    padding: 24px 22px 20px 22px;
+    text-align: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    animation: popIn 0.2s ease;
+}
+
+.introduce-icon {
+    font-size: 26px;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+
+#introduce-text {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+.introduce-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.introduce-btn {
+    flex: 1;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.introduce-yes {
+    background: var(--green-bg);
+    color: var(--green);
+}
+
+.introduce-yes:hover {
+    border-color: var(--green);
+}
+
+.introduce-no {
+    background: var(--bg-soft);
+    color: var(--text);
+}
+
+.introduce-no:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+}

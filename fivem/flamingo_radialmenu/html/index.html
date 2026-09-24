@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <title>Flamingo Radial Menu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="radial-wrapper" class="hidden">
+        <div class="radial-vignette"></div>
+        <div id="radial-menu">
+            <div class="radial-track"></div>
+            <div class="radial-sweep" id="radial-sweep"></div>
+            <div id="radial-ring"></div>
+
+            <div id="radial-center">
+                <div class="hub-photo icon hidden" id="hub-photo"></div>
+                <div class="hub-title" id="hub-title">Izaberi opciju</div>
+                <div class="hub-sub" id="hub-sub">Izaberi opciju</div>
+                <div class="hub-back" id="hub-back"><i class="fa-solid fa-xmark"></i><span>Zatvori</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         LIČNA KARTA
+         Ceo sadržaj se generiše u JS-u iz podataka koje šalje
+         flamingo_documents (broj dokumenta, matični broj, rokovi...).
+         ======================================================== -->
+    <div id="idcard-wrapper" class="doc-wrapper hidden">
+        <div id="idcard" class="doc-card">
+            <div class="doc-header">
+                <div class="doc-crest"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="doc-header-text">
+                    <span class="doc-country" id="ic-country">Republika San Andreas</span>
+                    <span class="doc-kind">Lična karta</span>
+                </div>
+                <span class="doc-status" id="ic-status"></span>
+            </div>
+
+            <div class="doc-body" id="ic-body"></div>
+
+            <div class="doc-mrz" id="ic-mrz"></div>
+
+            <div class="doc-actions">
+                <button class="doc-btn doc-btn-main" data-show="idcard">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i> Pokaži igraču
+                </button>
+                <button class="doc-btn doc-btn-close" data-close="idcard">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         LEKARSKO UVERENJE
+         ======================================================== -->
+    <div id="medcert-wrapper" class="doc-wrapper hidden">
+        <div id="medcert-card" class="doc-card">
+            <div class="doc-header">
+                <div class="doc-crest medical"><i class="fa-solid fa-staff-snake"></i></div>
+                <div class="doc-header-text">
+                    <span class="doc-country" id="mc-hospital">Opšta bolnica San Andreas</span>
+                    <span class="doc-kind">Lekarsko uverenje</span>
+                </div>
+                <span class="doc-status" id="mc-status"></span>
+            </div>
+
+            <div class="doc-body" id="mc-body"></div>
+
+            <div class="doc-actions">
+                <button class="doc-btn doc-btn-main" data-show="medcert">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i> Pokaži igraču
+                </button>
+                <button class="doc-btn doc-btn-close" data-close="medcert">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         DOZVOLE - sve kategorije na jednom dokumentu
+         ======================================================== -->
+    <div id="license-wrapper" class="doc-wrapper hidden">
+        <div id="license-card" class="doc-card wide">
+            <div class="doc-header">
+                <div class="doc-crest"><i class="fa-solid fa-id-card-clip"></i></div>
+                <div class="doc-header-text">
+                    <span class="doc-country" id="lic-country">Republika San Andreas</span>
+                    <span class="doc-kind">Dozvole</span>
+                </div>
+                <span class="doc-status" id="lic-status"></span>
+            </div>
+
+            <div class="doc-body" id="lic-body"></div>
+
+            <div class="doc-actions">
+                <button class="doc-btn doc-btn-main" data-show="licenses">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i> Pokaži igraču
+                </button>
+                <button class="doc-btn doc-btn-close" data-close="licenses">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         DOKUMENT KOJI TI JE NEKO POKAZAO (ili policijska provera)
+         ======================================================== -->
+    <div id="received-wrapper" class="hidden">
+        <div id="received-card">
+            <div class="rc-header">
+                <div class="doc-crest small" id="rc-crest"><i class="fa-solid fa-id-card"></i></div>
+                <div class="doc-header-text">
+                    <span class="doc-country" id="rc-title">-</span>
+                    <span class="doc-kind" id="rc-sub">-</span>
+                </div>
+                <span class="doc-status" id="rc-status"></span>
+            </div>
+
+            <div class="rc-body" id="rc-body"></div>
+
+            <div class="received-timer"><div class="received-timer-fill" id="rc-timer"></div></div>
+        </div>
+    </div>
+
+    <!-- "Upoznaj se" - Da/Ne popup -->
+    <div id="introduce-wrapper" class="hidden">
+        <div id="introduce-box">
+            <div class="introduce-icon"><i class="fa-solid fa-handshake"></i></div>
+            <p id="introduce-text">-</p>
+            <div class="introduce-actions">
+                <button id="introduce-yes" class="introduce-btn introduce-yes">
+                    <i class="fa-solid fa-check"></i> Da
+                </button>
+                <button id="introduce-no" class="introduce-btn introduce-no">
+                    <i class="fa-solid fa-xmark"></i> Ne
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
