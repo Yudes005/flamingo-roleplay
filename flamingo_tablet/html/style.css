@@ -1714,3 +1714,412 @@ html, body, #tablet-wrapper {
 .fl-req-panel .fl-org-field-label, .fl-req-panel .fl-org-field-label:first-of-type { margin: 4px 0 0; }
 .fl-req-panel .fl-org-hint { margin: 0; }
 #reqCreateAmountWrap { display: flex; flex-direction: column; gap: 10px; }
+
+
+/* =====================================================================
+   FLAMINGO TABLET - iPadOS redizajn
+   Sistemski deo (ram, status bar, zaključani/početni ekran, dock, ikonice,
+   obaveštenja) + zajednički iOS izgled aplikacija.
+   Boje su upisane direktno (bez var()), isto kao ostatak tableta.
+   ===================================================================== */
+
+/* ---------------- Font (lokalno, isti kao telefon) ---------------- */
+@font-face { font-family: 'Inter'; font-weight: 400; font-display: swap; src: url('fonts/inter-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-weight: 500; font-display: swap; src: url('fonts/inter-latin-500-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap; src: url('fonts/inter-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-weight: 700; font-display: swap; src: url('fonts/inter-latin-700-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-weight: 800; font-display: swap; src: url('fonts/inter-latin-800-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-weight: 400; font-display: swap; src: url('fonts/inter-latin-ext-400-normal.woff2') format('woff2'); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-weight: 500; font-display: swap; src: url('fonts/inter-latin-ext-500-normal.woff2') format('woff2'); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap; src: url('fonts/inter-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-weight: 700; font-display: swap; src: url('fonts/inter-latin-ext-700-normal.woff2') format('woff2'); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-weight: 800; font-display: swap; src: url('fonts/inter-latin-ext-800-normal.woff2') format('woff2'); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+#tablet-wrapper, #tablet-wrapper div, #tablet-wrapper span, #tablet-wrapper button, #tablet-wrapper input,
+#tablet-wrapper textarea, #tablet-wrapper select, #tablet-wrapper b, #tablet-wrapper p, #tablet-wrapper label,
+#tablet-wrapper h1, #tablet-wrapper h2, #tablet-wrapper h3, #tablet-wrapper h4, #tablet-wrapper small, #tablet-wrapper em,
+#tablet-wrapper strong, #tablet-wrapper a, #tablet-wrapper li, #tablet-wrapper td, #tablet-wrapper th {
+  font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+#tablet-wrapper { -webkit-font-smoothing: antialiased; }
+
+/* ---------------- Ram (iPad Pro, horizontalno) ---------------- */
+#tablet-frame {
+  position: relative;
+  width: 1120px;
+  height: 780px;
+  flex: none;
+  padding: 16px;
+  border-radius: 48px;
+  background: #0a0a0b;
+  box-shadow: 0 0 0 2px #6d6d72, 0 0 0 3.5px #2b2b2e;
+  transform-origin: center center;
+  animation: iosFrameIn .42s cubic-bezier(.2, .9, .3, 1);
+}
+@keyframes iosFrameIn { from { opacity: 0; transform: translateY(40px) scale(.97); } }
+.front-camera {
+  position: absolute; top: 5px; left: 50%; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2c3a66 0 25%, #0b0d18 55%, #050507); z-index: 5;
+}
+.side-button { position: absolute; background: #5d5d62; border-radius: 3px; }
+.side-power { top: -5px; left: 110px; width: 60px; height: 4px; }
+.side-volume-up { top: -5px; right: 150px; width: 50px; height: 4px; }
+.side-volume-down { top: -5px; right: 88px; width: 50px; height: 4px; }
+
+#tablet {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 32px;
+  overflow: hidden;
+  background-color: #0a3fd1;
+  background-image: url('img/ipad1.svg'), url('img/wallpaper.jpg');
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  color: #fff;
+  isolation: isolate;
+}
+
+/* ---------------- Status bar ---------------- */
+#tablet-statusbar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 90;
+  height: 30px; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13.5px; font-weight: 600; color: #fff;
+  pointer-events: none;
+}
+.statusbar-left { display: flex; align-items: center; gap: 8px; }
+#statusbar-date { font-weight: 600; }
+.statusbar-right { display: flex; align-items: center; gap: 7px; font-size: 12.5px; }
+.sb-signal { display: flex; align-items: flex-end; gap: 1.5px; height: 10px; }
+.sb-signal i { width: 3px; border-radius: 1px; background: #fff; }
+.sb-signal i:nth-child(1) { height: 4px; } .sb-signal i:nth-child(2) { height: 6px; } .sb-signal i:nth-child(3) { height: 8px; } .sb-signal i:nth-child(4) { height: 10px; }
+.sb-pct { font-size: 12.5px; }
+.sb-battery { width: 25px; height: 12px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, .5); padding: 1.5px; position: relative; }
+.sb-battery::after { content: ''; position: absolute; right: -3.5px; top: 3.5px; width: 2px; height: 3.5px; border-radius: 0 2px 2px 0; background: rgba(255, 255, 255, .5); }
+.sb-battery i { display: block; height: 100%; width: 85%; border-radius: 2px; background: #fff; }
+
+/* ---------------- Obaveštenja (baner) ---------------- */
+.toast-stack {
+  position: absolute; top: 38px; left: 50%; transform: translateX(-50%); z-index: 100;
+  display: flex; flex-direction: column; gap: 8px; width: 400px; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-radius: 20px;
+  background: rgba(44, 44, 46, .88);
+  backdrop-filter: blur(30px) saturate(170%);
+  font-size: 13.5px; font-weight: 500; color: #fff;
+  animation: iosToastIn .45s cubic-bezier(.2, .9, .3, 1);
+}
+.toast.leaving { animation: iosToastOut .3s ease-in forwards; }
+@keyframes iosToastIn { from { opacity: 0; transform: translateY(-30px) scale(.96); } }
+@keyframes iosToastOut { to { opacity: 0; transform: translateY(-30px) scale(.96); } }
+.toast-icon {
+  flex: 0 0 34px; width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+  background: #0a84ff; color: #fff !important;
+}
+.toast-success .toast-icon { background: #30d158; }
+.toast-error .toast-icon { background: #ff453a; }
+.toast-text { line-height: 1.35; }
+
+/* ---------------- Zaključani ekran ---------------- */
+#lock-screen {
+  position: absolute; inset: 0; z-index: 60;
+  display: flex; flex-direction: column; align-items: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .12), transparent 40%, rgba(0, 0, 0, .22));
+  cursor: pointer;
+  animation: iosFade .3s ease;
+}
+#lock-screen.hidden { display: none !important; }
+#lock-screen.unlocking { animation: iosLockUp .42s cubic-bezier(.5, 0, .2, 1) forwards; pointer-events: none; }
+@keyframes iosLockUp { to { transform: translateY(-100%); } }
+@keyframes iosFade { from { opacity: 0; } }
+.lock-center { margin-top: 54px; display: flex; flex-direction: column; align-items: center; text-shadow: 0 2px 18px rgba(0, 0, 0, .25); }
+.lock-ic { font-size: 18px; margin-bottom: 14px; }
+.lock-date { font-size: 21px; font-weight: 600; color: rgba(255, 255, 255, .92); }
+.lock-clock { font-size: 124px; font-weight: 700; line-height: 1; letter-spacing: -4px; margin-top: 2px; }
+.lock-bottom-hint { margin-top: auto; margin-bottom: 36px; }
+.lock-hint { font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, .9); text-shadow: 0 1px 10px rgba(0, 0, 0, .3); animation: iosHint 2.6s ease-in-out infinite; }
+@keyframes iosHint { 50% { opacity: .5; } }
+
+/* ---------------- Početni ekran ---------------- */
+#home-screen {
+  position: absolute; inset: 0; z-index: 10;
+  display: grid; grid-template-columns: 318px 1fr; column-gap: 36px;
+  padding: 58px 44px 0;
+  animation: iosHomeIn .45s cubic-bezier(.2, .9, .3, 1);
+}
+#home-screen.hidden { display: none !important; }
+#home-screen.behind-lock { visibility: hidden; animation: none; }
+@keyframes iosHomeIn { from { opacity: 0; transform: scale(1.06); } }
+
+/* Widgeti */
+.home-widgets { display: flex; flex-direction: column; gap: 22px; }
+.widget {
+  border-radius: 24px; padding: 16px;
+  background: rgba(30, 30, 32, .62);
+  backdrop-filter: blur(28px) saturate(170%);
+  box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .12);
+  color: #fff;
+}
+.w-clock { display: flex; align-items: center; gap: 16px; }
+.wcl-face { width: 116px; height: 116px; border-radius: 50%; background: #fff; flex: none; box-shadow: inset 0 0 0 3px #e5e5ea; }
+.wcl-face svg { width: 100%; height: 100%; display: block; }
+.wcl-face text { font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 600; fill: #1c1c1e; }
+.wcl-face line { stroke-linecap: round; }
+#ios-h { stroke: #1c1c1e; stroke-width: 3.4; }
+#ios-m { stroke: #1c1c1e; stroke-width: 2.4; }
+#ios-s { stroke: #ff9f0a; stroke-width: 1.2; }
+.wcl-face circle { fill: #ff9f0a; }
+.wcl-info b { display: block; font-size: 16px; font-weight: 600; }
+.wcl-info span { display: block; font-size: 34px; font-weight: 300; letter-spacing: -1px; margin-top: 2px; }
+.w-cal { display: flex; gap: 14px; background: rgba(255, 255, 255, .9); color: #1c1c1e; }
+.wca-left { flex: 0 0 92px; display: flex; flex-direction: column; }
+.wca-left span { font-size: 11px; font-weight: 700; color: #ff3b30; letter-spacing: .3px; }
+.wca-left b { font-size: 48px; font-weight: 400; line-height: 1.05; letter-spacing: -2px; }
+.wca-left em { font-style: normal; font-size: 13px; font-weight: 600; color: #6c6c70; }
+.wca-grid { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px 0; font-size: 10px; font-weight: 600; text-align: center; align-content: start; }
+.wca-grid i { font-style: normal; height: 17px; line-height: 17px; }
+.wca-grid i.h { color: #8e8e93; font-size: 9px; }
+.wca-grid i.t { background: #ff3b30; color: #fff; border-radius: 50%; width: 17px; margin: 0 auto; }
+.w-org { padding: 14px; }
+.w-org.hidden { display: none !important; }
+.wo-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; font-size: 14px; }
+.wo-ic { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; background: linear-gradient(180deg, #ff6b6b, #e0162b); }
+.home-quickstats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.home-quickstats.hidden { display: grid !important; }
+.quickstat-card { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; background: rgba(255, 255, 255, .08); }
+.quickstat-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; }
+.quickstat-icon.calls { background: #ff453a; }
+.quickstat-icon.medkit { background: #0a84ff; }
+.quickstat-text { display: flex; flex-direction: column; }
+.quickstat-value { font-size: 26px; font-weight: 700; letter-spacing: -.8px; line-height: 1.1; }
+.quickstat-label { font-size: 11.5px; font-weight: 500; color: rgba(255, 255, 255, .65); }
+
+/* Ikonice */
+#app-grid {
+  display: grid; grid-template-columns: repeat(5, 96px); grid-auto-rows: 104px;
+  justify-content: space-between; align-content: start; row-gap: 14px;
+  padding-top: 4px;
+}
+.app-icon { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+.app-icon.hidden { display: none !important; }
+.app-icon-glyph {
+  position: relative; width: 72px; height: 72px; border-radius: 17px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; color: #fff;
+  background: linear-gradient(180deg, #8e8e93, #48484a);
+  box-shadow: 0 8px 18px -8px rgba(0, 0, 0, .5);
+  transition: transform .15s ease, filter .15s ease;
+}
+.app-icon-glyph::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 0 0 .5px rgba(255, 255, 255, .15); pointer-events: none; }
+.app-icon:active .app-icon-glyph { transform: scale(.9); filter: brightness(.8); }
+.app-icon-label { font-size: 12.5px; font-weight: 500; color: #fff; text-align: center; text-shadow: 0 1px 6px rgba(0, 0, 0, .5); white-space: nowrap; }
+
+#tablet .app-icon-glyph.bolnica, #tablet .app-icon-mini.bolnica, #tablet .dock-icon.dock-bolnica { background: linear-gradient(180deg, #ff6b6b, #e0162b); }
+#tablet .app-icon-glyph.supply, #tablet .app-icon-mini.supply { background: linear-gradient(180deg, #5ac8fa, #0a6fe0); }
+#tablet .app-icon-glyph.lifeinvader, #tablet .app-icon-mini.lifeinvader { background: linear-gradient(180deg, #ff5b8a, #e0165b); }
+#tablet .app-icon-glyph.organizacija, #tablet .app-icon-mini.organizacija, #tablet .dock-icon.dock-organizacija { background: linear-gradient(180deg, #a78bfa, #6d28d9); }
+#tablet .app-icon-glyph.organizacija--lifeinvader, #tablet .app-icon-mini.organizacija--lifeinvader, #tablet .dock-icon.dock-organizacija--lifeinvader { background: linear-gradient(180deg, #ff5b8a, #e0165b); }
+#tablet .app-icon-glyph.organizacija--vlada, #tablet .app-icon-mini.organizacija--vlada, #tablet .dock-icon.dock-organizacija--vlada { background: linear-gradient(180deg, #ffc14d, #e08600); }
+#tablet .app-icon-glyph.organizacija--policija, #tablet .dock-icon.dock-organizacija--policija { background: linear-gradient(180deg, #4d7cff, #1b3fb8); }
+#tablet .app-icon-glyph.organizacija--fib, #tablet .dock-icon.dock-organizacija--fib { background: linear-gradient(180deg, #4b5563, #111827); }
+#tablet .app-icon-glyph.organizacija--sheriff, #tablet .dock-icon.dock-organizacija--sheriff { background: linear-gradient(180deg, #d6a54a, #8a5a14); }
+#tablet .app-icon-glyph.mdt, #tablet .app-icon-mini.mdt { background: linear-gradient(180deg, #ffc14d, #e08600); }
+#tablet .app-icon-glyph.pdmdt, #tablet .app-icon-mini.pdmdt { background: linear-gradient(180deg, #4d7cff, #1b3fb8); }
+#tablet .app-icon-glyph.market, #tablet .app-icon-mini.market, #tablet .dock-icon.dock-market { background: linear-gradient(180deg, #5ef97b, #0bb03a); }
+#tablet .app-icon-glyph.kuce, #tablet .app-icon-mini.kuce, #tablet .dock-icon.dock-kuce { background: linear-gradient(180deg, #ffb340, #ff7a00); }
+#tablet .dock-icon.dock-settings { background: linear-gradient(180deg, #9d9da3, #58585e); }
+
+.app-badge {
+  position: absolute; top: -7px; left: 50%; margin-left: 24px;
+  min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px;
+  background: #ff3b30; color: #fff; font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+}
+.app-badge.hidden { display: none !important; }
+
+/* Dock */
+.home-dock, #home-dock.home-dock.hidden {
+  position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%);
+  display: flex !important; align-items: center; gap: 16px;
+  padding: 12px 14px; border-radius: 30px;
+  background: rgba(255, 255, 255, .2);
+  backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .2);
+}
+.dock-icon {
+  position: relative; width: 62px; height: 62px; border-radius: 15px; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: #fff;
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .45);
+  transition: transform .15s ease;
+}
+.dock-icon::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28); pointer-events: none; }
+.dock-icon:active { transform: scale(.9); }
+.dock-icon.hidden { display: none !important; }
+.dock-sep { width: 1px; height: 48px; background: rgba(255, 255, 255, .28); }
+
+/* Home indikator (klik = zatvori tablet) */
+.home-indicator {
+  position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%);
+  width: 190px; height: 5px; border-radius: 3px; background: #fff; z-index: 95; cursor: pointer;
+}
+.home-indicator::before { content: ''; position: absolute; inset: -10px -20px; }
+
+/* =====================================================================
+   APLIKACIJE - zajednički iOS okvir
+   ===================================================================== */
+#tablet .app-screen {
+  position: absolute; inset: 0; z-index: 20;
+  padding-top: 30px;
+  display: flex; flex-direction: column;
+  background: #000;
+  backdrop-filter: none;
+  animation: iosAppIn .38s cubic-bezier(.2, .9, .3, 1);
+}
+@keyframes iosAppIn { from { opacity: 0; transform: scale(.94); } }
+#tablet .app-screen.hidden { display: none !important; }
+
+/* Navigaciona traka */
+#tablet .app-topbar {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 56px; padding: 8px 22px;
+  background: rgba(22, 22, 24, .92);
+  border-bottom: .5px solid rgba(84, 84, 88, .6);
+}
+#tablet .app-back {
+  width: auto; height: 34px; padding: 0 6px 0 2px; border: none; border-radius: 8px;
+  background: transparent; color: #0a84ff; font-size: 20px;
+}
+#tablet .app-back:hover { background: rgba(10, 132, 255, .12); border: none; }
+#tablet .app-icon-mini { width: 30px; height: 30px; border-radius: 8px; font-size: 13px; color: #fff; flex: none; }
+#tablet .app-title { font-size: 18px; font-weight: 700; letter-spacing: -.3px; color: #fff; }
+
+/* Segmentirani prekidači u nav baru (Uprava / Moja organizacija) */
+#tablet .org-mode-switch { background: rgba(118, 118, 128, .24); border: none; border-radius: 9px; padding: 2px; gap: 0; backdrop-filter: none; }
+#tablet .org-mode-btn { border-radius: 7px; padding: 6px 16px; font-size: 13px; font-weight: 600; color: #fff; background: transparent; box-shadow: none; }
+#tablet .org-mode-btn.active { background: #636366; color: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, .25); }
+
+/* ---------------- Bolnica: pozivi ---------------- */
+#tablet .calls-count-pill { background: #ff453a; border: none; color: #fff; }
+#tablet .duty-status-bar { border-radius: 12px; border: none; background: #1c1c1e; margin: 16px 24px 0; }
+#tablet .calls-list { padding: 16px 24px 28px; }
+
+/* =====================================================================
+   OPŠTI iOS DETALJI UNUTAR APLIKACIJA
+   ===================================================================== */
+#tablet .app-screen input, #tablet .app-screen textarea, #tablet .app-screen select { caret-color: #0a84ff; }
+#tablet .app-screen ::placeholder { color: rgba(235, 235, 245, .3); }
+#tablet .app-screen *::-webkit-scrollbar { width: 0; height: 0; }
+
+/* =====================================================================
+   ORGANIZACIJA / BOSS MENI - izgled iPadOS "Podešavanja"
+   ===================================================================== */
+#tablet .org-category-body { padding: 20px 22px 22px; }
+#tablet .org-category-body::before { background: #000; }
+
+/* Sidebar kao grupisana iOS lista */
+#tablet .fl-settings-sidenav {
+  width: 260px; gap: 2px; padding: 6px;
+  background: #1c1c1e; border-radius: 14px; align-self: flex-start; max-height: 100%;
+}
+#tablet .fl-settings-nav-item {
+  background: transparent; border: none; border-radius: 10px; padding: 8px 10px; gap: 12px;
+  box-shadow: none; transform: none;
+}
+#tablet .fl-settings-nav-item:hover { background: rgba(255, 255, 255, .05); border: none; transform: none; }
+#tablet .fl-settings-nav-item.active { background: #0a84ff; border: none; box-shadow: none; }
+#tablet .fl-settings-nav-item.active .fl-settings-nav-sub { color: rgba(255, 255, 255, .8); }
+#tablet .fl-settings-nav-item.active .fl-settings-nav-chevron { color: #fff; }
+#tablet .fl-settings-nav-item .fl-settings-nav-icon { width: 30px; height: 30px; border-radius: 7px; font-size: 13px; color: #fff !important; transform: none !important; }
+#tablet .fl-settings-nav-item[data-org-tab="clanovi"] .fl-settings-nav-icon, #tablet .fl-settings-nav-item[data-orgm-tab="clanovi"] .fl-settings-nav-icon { background: #bf5af2; }
+#tablet .fl-settings-nav-item[data-org-tab="rankovi"] .fl-settings-nav-icon { background: #5e5ce6; }
+#tablet .fl-settings-nav-item[data-org-tab="plate"] .fl-settings-nav-icon { background: #30d158; }
+#tablet .fl-settings-nav-item[data-org-tab="sef"] .fl-settings-nav-icon { background: #ff9f0a; }
+#tablet .fl-settings-nav-item[data-org-tab="postavke"] .fl-settings-nav-icon { background: #8e8e93; }
+#tablet .fl-settings-nav-item[data-org-tab="logovi"] .fl-settings-nav-icon { background: #40c8e0; }
+#tablet .fl-settings-nav-item[data-org-tab="obavestenje"] .fl-settings-nav-icon, #tablet .fl-settings-nav-item[data-orgm-tab="obavestenja"] .fl-settings-nav-icon { background: #ff453a; }
+#tablet .fl-settings-nav-item[data-org-tab="zahtevi"] .fl-settings-nav-icon, #tablet .fl-settings-nav-item[data-orgm-tab="zahtevi"] .fl-settings-nav-icon { background: #ff9f0a; }
+#tablet .fl-settings-nav-item[data-orgm-tab="eventi"] .fl-settings-nav-icon { background: #ff2d55; }
+#tablet .fl-settings-nav-item[data-orgm-tab="aktivnosti"] .fl-settings-nav-icon { background: #40c8e0; }
+#tablet .fl-settings-nav-item[data-orgm-tab="ranglista"] .fl-settings-nav-icon { background: #ffd60a; }
+#tablet .fl-settings-nav-item[data-orgm-tab="mojprofil"] .fl-settings-nav-icon { background: #0a84ff; }
+#tablet .fl-settings-nav-item[data-orgm-tab="statistika"] .fl-settings-nav-icon { background: #5e5ce6; }
+#tablet .fl-settings-nav-item.active .fl-settings-nav-icon { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .5); }
+#tablet .fl-settings-nav-title { font-size: 14px; font-weight: 600; letter-spacing: 0; text-transform: lowercase; }
+#tablet .fl-settings-nav-title::first-letter { text-transform: uppercase; }
+#tablet .fl-settings-nav-sub { font-size: 11.5px; }
+
+/* Glavni panel i desni info panel */
+#tablet .fl-settings-main { background: #1c1c1e; border: none; border-radius: 16px; box-shadow: none; }
+#tablet .fl-org-section-title { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
+
+/* Dugmad (iOS) */
+#tablet .fl-btn-primary { background: #0a84ff; border-color: transparent; color: #fff; box-shadow: none; border-radius: 12px; font-weight: 600; }
+#tablet .fl-btn-secondary { background: rgba(118, 118, 128, .24); border-color: transparent; color: #0a84ff; border-radius: 12px; font-weight: 600; }
+#tablet .fl-btn-danger { border-radius: 12px; font-weight: 600; }
+#tablet .fl-btn-primary:hover, #tablet .fl-btn-secondary:hover { transform: none; filter: brightness(1.12); }
+
+/* Polja za unos i padajući meniji */
+#tablet .fl-input, #tablet .fl-select-trigger { background: #2c2c2e; border: 1px solid transparent; border-radius: 10px; }
+#tablet .fl-input:focus, #tablet .fl-select.open .fl-select-trigger { background: #2c2c2e; border-color: #0a84ff; }
+#tablet .fl-select-menu { background: rgba(44, 44, 46, .98); border: none; border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, .55); }
+#tablet .fl-select-option.selected { background: transparent; color: #0a84ff; }
+
+/* =====================================================================
+   iOS kontrole (checkbox, segmentirani tabovi)
+   ===================================================================== */
+#tablet .app-screen input[type="checkbox"] {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; flex: none; margin: 0 6px 0 0; vertical-align: middle;
+  border-radius: 50%; border: 1.5px solid rgba(235, 235, 245, .35); background: transparent;
+  display: inline-grid; place-items: center; cursor: pointer; transition: background .15s, border-color .15s;
+}
+#tablet .app-screen input[type="checkbox"]:checked { background: #0a84ff; border-color: #0a84ff; }
+#tablet .app-screen input[type="checkbox"]:checked::after {
+  content: ''; width: 5px; height: 9px; margin-top: -2px;
+  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+#tablet .app-screen input[type="checkbox"]:disabled { opacity: .45; }
+
+/* LifeInvader: segmentirana kontrola */
+#tablet .li-tabbar { gap: 0; margin: 12px 22px 4px; padding: 2px; border: none; border-radius: 9px; background: rgba(118, 118, 128, .24); }
+#tablet .li-tab { background: transparent; border: none; border-radius: 7px; padding: 7px 10px; color: #fff; font-size: 13px; font-weight: 600; }
+#tablet .li-tab.active { background: #636366; border: none; box-shadow: 0 3px 8px rgba(0, 0, 0, .25); }
+
+/* =====================================================================
+   MARKET i NEKRETNINE - iPadOS sidebar
+   ===================================================================== */
+#tablet .mk-side, #tablet .kc-side { background: #1c1c1e; border-right: .5px solid rgba(84, 84, 88, .6); }
+#tablet .mk-nav { border-radius: 10px; font-weight: 600; font-size: 14px; color: #fff; }
+#tablet .mk-nav i:first-child { color: #0a84ff; }
+#tablet .mk-nav.active { background: #0a84ff; color: #fff; box-shadow: none; }
+#tablet .mk-nav.active i:first-child, #tablet .mk-nav.active em { color: #fff; }
+#tablet .kc-cap { background: #2c2c2e; border: none; }
+#tablet .kc-item { background: transparent; border: none; border-radius: 12px; }
+#tablet .kc-item:hover { background: rgba(255, 255, 255, .05); }
+#tablet .kc-item.active { background: #0a84ff; border: none; }
+#tablet .kc-item.active * { color: #fff !important; }
+
+/* =====================================================================
+   MDT (Policija / Vlada) - iPadOS split view
+   ===================================================================== */
+#tablet .fm-main::before { display: none; }
+#tablet .fm-side { background: #1c1c1e; border-right: .5px solid rgba(84, 84, 88, .6); }
+#tablet .fm-nav-btn { font-size: 14px; font-weight: 600; color: #fff; height: 38px; border-radius: 10px; }
+#tablet .fm-nav-btn i { color: #0a84ff; font-size: 14px; width: 20px; }
+#tablet .fm.gov .fm-nav-btn i { color: #ff9f0a; }
+#tablet .fm-nav-btn.active { background: #0a84ff; box-shadow: none; color: #fff; }
+#tablet .fm.gov .fm-nav-btn.active { background: #ff9f0a; color: #fff; }
+#tablet .fm-nav-btn.active i { color: inherit; }
+#tablet .fm-nav-sec { font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #98989f; margin: 14px 10px 4px; }
+#tablet .fm-head { height: 60px; border-bottom: .5px solid rgba(84, 84, 88, .6); background: rgba(22, 22, 24, .92); }
+#tablet .fm-head-t b { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+#tablet .fm-me { background: #2c2c2e; border: none; }
+#tablet .fm-exit { background: transparent; color: #ff453a; font-weight: 600; font-size: 13.5px; }
+#tablet .fm-exit:hover { background: rgba(255, 69, 58, .12); }

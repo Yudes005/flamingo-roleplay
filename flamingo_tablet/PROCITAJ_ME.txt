@@ -5,7 +5,7 @@ NISU menjani - menjan je samo izgled.
 
 NOVO
 ----
-- ios.css + ios.js: iPad Pro ram, iPadOS status bar, zaključani ekran
+- Sistemski iPadOS sloj (na kraju style.css i script.js): iPad Pro ram, iPadOS status bar, zaključani ekran
   (datum iznad velikog sata), početni ekran sa widgetima (analogni sat,
   kalendar, "Hitna pomoć" statistika za doktore), ikonice u iOS stilu i
   dock (Organizacija, Bolnica, Market, Nekretnine, promena pozadine).

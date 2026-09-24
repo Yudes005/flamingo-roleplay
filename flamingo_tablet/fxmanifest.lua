@@ -28,8 +28,6 @@ files {
     'html/market.js',
     'html/market.css',
     'html/fmdt.css',
-    'html/ios.css',
-    'html/ios.js',
     'html/fonts/*.woff2',
     'html/img/*.svg',
     'html/mdt_core.js',
