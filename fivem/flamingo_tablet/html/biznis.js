@@ -275,7 +275,9 @@
     refill: l => ({ ic: 'fa-truck-fast', cls: 'ref', t: 'Dopuna bankomata', s: esc(l.actor || 'Transport'), v: `+${money(l.amount)}`, vc: 'blue' }),
     buy: l => ({ ic: 'fa-key', cls: 'in', t: 'Kupovina biznisa', s: esc(l.actor || ''), v: money(l.amount), vc: '' }),
     owner: l => ({ ic: 'fa-crown', cls: 'in', t: 'Novi vlasnik', s: esc(l.actor || ''), v: '', vc: '' }),
-    state: l => ({ ic: 'fa-landmark', cls: 'out', t: 'Vraćeno državi', s: esc(l.actor || ''), v: '', vc: '' })
+    state: l => ({ ic: 'fa-landmark', cls: 'out', t: 'Vraćeno državi', s: esc(l.actor || ''), v: '', vc: '' }),
+    sell_state: l => ({ ic: 'fa-landmark', cls: 'out', t: 'Prodato državi', s: esc(l.actor || ''), v: money(l.amount), vc: '' }),
+    sold: l => ({ ic: 'fa-handshake', cls: 'in', t: 'Prodato igraču', s: esc(l.actor || ''), v: money(l.amount), vc: '' })
   };
   function tierLabel(id) {
     const c = (bz.data.cards || []).find(x => x.id === id);
@@ -302,6 +304,21 @@
       </div>`;
   }
 
+  function renderSellState(b) {
+    return `
+      <div class="bz-section bz-sell">
+        <div class="bz-section-head">
+          <div>
+            <div class="bz-section-title"><i class="fa-solid fa-landmark"></i> Prodaj državi</div>
+            <div class="bz-section-sub">Država otkupljuje biznis za pola cene: <b>${money(b.sellPrice)}</b> (cena ${money(b.price)}).
+              ${b.balance > 0 ? `Iz kase ti se isplaćuje još <b>${money(b.balance)}</b>.` : ''} Novac ide na račun.
+              Igraču možeš da prodaš preko radial menija (<span class="bz-kbd">G</span> → Prodaj biznis).</div>
+          </div>
+          <button class="bz-btn danger" data-bz="sellState"><i class="fa-solid fa-hand-holding-dollar"></i> Prodaj za ${money(b.sellPrice)}</button>
+        </div>
+      </div>`;
+  }
+
   function renderDetail(b, d) {
     return `
       ${renderHero(b)}
@@ -317,7 +334,8 @@
       </div>
       ${renderChart(b)}
       ${renderTiers(b, d)}
-      ${renderLogs(b)}`;
+      ${renderLogs(b)}
+      ${renderSellState(b)}`;
   }
 
   // ---------- događaji ----------
@@ -371,6 +389,9 @@
         break;
       case 'refill':
         action('refill');
+        break;
+      case 'sellState':
+        if (arm('sellState', btn, 'Klikni ponovo za prodaju')) action('sellState');
         break;
       case 'rename':
         bz.renaming = true;

@@ -260,6 +260,32 @@ MySQL.ready(function()
 end)
 
 -- ============================================================
+--  Kasa pri prodaji: sve sto je ostalo u kasi isplacuje se prodavcu na racun
+-- ============================================================
+local function payoutKasa(b, xPlayer)
+    local amount = math.floor(b.balance)
+    if amount < 1 then return 0 end
+    b.balance = 0
+    addMoney(b, { balance = -amount })
+    xPlayer.addAccountMoney('bank', amount, 'Isplata iz kase biznisa')
+    logTx(b.id, 'take', amount, 0, 'bank', xPlayer.getName())
+    return amount
+end
+
+local function bankLog(src, txType, title, amount, memo, party)
+    if GetResourceState('flamingo_banke') ~= 'started' then return end
+    pcall(function()
+        exports['flamingo_banke']:AddTransaction(src, txType, title, amount, memo, party)
+    end)
+end
+
+local function ownedBy(identifier)
+    for _, b in pairs(BIZ) do
+        if b.owner == identifier and not b.disabled then return b end
+    end
+end
+
+-- ============================================================
 --  Promena vlasnika (kupovina / aukcija / admin)
 --  Kasa se pri promeni vlasnika prazni - stari vlasnik treba da je podigne pre prodaje.
 -- ============================================================
@@ -429,6 +455,7 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:list', function(src, cb)
             custom   = b.label ~= nil and b.label ~= '',
             coords   = { x = b.coords.x, y = b.coords.y, z = b.coords.z },
             price    = b.price,
+            sellPrice = math.floor(b.price * Config.SellToStateRatio),
             balance  = b.balance,
             atmCash  = b.atmCash,
             atmMax   = Config.ATM.maxCash,
@@ -516,6 +543,19 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:action', function(src, cb, p
         MySQL.update('UPDATE flamingo_biznisi SET label = ? WHERE id = ?', { label, b.id })
         syncAll()
         return cb({ ok = true, message = label and ('Biznis se sada zove "%s".'):format(label) or 'Vraćen je podrazumevani naziv.' })
+
+    elseif action == 'sellState' then
+        local value = math.floor(b.price * Config.SellToStateRatio)
+        local kasa = payoutKasa(b, xPlayer)
+        if value > 0 then
+            xPlayer.addAccountMoney('bank', value, 'Prodaja biznisa drzavi')
+            bankLog(src, 'income', 'Prodaja biznisa', value, bizName(b), 'Država')
+        end
+        logTx(b.id, 'sell_state', value, 0, nil, name)
+        local label = bizName(b)
+        setOwner(b, nil, nil, 'Prodato državi')
+        return cb({ ok = true, message = ('Prodao si %s državi za %s.%s'):format(label, fmt(value),
+            kasa > 0 and (' Iz kase ti je isplaćeno još %s.'):format(fmt(kasa)) or '') })
 
     elseif action == 'refill' then
         local missing = math.max(0, Config.ATM.maxCash - b.atmCash)
@@ -742,3 +782,130 @@ end, false, { help = 'Dopuni bankomat gotovinom (test)', arguments = {
     { name = 'id', help = 'ID biznisa', type = 'number' },
     { name = 'iznos', help = 'Iznos (prazno = do punog)', type = 'any' }
 } })
+
+-- ============================================================
+--  Prodaja biznisa igracu (radial meni G -> "Prodaj biznis")
+--  Prodavac bira igraca u blizini i cenu, kupac dobija ponudu
+--  i ima Config.PlayerSale.timeout sekundi da prihvati.
+-- ============================================================
+local offers = {}       -- [kupacSrc] = { id, seller, bizId, price, expires }
+local offerSeq = 0
+
+local function playersNear(a, b, dist)
+    local pa, pb = GetPlayerPed(a), GetPlayerPed(b)
+    if pa == 0 or pb == 0 then return false end
+    return #(GetEntityCoords(pa) - GetEntityCoords(pb)) <= dist
+end
+
+-- Podaci za prozor prodaje (sta prodajem i koliko vredi)
+ESX.RegisterServerCallback('flamingo_biznisi:sellInfo', function(src, cb)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    local b = xPlayer and ownedBy(xPlayer.identifier)
+    if not b then return cb({ ok = false, msg = 'Nemaš biznis.' }) end
+    cb({
+        ok = true, id = b.id, name = bizName(b), price = b.price,
+        stateValue = math.floor(b.price * Config.SellToStateRatio),
+        balance = b.balance,
+        minPrice = Config.PlayerSale.minPrice, maxPrice = Config.PlayerSale.maxPrice,
+        distance = Config.PlayerSale.distance
+    })
+end)
+
+RegisterNetEvent('flamingo_biznisi:server:sellOffer', function(target, price)
+    local src = source
+    if not passCooldown(src, 2000) then return notify(src, 'Sačekaj trenutak pa pokušaj ponovo.', 'error') end
+
+    local xSeller = ESX.GetPlayerFromId(src)
+    local b = xSeller and ownedBy(xSeller.identifier)
+    if not b then return notify(src, 'Nemaš biznis koji možeš da prodaš.', 'error') end
+
+    target = tonumber(target)
+    price = toAmount(price)
+    local xBuyer = target and ESX.GetPlayerFromId(target)
+    if not xBuyer or target == src then return notify(src, 'Izaberi igrača u blizini.', 'error') end
+    if not price or price < Config.PlayerSale.minPrice or price > Config.PlayerSale.maxPrice then
+        return notify(src, 'Unesi ispravnu cenu.', 'error')
+    end
+    if not playersNear(src, target, Config.PlayerSale.distance + 1.0) then
+        return notify(src, 'Kupac mora biti pored tebe.', 'error')
+    end
+    if Config.MaxPerPlayer > 0 and ownedCount(xBuyer.identifier) >= Config.MaxPerPlayer then
+        return notify(src, 'Taj igrač već ima biznis.', 'error')
+    end
+    if offers[target] and offers[target].expires > os.time() then
+        return notify(src, 'Taj igrač već razmatra drugu ponudu.', 'error')
+    end
+
+    offerSeq = offerSeq + 1
+    local offer = { id = offerSeq, seller = src, bizId = b.id, price = price, expires = os.time() + Config.PlayerSale.timeout }
+    offers[target] = offer
+
+    TriggerClientEvent('flamingo_biznisi:client:offer', target, {
+        id = offer.id, seller = xSeller.getName(), name = bizName(b), type = b.type,
+        price = price, stateValue = math.floor(b.price * Config.SellToStateRatio),
+        bank = xBuyer.getAccount('bank').money, timeout = Config.PlayerSale.timeout
+    })
+    notify(src, ('Ponuda je poslata: %s za %s. Čeka se odgovor kupca.'):format(bizName(b), fmt(price)), 'info')
+
+    SetTimeout(Config.PlayerSale.timeout * 1000 + 1000, function()
+        if offers[target] == offer then
+            offers[target] = nil
+            notify(src, 'Kupac nije odgovorio na ponudu na vreme.', 'error')
+            TriggerClientEvent('flamingo_biznisi:client:offerClosed', target, offer.id)
+        end
+    end)
+end)
+
+RegisterNetEvent('flamingo_biznisi:server:offerResponse', function(id, accepted)
+    local src = source
+    local offer = offers[src]
+    if not offer or offer.id ~= tonumber(id) then return end
+    offers[src] = nil
+
+    local seller = offer.seller
+    local xBuyer, xSeller = ESX.GetPlayerFromId(src), ESX.GetPlayerFromId(seller)
+    if not xBuyer then return end
+    if not xSeller then return notify(src, 'Prodavac više nije u gradu.', 'error') end
+
+    if not accepted then
+        notify(seller, ('%s je odbio ponudu za biznis.'):format(xBuyer.getName()), 'error')
+        return notify(src, 'Odbio si ponudu.', 'info')
+    end
+
+    local function fail(msg)
+        notify(src, msg, 'error')
+        notify(seller, 'Prodaja nije uspela: ' .. msg, 'error')
+    end
+
+    local b = BIZ[offer.bizId]
+    if offer.expires < os.time() then return fail('Ponuda je istekla.') end
+    if not b or b.disabled or b.owner ~= xSeller.identifier then return fail('Biznis više nije na prodaju.') end
+    if not playersNear(src, seller, Config.PlayerSale.distance + 1.0) then return fail('Kupac i prodavac moraju biti jedan pored drugog.') end
+    if Config.MaxPerPlayer > 0 and ownedCount(xBuyer.identifier) >= Config.MaxPerPlayer then return fail('Kupac već ima biznis.') end
+    if xBuyer.getAccount('bank').money < offer.price then return fail('Kupac nema dovoljno novca na računu.') end
+
+    local label = bizName(b)
+    xBuyer.removeAccountMoney('bank', offer.price, 'Kupovina biznisa')
+    xSeller.addAccountMoney('bank', offer.price, 'Prodaja biznisa')
+    local kasa = payoutKasa(b, xSeller)
+
+    bankLog(src, 'expense', 'Kupovina biznisa', offer.price, label, xSeller.getName())
+    bankLog(seller, 'income', 'Prodaja biznisa', offer.price, label, xBuyer.getName())
+    logTx(b.id, 'sold', offer.price, 0, nil, ('%s -> %s'):format(xSeller.getName(), xBuyer.getName()))
+    setOwner(b, xBuyer.identifier, xBuyer.getName())
+
+    notify(src, ('Kupio si %s za %s. Upravljaj njime na tabletu, aplikacija "Moj biznis".'):format(label, fmt(offer.price)), 'success')
+    notify(seller, ('Prodao si %s igraču %s za %s.%s'):format(label, xBuyer.getName(), fmt(offer.price),
+        kasa > 0 and (' Iz kase ti je isplaćeno još %s.'):format(fmt(kasa)) or ''), 'success')
+end)
+
+AddEventHandler('playerDropped', function()
+    local src = source
+    offers[src] = nil
+    for buyer, o in pairs(offers) do
+        if o.seller == src then
+            offers[buyer] = nil
+            TriggerClientEvent('flamingo_biznisi:client:offerClosed', buyer, o.id)
+        end
+    end
+end)

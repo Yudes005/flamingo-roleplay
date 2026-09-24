@@ -152,10 +152,14 @@ const GOV_CATEGORY = {
 // FLAMINGO_KUCE: vidi ga samo vlasnik kuće (hasHouse iz client.lua)
 const HOUSE_SELL_OPTION = { key: 'house_sell', label: 'Prodaj kuću', icon: 'fa-solid fa-house-circle-check', type: 'action' };
 
-function buildRootOptions(job, isHospitalBoss, isLifeinvaderBoss, isGovBoss, isGovMember, hasHouse, external, policeSystem) {
+// FLAMINGO_BIZNISI: vidi ga samo vlasnik biznisa (hasBusiness iz client.lua)
+const BIZ_SELL_OPTION = { key: 'biz_sell', label: 'Prodaj biznis', icon: 'fa-solid fa-briefcase', type: 'action' };
+
+function buildRootOptions(job, isHospitalBoss, isLifeinvaderBoss, isGovBoss, isGovMember, hasHouse, external, policeSystem, hasBusiness) {
     let options = ROOT_OPTIONS;
 
     if (hasHouse) options = [...options, HOUSE_SELL_OPTION];
+    if (hasBusiness) options = [...options, BIZ_SELL_OPTION];
 
     if (job === 'ambulance') options = [HOSPITAL_CATEGORY, ...options];
     // Kad je flamingo_policija pokrenut, policijske opcije dolaze od njega (external)
@@ -906,7 +910,7 @@ window.addEventListener('message', (event) => {
     if (data.action === 'open') {
         currentPlayer = data.player;
         currentPhoto = data.player.photo || null;
-        currentOptions = buildRootOptions(data.player.job, data.player.isHospitalBoss, data.player.isLifeinvaderBoss, data.player.isGovBoss, data.player.isGovMember, data.player.hasHouse, data.player.external, data.player.policeSystem);
+        currentOptions = buildRootOptions(data.player.job, data.player.isHospitalBoss, data.player.isLifeinvaderBoss, data.player.isGovBoss, data.player.isGovMember, data.player.hasHouse, data.player.external, data.player.policeSystem, data.player.hasBusiness);
         menuStack = [];
         titleStack = [];
         currentTitle = null;

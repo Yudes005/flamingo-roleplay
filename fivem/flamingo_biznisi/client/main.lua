@@ -105,7 +105,91 @@ RegisterNetEvent('flamingo_biznisi:client:pickAtm', function(price)
     TriggerServerEvent('flamingo_biznisi:server:addAtm', GetEntityCoords(obj), price)
 end)
 
+-- ============================================================
+--  Prodaja biznisa igracu (radial meni G -> "Prodaj biznis")
+-- ============================================================
+local nuiOpen = nil   -- 'sell' | 'offer' | nil
+
+-- exports['flamingo_biznisi']:HasBusiness() -> radial prikazuje "Prodaj biznis" samo vlasniku
+exports('HasBusiness', function()
+    return next(mine) ~= nil
+end)
+
+local function nearbyPlayers()
+    local list = {}
+    local myPed = PlayerPedId()
+    local myPos = GetEntityCoords(myPed)
+    for _, pid in ipairs(GetActivePlayers()) do
+        local ped = GetPlayerPed(pid)
+        if ped ~= myPed and DoesEntityExist(ped) then
+            local d = #(myPos - GetEntityCoords(ped))
+            if d <= Config.PlayerSale.distance then
+                list[#list + 1] = { id = GetPlayerServerId(pid), dist = math.floor(d * 10 + 0.5) / 10 }
+            end
+        end
+    end
+    table.sort(list, function(a, b) return a.dist < b.dist end)
+    return list
+end
+
+local function closeNui()
+    if not nuiOpen then return end
+    nuiOpen = nil
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = 'close' })
+end
+
+local function openSellMenu()
+    if nuiOpen then return end
+    ESX.TriggerServerCallback('flamingo_biznisi:sellInfo', function(info)
+        if not info or not info.ok then
+            return notify((info and info.msg) or 'Nemaš biznis.', 'error')
+        end
+        info.players = nearbyPlayers()
+        nuiOpen = 'sell'
+        SetNuiFocus(true, true)
+        SendNUIMessage({ action = 'sell', data = info })
+    end)
+end
+exports('OpenSellMenu', openSellMenu)
+
+RegisterNUICallback('refreshPlayers', function(_, cb)
+    cb(nearbyPlayers())
+end)
+
+RegisterNUICallback('sellOffer', function(data, cb)
+    cb('ok')
+    closeNui()
+    if type(data) ~= 'table' then return end
+    TriggerServerEvent('flamingo_biznisi:server:sellOffer', data.target, data.price)
+end)
+
+RegisterNetEvent('flamingo_biznisi:client:offer', function(offer)
+    if nuiOpen == 'sell' then closeNui() end
+    nuiOpen = 'offer'
+    SetNuiFocus(true, true)
+    SendNUIMessage({ action = 'offer', data = offer })
+end)
+
+RegisterNetEvent('flamingo_biznisi:client:offerClosed', function(id)
+    SendNUIMessage({ action = 'offerClosed', id = id })
+    if nuiOpen == 'offer' then closeNui() end
+end)
+
+RegisterNUICallback('offerResponse', function(data, cb)
+    cb('ok')
+    closeNui()
+    if type(data) ~= 'table' then return end
+    TriggerServerEvent('flamingo_biznisi:server:offerResponse', data.id, data.accepted == true)
+end)
+
+RegisterNUICallback('close', function(_, cb)
+    cb('ok')
+    closeNui()
+end)
+
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     for _, blip in pairs(blips) do RemoveBlip(blip) end
+    if nuiOpen then SetNuiFocus(false, false) end
 end)

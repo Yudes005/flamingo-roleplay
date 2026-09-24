@@ -305,6 +305,15 @@ local function openRadial()
         hasHouse = ok and result or false
     end
 
+    -- FLAMINGO_BIZNISI: dugme "Prodaj biznis" se prikazuje samo vlasniku biznisa
+    local hasBusiness = false
+    if GetResourceState('flamingo_biznisi') == 'started' then
+        local ok, result = pcall(function()
+            return exports['flamingo_biznisi']:HasBusiness()
+        end)
+        hasBusiness = ok and result or false
+    end
+
     -- Meni ide odmah. Ako slika jos nije kesirana, salje se nil -
     -- NUI nacrta placeholder ikonicu i zameni je cim slika stigne.
     SendNUIMessage({
@@ -317,6 +326,7 @@ local function openRadial()
             isGovBoss        = isGovBoss,
             isGovMember      = isGovMember,
             hasHouse         = hasHouse,
+            hasBusiness      = hasBusiness,
             photo            = cachedMyPhotoUrl(),
             external         = collectExternal(),
             policeSystem     = GetResourceState('flamingo_policija') == 'started'
@@ -457,6 +467,15 @@ local RADIAL_ACTIONS = {
         CreateThread(function()
             Wait(150)
             exports['flamingo_kuce']:OpenSellMenu()
+        end)
+    end,
+
+    -- FLAMINGO_BIZNISI: prodaja biznisa drugom igraču (isto kao kuća)
+    biz_sell              = function()
+        if GetResourceState('flamingo_biznisi') ~= 'started' then return end
+        CreateThread(function()
+            Wait(150)
+            exports['flamingo_biznisi']:OpenSellMenu()
         end)
     end,
 

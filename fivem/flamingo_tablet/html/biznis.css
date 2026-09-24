@@ -220,3 +220,10 @@
 .bz-empty b { color: #ffffff; }
 .bz-warn { color: #ffb340 !important; font-weight: 700; }
 .bz-kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 6px; background: rgba(255,255,255,.12); color: #fff; font-size: 11px; font-weight: 800; }
+
+/* prodaja drzavi */
+.bz-sell { border-color: rgba(255, 69, 58, .25); }
+.bz-sell .bz-section-sub { margin-top: 4px; max-width: 520px; }
+.bz-btn.danger { background: rgba(255, 69, 58, .12); border-color: rgba(255, 69, 58, .4); color: var(--red); }
+.bz-btn.danger:hover { background: rgba(255, 69, 58, .2); }
+.bz-btn.danger.armed { background: #ff453a; color: #fff; border-color: transparent; }

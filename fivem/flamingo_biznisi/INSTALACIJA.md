@@ -17,16 +17,21 @@
    - videti gotovinu u bankomatu i pokrenuti **Dopuni bankomat [Transport]**
    - pratiti grafik zarade za 7 dana, zaradu po kartici i istoriju transakcija
    - promeniti naziv biznisa i uključiti navigaciju do bankomata
+   - **prodati biznis državi** za pola cene (`Config.SellToStateRatio = 0.5`), uz isplatu kase
+6. **Prodaja igraču:** radial meni (**G**) → **Prodaj biznis** (vidi ga samo vlasnik). Biraš igrača pored sebe i cenu.
+   Kupac dobija ponudu i ima 30 sekundi da je prihvati. Novac ide sa njegovog računa na tvoj, a kasa se isplaćuje tebi.
+   Kupac ne sme već imati biznis.
 
 ## Instalacija
 
-1. Ubaci `flamingo_biznisi` u resources i zameni `flamingo_banke` i `flamingo_tablet` ovim verzijama.
+1. Ubaci `flamingo_biznisi` u resources i zameni `flamingo_banke`, `flamingo_tablet` i `flamingo_radialmenu` ovim verzijama.
 2. Proveri redosled u `server.cfg`:
    ```
    ensure esx_notify
    ensure flamingo_tablet
    ensure flamingo_banke
    ensure flamingo_biznisi
+   ensure flamingo_radialmenu
    ```
 3. SQL se ne pokreće ručno. Tabele `flamingo_biznisi` i `flamingo_biznisi_log` se prave same pri prvom startu,
    i tada se ubacuju svi bankomati iz `Config.ATMs`.

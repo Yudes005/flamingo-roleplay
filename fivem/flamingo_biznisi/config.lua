@@ -15,6 +15,20 @@ Config.AllowDirectBuy = true
 Config.BuyFrom        = 'bank'  -- 'bank' | 'money' | 'any' (prvo racun pa gotovina)
 Config.MaxPerPlayer   = 1       -- koliko biznisa sme da ima jedan igrac (0 = bez limita)
 
+-- ============================================================
+--  Prodaja biznisa
+-- ============================================================
+-- Prodaja drzavi (tablet -> Moj biznis): dobijas ovaj deo cene biznisa (0.5 = pola)
+Config.SellToStateRatio = 0.5
+
+-- Prodaja igracu (radial meni G -> "Prodaj biznis")
+Config.PlayerSale = {
+    distance = 3.0,          -- koliko blizu mora biti kupac
+    timeout  = 30,           -- sekundi da kupac prihvati ponudu
+    minPrice = 1,
+    maxPrice = 100000000,
+}
+
 -- Deo provizije koji ide drzavi (0 = cela provizija ide u kasu biznisa)
 Config.StateCut = 0
 
