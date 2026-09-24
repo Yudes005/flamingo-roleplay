@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8" />
+<title>Flamingo Telefon</title>
+<link rel="stylesheet" href="vendor/fontawesome/css/all.min.css" />
+<link rel="stylesheet" href="style.css?v=200" />
+</head>
+<body>
+
+<div id="phone-wrapper" class="hidden">
+  <div class="device">
+    <div class="screen" id="screen">
+
+      <div class="island" id="island"><div class="island-content" id="island-content"></div></div>
+
+      <div class="statusbar">
+        <span id="clock">12:00</span>
+        <span class="right">
+          <span id="phone-number" style="font-size:11px;color:rgba(255,255,255,.75)">---</span>
+          <i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i>
+          <span class="battery"><i></i></span>
+        </span>
+      </div>
+
+      <!-- ============ LOCK ============ -->
+      <div id="lock-screen">
+        <div class="lock-lock"><i class="fa-solid fa-lock"></i></div>
+        <div id="lock-clock">12:00</div>
+        <div id="lock-date">ponedeljak, 1. januar</div>
+        <div class="lock-notifs" id="lock-notifs"></div>
+        <div class="lock-flash">
+          <button id="lock-cam"><i class="fa-solid fa-camera"></i></button>
+          <button id="lock-light"><i class="fa-solid fa-lightbulb"></i></button>
+        </div>
+        <div class="lock-hint">Klikni bilo gde da otključaš</div>
+      </div>
+
+      <!-- ============ HOME ============ -->
+      <div id="home">
+        <div class="app-grid" id="app-grid">
+          <div class="app" data-app="contacts"><div class="app-ic ic-contacts"><i class="fa-solid fa-address-book"></i></div><div class="app-name">Kontakti</div></div>
+          <div class="app" data-app="banka"><div class="app-ic ic-bank"><i class="fa-solid fa-building-columns"></i></div><div class="app-name">Banka</div></div>
+          <div class="app" data-app="li"><div class="app-ic ic-li"><i class="fa-solid fa-tower-broadcast"></i></div><div class="app-name">LifeInvader</div></div>
+          <div class="app" data-app="usluge"><div class="app-ic ic-serv"><i class="fa-solid fa-hand-holding-hand"></i></div><div class="app-name">Usluge</div></div>
+          <div class="app" data-app="camera"><div class="app-ic ic-cam"><i class="fa-solid fa-camera"></i></div><div class="app-name">Kamera</div></div>
+          <div class="app" data-app="gallery"><div class="app-ic ic-gal"><i class="fa-solid fa-images"></i></div><div class="app-name">Galerija</div></div>
+          <div class="app" data-app="notes"><div class="app-ic ic-notes"><i class="fa-solid fa-note-sticky"></i></div><div class="app-name">Beleške</div></div>
+          <div class="app" data-app="music"><div class="app-ic ic-music"><i class="fa-solid fa-music"></i></div><div class="app-name">Muzika</div></div>
+          <div class="app" data-app="calc"><div class="app-ic ic-calc"><i class="fa-solid fa-calculator"></i></div><div class="app-name">Kalkulator</div></div>
+          <div class="app" data-app="settings"><div class="app-ic ic-settings"><i class="fa-solid fa-gear"></i></div><div class="app-name">Podešavanja</div></div>
+        </div>
+        <div class="home-search"><i class="fa-solid fa-magnifying-glass"></i> Traži</div>
+        <div class="dock">
+          <div class="app" data-app="phone"><div class="app-ic ic-phone"><i class="fa-solid fa-phone"></i></div></div>
+          <div class="app" data-app="messages"><div class="app-ic ic-msg"><i class="fa-solid fa-comment"></i><span class="badge hidden" id="msg-badge">0</span></div></div>
+          <div class="app" data-app="camera"><div class="app-ic ic-cam"><i class="fa-solid fa-camera"></i></div></div>
+          <div class="app" data-app="settings"><div class="app-ic ic-settings"><i class="fa-solid fa-gear"></i></div></div>
+        </div>
+      </div>
+
+      <!-- ============ TELEFON ============ -->
+      <div class="app-screen hidden-screen" id="app-phone">
+        <div class="app-head"><h1 id="phone-title">Nedavni</h1><button class="act" id="phone-clear" title="Obriši istoriju"><i class="fa-solid fa-trash"></i></button></div>
+        <div class="app-body">
+          <div id="tab-recents"><div class="list" id="calls-list"></div><div class="empty hidden-screen" id="calls-empty"><i class="fa-solid fa-phone-slash"></i>Nema poziva</div></div>
+          <div id="tab-favorites" class="hidden-screen"><div class="list" id="fav-list"></div><div class="empty hidden-screen" id="fav-empty"><i class="fa-solid fa-star"></i>Nemaš omiljene kontakte</div></div>
+          <div id="tab-contacts" class="hidden-screen">
+            <div class="search"><i class="fa-solid fa-magnifying-glass"></i><input id="contact-search" placeholder="Pretraga"></div>
+            <div class="list" id="contacts-list"></div>
+            <div class="empty hidden-screen" id="contacts-empty"><i class="fa-solid fa-user-plus"></i>Imenik je prazan</div>
+            <button class="btn btn-grey" id="add-contact-btn" style="margin-top:14px"><i class="fa-solid fa-plus"></i> Novi kontakt</button>
+          </div>
+          <div id="tab-keypad" class="hidden-screen">
+            <div class="dial-display" id="dial-display"></div>
+            <div class="keypad" id="keypad"></div>
+            <div class="dial-actions">
+              <div style="width:74px"></div>
+              <button class="dial-call" id="dial-call"><i class="fa-solid fa-phone"></i></button>
+              <button style="width:74px;font-size:20px;color:var(--dim)" id="dial-back"><i class="fa-solid fa-delete-left"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar" id="phone-tabs">
+          <button data-tab="favorites"><i class="fa-solid fa-star"></i>Omiljeni</button>
+          <button data-tab="recents" class="on"><i class="fa-solid fa-clock-rotate-left"></i>Nedavni</button>
+          <button data-tab="contacts"><i class="fa-solid fa-address-book"></i>Kontakti</button>
+          <button data-tab="keypad"><i class="fa-solid fa-grip"></i>Tastatura</button>
+        </div>
+      </div>
+
+      <!-- Novi kontakt -->
+      <div class="app-screen hidden-screen" id="app-newcontact">
+        <div class="app-head"><button class="back" data-back="phone"><i class="fa-solid fa-chevron-left"></i> Nazad</button><h1 style="font-size:20px;text-align:center">Novi kontakt</h1><div style="width:60px"></div></div>
+        <div class="app-body">
+          <div class="field"><i class="fa-solid fa-user"></i><input id="contact-name-input" placeholder="Ime" maxlength="24"></div>
+          <div class="field"><i class="fa-solid fa-hashtag"></i><input id="contact-number-input" placeholder="123-4567"></div>
+          <div id="contact-modal-msg" style="font-size:13px;color:var(--pink);min-height:18px;margin:4px 2px"></div>
+          <button class="btn btn-primary" id="contact-save-btn">Sačuvaj kontakt</button>
+        </div>
+      </div>
+
+      <!-- ============ PORUKE ============ -->
+      <div class="app-screen hidden-screen" id="app-messages">
+        <div class="app-head"><h1>Poruke</h1><button class="act" id="new-msg-btn"><i class="fa-solid fa-pen"></i></button></div>
+        <div class="app-body">
+          <div class="list" id="conversations-list"></div>
+          <div class="empty hidden-screen" id="conversations-empty"><i class="fa-solid fa-comments"></i>Nemaš poruka</div>
+        </div>
+      </div>
+      <div class="app-screen hidden-screen" id="app-thread">
+        <div class="app-head"><button class="back" data-back="messages"><i class="fa-solid fa-chevron-left"></i> Poruke</button><div style="flex:1"></div><button class="act" id="thread-call"><i class="fa-solid fa-phone"></i></button></div>
+        <div class="app-body"><div class="thread-head"><div class="avatar" id="thread-avatar">?</div><b id="thread-name">Broj</b></div><div id="thread-messages"></div></div>
+        <div class="composer"><input id="thread-input" placeholder="Poruka..." maxlength="255"><button id="thread-send" disabled><i class="fa-solid fa-arrow-up"></i></button></div>
+      </div>
+      <div class="app-screen hidden-screen" id="app-newmsg">
+        <div class="app-head"><button class="back" data-back="messages"><i class="fa-solid fa-chevron-left"></i> Nazad</button><h1 style="font-size:20px">Nova poruka</h1><div style="width:60px"></div></div>
+        <div class="app-body">
+          <div class="field"><span style="color:var(--faint);font-size:14px">Za:</span><input id="newmsg-number" placeholder="123-4567"></div>
+          <div class="sec-title">Ili izaberi kontakt</div>
+          <div class="list" id="newmsg-contacts"></div>
+        </div>
+      </div>
+
+      <!-- ============ BANKA ============ -->
+      <div class="app-screen hidden-screen" id="app-banka">
+        <div class="app-head"><h1>Banka</h1><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="bank-card">
+            <div class="bank-chip"></div>
+            <div class="lbl">STANJE NA RAČUNU</div>
+            <div class="bal" id="banka-balance">—</div>
+            <div class="holder" id="banka-holder">Učitavam...</div>
+          </div>
+          <div class="sec-title">Pošalji novac</div>
+          <div class="amount-box"><span class="amt">$<span id="banka-amount-txt">0</span></span></div>
+          <input id="banka-amount" style="position:absolute;opacity:0;pointer-events:none">
+          <div class="chips">
+            <button class="chip" data-add="100">+$100</button><button class="chip" data-add="500">+$500</button>
+            <button class="chip" data-add="1000">+$1.000</button><button class="chip" data-add="5000">+$5.000</button>
+            <button class="chip" data-add="max">MAX</button><button class="chip" data-add="clear">C</button>
+          </div>
+          <div class="field"><i class="fa-solid fa-id-card"></i><input id="banka-target" placeholder="ID igrača (npr. 27)" inputmode="numeric"></div>
+          <div class="field"><i class="fa-solid fa-pen"></i><input id="banka-memo" placeholder="Poruka (nije obavezno)" maxlength="40"></div>
+          <div id="banka-msg" style="font-size:13px;color:var(--pink);min-height:18px;margin:2px 2px 8px"></div>
+          <button class="btn btn-green" id="banka-send"><i class="fa-solid fa-paper-plane"></i> <span id="banka-send-label">Pošalji</span></button>
+          <div class="sec-title">Poslednje transakcije</div>
+          <div class="list" id="banka-recent"></div>
+        </div>
+        <div class="success-screen hidden-screen" id="banka-done">
+          <div class="success-ic"><i class="fa-solid fa-check"></i></div>
+          <div style="font-family:'Poppins';font-size:26px" id="banka-done-amount">$0</div>
+          <div style="font-size:14px;color:var(--dim)">Novac je poslat</div>
+          <button class="btn btn-grey" id="banka-done-btn" style="width:160px;margin-top:14px">U redu</button>
+        </div>
+      </div>
+
+      <!-- ============ LIFEINVADER ============ -->
+      <div class="app-screen hidden-screen" id="app-li">
+        <div class="app-head"><h1>LifeInvader</h1><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="li-top"><i class="fa-solid fa-tower-broadcast"></i><div><b>Oglasnik</b><div style="font-size:12px;opacity:.85">Tvoj oglas vidi ceo grad</div></div></div>
+          <div class="field"><textarea id="oglasnik-input" placeholder="Šta se dešava? Napiši oglas..." maxlength="220"></textarea></div>
+          <div class="counter"><span id="li-count">0</span>/220</div>
+          <button class="btn btn-primary" id="oglasnik-submit-btn"><i class="fa-solid fa-paper-plane"></i> Objavi oglas</button>
+          <div id="oglasnik-status-msg" style="font-size:13px;color:var(--green);min-height:18px;margin:8px 2px;opacity:0;transition:opacity .3s"></div>
+          <div class="sec-title">Tvoji oglasi</div>
+          <div id="li-feed"></div>
+        </div>
+      </div>
+
+      <!-- ============ USLUGE ============ -->
+      <div class="app-screen hidden-screen" id="app-usluge">
+        <div class="app-head"><h1>Usluge</h1><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="serv-hero"><i class="fa-solid fa-city"></i><div><b>Gradske usluge</b><span>Pozovi pomoć na svoju lokaciju</span></div></div>
+          <div class="serv-grid">
+            <button class="serv-card taxi" data-serv="taxi"><i class="fa-solid fa-taxi"></i><b>Taxi</b><span>Prevoz po gradu</span></button>
+            <button class="serv-card med" data-serv="med"><i class="fa-solid fa-truck-medical"></i><b>Hitna pomoć</b><span>Doktor na lokaciju</span></button>
+            <button class="serv-card soon" disabled><i class="fa-solid fa-screwdriver-wrench"></i><b>Mehaničar</b><span>Uskoro</span></button>
+            <button class="serv-card pd" data-serv="pd"><i class="fa-solid fa-shield-halved"></i><b>Policija</b><span>Prijavi događaj</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ GALERIJA ============ -->
+      <div class="app-screen hidden-screen" id="app-gallery">
+        <div class="app-head"><h1>Galerija</h1><button class="act" id="gal-cam"><i class="fa-solid fa-camera"></i></button><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="gal-grid" id="gal-grid"></div>
+          <div class="empty hidden-screen" id="gal-empty"><i class="fa-solid fa-images"></i>Nemaš slika<br><span style="font-size:12.5px">Otvori Kameru i slikaj nešto</span></div>
+        </div>
+      </div>
+      <div class="app-screen hidden-screen" id="app-photo">
+        <div class="app-head"><button class="back" data-back="gallery"><i class="fa-solid fa-chevron-left"></i> Galerija</button><div style="flex:1"></div>
+          <button class="act" id="photo-wall" title="Postavi kao pozadinu"><i class="fa-solid fa-image"></i></button>
+          <button class="act" id="photo-del" title="Obriši"><i class="fa-solid fa-trash"></i></button></div>
+        <div class="app-body" style="display:flex;align-items:center;justify-content:center"><img id="photo-view" style="width:100%;border-radius:16px"></div>
+      </div>
+
+      <!-- ============ TAXI ============ -->
+      <div class="app-screen hidden-screen" id="app-taxi">
+        <div class="app-head"><button class="back" data-back="usluge"><i class="fa-solid fa-chevron-left"></i> Usluge</button><h1 style="font-size:22px">Taxi</h1><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="map-hero"><div class="map-pin"><i class="fa-solid fa-location-dot"></i></div><div id="taxi-radar" class="hidden-screen"><div class="radar"></div><div class="radar d2"></div><div class="radar d3"></div></div></div>
+          <div class="taxi-state" id="taxi-state-idle">
+            <div class="big-note">Pozovi taxi na svoju trenutnu lokaciju. Vozač dolazi po tebe, a cenu vidiš pre plaćanja.</div>
+            <button class="btn btn-pink" id="taxi-call-btn"><i class="fa-solid fa-taxi"></i> Pozovi taxi</button>
+            <div id="taxi-idle-msg" style="font-size:13px;color:var(--dim);text-align:center;margin-top:12px"></div>
+          </div>
+          <div class="taxi-state hidden-screen" id="taxi-state-waiting">
+            <div class="big-note"><b>Tražimo vozača...</b><br>Poziv je poslat svim vozačima na dužnosti.</div>
+            <button class="btn btn-grey" id="taxi-cancel-waiting-btn">Otkaži poziv</button>
+          </div>
+          <div class="taxi-state hidden-screen" id="taxi-state-accepted">
+            <div class="big-note"><b>Vozač je prihvatio!</b><br>Stiže po tebe - sačekaj na svojoj lokaciji.</div>
+            <button class="btn btn-grey" id="taxi-cancel-accepted-btn">Otkaži vožnju</button>
+          </div>
+          <div class="taxi-state hidden-screen" id="taxi-state-destination">
+            <div class="sec-title">Gde ideš?</div>
+            <div class="list" id="taxi-destination-list"></div>
+            <button class="btn btn-grey" id="taxi-custom-dest-btn" style="margin-top:12px"><i class="fa-solid fa-map-location-dot"></i> Koristi GPS sa mape</button>
+          </div>
+          <div class="taxi-state hidden-screen" id="taxi-state-driving">
+            <div class="big-note"><b>Vožnja u toku</b><br>Vozač te vozi na odabranu destinaciju. Prijatnu vožnju!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ HITNA ============ -->
+      <div class="app-screen hidden-screen" id="app-med">
+        <div class="app-head"><button class="back" data-back="usluge"><i class="fa-solid fa-chevron-left"></i> Usluge</button><h1 style="font-size:22px">Hitna</h1><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="med-hero"><i class="fa-solid fa-truck-medical"></i><b>Hitna pomoć</b><div style="font-size:13px;opacity:.9">Pozovi doktora na svoju lokaciju</div></div>
+          <div style="text-align:center"><div class="duty-badge" id="doktor-duty-badge"><i class="fa-solid fa-circle"></i> <span id="doktor-duty-text">Proveravam...</span></div></div>
+          <div id="doktor-state-idle">
+            <div class="field"><textarea id="doktor-reason-input" placeholder="Šta se desilo? (kratak opis)" maxlength="120" style="height:90px"></textarea></div>
+            <button class="btn btn-red" id="doktor-call-btn" disabled><i class="fa-solid fa-phone"></i> Pozovi hitnu</button>
+            <div id="doktor-idle-msg" style="font-size:13px;color:var(--dim);text-align:center;margin-top:10px"></div>
+          </div>
+          <div id="doktor-state-sending" class="hidden-screen"><div class="big-note"><i class="fa-solid fa-spinner fa-spin"></i><br>Šaljem poziv...</div></div>
+          <div id="doktor-state-sent" class="hidden-screen"><div class="big-note" id="doktor-sent-msg"></div><button class="btn btn-grey" id="doktor-sent-ok-btn">U redu</button></div>
+          <div id="doktor-state-failed" class="hidden-screen"><div class="big-note" id="doktor-failed-msg"></div><button class="btn btn-grey" id="doktor-failed-back-btn">Nazad</button></div>
+        </div>
+      </div>
+
+      <!-- ============ POLICIJA (flamingo_policija) ============ -->
+      <div class="app-screen hidden-screen" id="app-pd">
+        <div class="app-head"><button class="back" data-back="usluge"><i class="fa-solid fa-chevron-left"></i> Usluge</button><h1 style="font-size:22px">Policija</h1><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="pd-hero"><i class="fa-solid fa-shield-halved"></i><b>Poziv policiji</b><div style="font-size:13px;opacity:.9">Prijava se šalje dežurnim jedinicama sa tvojom lokacijom</div></div>
+          <div style="text-align:center"><div class="duty-badge" id="pd-duty-badge"><i class="fa-solid fa-circle"></i> <span id="pd-duty-text">Proveravam...</span></div></div>
+          <div id="pd-state-idle">
+            <div class="pd-quick" id="pd-quick">
+              <button data-q="Pucnjava u blizini"><i class="fa-solid fa-gun"></i>Pucnjava</button>
+              <button data-q="Pljačka u toku"><i class="fa-solid fa-sack-dollar"></i>Pljačka</button>
+              <button data-q="Tuča / napad"><i class="fa-solid fa-hand-fist"></i>Napad</button>
+              <button data-q="Krađa vozila"><i class="fa-solid fa-car-burst"></i>Krađa</button>
+            </div>
+            <div class="field"><textarea id="pd-reason-input" placeholder="Šta se dešava? (kratak opis)" maxlength="200" style="height:90px"></textarea></div>
+            <button class="btn btn-blue" id="pd-call-btn" disabled><i class="fa-solid fa-phone"></i> Pozovi policiju</button>
+            <div id="pd-idle-msg" style="font-size:13px;color:var(--dim);text-align:center;margin-top:10px"></div>
+          </div>
+          <div id="pd-state-sending" class="hidden-screen"><div class="big-note"><i class="fa-solid fa-spinner fa-spin"></i><br>Šaljem prijavu...</div></div>
+          <div id="pd-state-sent" class="hidden-screen"><div class="big-note" id="pd-sent-msg"></div><button class="btn btn-grey" id="pd-sent-ok-btn">U redu</button></div>
+          <div id="pd-state-failed" class="hidden-screen"><div class="big-note" id="pd-failed-msg"></div><button class="btn btn-grey" id="pd-failed-back-btn">Nazad</button></div>
+        </div>
+      </div>
+
+      <!-- ============ BELEŠKE ============ -->
+      <div class="app-screen hidden-screen" id="app-notes">
+        <div class="app-head"><h1>Beleške</h1><button class="act" id="note-new"><i class="fa-solid fa-pen-to-square"></i></button><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body"><div class="list" id="notes-list"></div><div class="empty hidden-screen" id="notes-empty"><i class="fa-solid fa-note-sticky"></i>Nemaš beleški</div></div>
+      </div>
+      <div class="app-screen hidden-screen" id="app-note">
+        <div class="app-head"><button class="back" data-back="notes"><i class="fa-solid fa-chevron-left"></i> Beleške</button><div style="flex:1"></div><button class="act" id="note-delete"><i class="fa-solid fa-trash"></i></button><button class="act" id="note-save"><i class="fa-solid fa-check"></i></button></div>
+        <div class="app-body">
+          <input id="note-title" placeholder="Naslov" maxlength="60" style="font-family:'Poppins';font-size:22px;font-weight:600;width:100%;margin-bottom:10px">
+          <textarea id="note-body" placeholder="Piši ovde..." style="width:100%;height:420px;font-size:15px;line-height:1.5;resize:none"></textarea>
+        </div>
+      </div>
+
+      <!-- ============ MUZIKA ============ -->
+      <div class="app-screen hidden-screen" id="app-music">
+        <div class="app-head"><h1>Muzika</h1><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="player">
+            <div class="cover" id="music-cover"><i class="fa-solid fa-compact-disc"></i></div>
+            <b id="music-title">Ništa ne svira</b><span id="music-sub">Izaberi stanicu ispod</span>
+            <div class="player-controls">
+              <button id="music-prev"><i class="fa-solid fa-backward-step"></i></button>
+              <button class="play" id="music-play"><i class="fa-solid fa-play"></i></button>
+              <button id="music-next"><i class="fa-solid fa-forward-step"></i></button>
+            </div>
+            <input type="range" class="slider" id="music-vol" min="0" max="100" value="45">
+          </div>
+          <div class="sec-title">Stanice</div>
+          <div class="list" id="music-list"></div>
+          <div class="sec-title">Svoj link (mp3 / stream)</div>
+          <div class="field"><i class="fa-solid fa-link"></i><input id="music-url" placeholder="https://..."></div>
+          <button class="btn btn-grey" id="music-url-play"><i class="fa-solid fa-play"></i> Pusti link</button>
+          <div class="big-note" style="text-align:left">Muziku čuješ samo ti, i svira i kad zatvoriš telefon.</div>
+        </div>
+      </div>
+
+      <!-- ============ KALKULATOR ============ -->
+      <div class="app-screen hidden-screen" id="app-calc">
+        <div class="app-head"><div style="flex:1"></div><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body" style="display:flex;flex-direction:column;justify-content:flex-end">
+          <div class="calc-display" id="calc-display">0</div>
+          <div class="calc-grid" id="calc-grid"></div>
+        </div>
+      </div>
+
+      <!-- ============ PODEŠAVANJA ============ -->
+      <div class="app-screen hidden-screen" id="app-settings">
+        <div class="app-head"><h1>Podešavanja</h1><button class="act" data-home="1"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="app-body">
+          <div class="set-group">
+            <div class="set-row"><div class="set-ic" style="background:var(--pink)"><i class="fa-solid fa-sim-card"></i></div>Moj broj<span class="val" id="set-number">---</span></div>
+            <div class="set-row"><div class="set-ic" style="background:var(--green)"><i class="fa-solid fa-signal"></i></div>Mreža<span class="val">Flamingo 5G</span></div>
+          </div>
+          <div class="sec-title">Pozadina</div>
+          <div class="wall-grid" id="wall-grid"></div>
+          <div class="sec-title">Zvuk i obaveštenja</div>
+          <div class="set-group">
+            <div class="set-row"><div class="set-ic" style="background:var(--orange)"><i class="fa-solid fa-bell"></i></div>Zvono<div class="switch on" id="sw-ring"><i></i></div></div>
+            <div class="set-row"><div class="set-ic" style="background:var(--purple)"><i class="fa-solid fa-moon"></i></div>Ne uznemiravaj<div class="switch" id="sw-dnd"><i></i></div></div>
+            <div class="set-row"><div class="set-ic" style="background:var(--teal)"><i class="fa-solid fa-volume-high"></i></div>Jačina<input type="range" class="slider" id="set-vol" min="0" max="100" value="60" style="width:120px;margin:0 0 0 auto"></div>
+          </div>
+          <div class="sec-title">O telefonu</div>
+          <div class="set-group">
+            <div class="set-row"><div class="set-ic" style="background:#5a5a62"><i class="fa-solid fa-mobile-screen"></i></div>Model<span class="val">Flamingo 15 Pro</span></div>
+            <div class="set-row"><div class="set-ic" style="background:#5a5a62"><i class="fa-solid fa-code-branch"></i></div>Verzija<span class="val">2.0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ POZIV ============ -->
+      <div id="call-screen" class="hidden-screen">
+        <div id="call-avatar">?</div>
+        <div id="call-name">Nepoznat</div>
+        <div id="call-number"></div>
+        <div id="call-status">Zovem...</div>
+        <div class="call-pad">
+          <button id="call-mute"><i class="fa-solid fa-microphone-slash"></i>Mikrofon</button>
+          <button id="call-speaker"><i class="fa-solid fa-volume-high"></i>Zvučnik</button>
+          <button id="call-hold"><i class="fa-solid fa-pause"></i>Pauza</button>
+        </div>
+        <div class="call-actions single hidden-screen" id="call-actions-active">
+          <button class="call-btn decline" id="end-call-btn"><i class="fa-solid fa-phone-slash"></i></button>
+        </div>
+        <div class="call-actions hidden-screen" id="call-actions-incoming">
+          <button class="call-btn decline" id="decline-call-btn"><i class="fa-solid fa-phone-slash"></i></button>
+          <button class="call-btn answer" id="answer-call-btn"><i class="fa-solid fa-phone"></i></button>
+        </div>
+      </div>
+
+      <!-- ============ SIM ============ -->
+      <div id="sim-setup" class="hidden-screen">
+        <div class="sim-ic"><i class="fa-solid fa-sim-card"></i></div>
+        <h2>Aktiviraj SIM</h2>
+        <p>Izaberi svoj broj telefona ili uzmi nasumičan.<br>Broj je stalan i vide ga drugi igrači.</p>
+        <input id="sim-number-input" placeholder="123-4567" inputmode="numeric">
+        <div id="sim-status-msg"></div>
+        <button class="btn btn-grey" id="sim-generate-btn"><i class="fa-solid fa-dice"></i> Nasumičan broj</button>
+        <button class="btn btn-pink" id="sim-submit-btn">Aktiviraj</button>
+      </div>
+
+      <div id="toast" class="hidden-screen"></div>
+      <div class="home-indicator" id="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<div id="camera-screen" class="hidden">
+  <div class="cam-top"><span><kbd>KLIK</kbd> slikaj</span><span><kbd>↑</kbd> selfi</span><span><kbd>ESC</kbd> izlaz</span></div>
+  <div class="cam-toast hidden" id="cam-toast"></div>
+  <div class="cam-frame"></div>
+</div>
+<div id="cam-flash"></div>
+
+<script src="script.js?v=200"></script>
+</body>
+</html>
