@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flamingo Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Market UI -->
+  <div id="app" class="hidden">
+    <div class="market">
+
+      <header class="market-header">
+        <div class="brand">
+          <div class="brand-logo"><i class="fa-solid fa-basket-shopping"></i></div>
+          <div class="brand-text">
+            <span class="brand-small" id="welcomeTitle">Dobrodošli u</span>
+            <h1 id="shopLabel">Flamingo Market</h1>
+          </div>
+        </div>
+
+        <div class="close-btn" id="closeBtn"><i class="fa-solid fa-xmark"></i></div>
+      </header>
+
+      <div class="market-body">
+
+        <div class="products-panel">
+          <div class="products-title">Artikli</div>
+          <div id="productList" class="product-grid"></div>
+        </div>
+
+        <div class="cart-panel">
+          <h2 id="cartLabel">Korpa</h2>
+
+          <div id="cartEmpty" class="cart-empty">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="emptyCartLabel">Vaša korpa je prazna</span>
+          </div>
+
+          <ul id="cartItems" class="cart-items"></ul>
+
+          <div class="cart-total">
+            <span id="totalLabel">Ukupno</span>
+            <span id="totalAmount">$0</span>
+          </div>
+
+          <div class="cart-actions">
+            <button id="payCardBtn" class="pay-btn primary">
+              <i class="fa-solid fa-credit-card"></i>
+              <span id="payCard">Plati karticom</span>
+            </button>
+            <button id="payCashBtn" class="pay-btn secondary">
+              <i class="fa-solid fa-money-bill-wave"></i>
+              <span id="payCash">Plati kešom</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
