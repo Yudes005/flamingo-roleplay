@@ -26,9 +26,11 @@
   };
   const DAYS = ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'];
   const isMarket = b => b.type === 'market';
+  const isCarwash = b => b.type === 'carwash';
   const TYPE = {
     atm: { icon: 'fa-money-bill-transfer', label: 'Bankomat' },
-    market: { icon: 'fa-store', label: 'Market' }
+    market: { icon: 'fa-store', label: 'Market' },
+    carwash: { icon: 'fa-spray-can-sparkles', label: 'Perionica' }
   };
   const typeOf = b => TYPE[b.type] || TYPE.atm;
   const lowProducts = b => (b.products || []).filter(p => p.low);
@@ -155,7 +157,7 @@
         <div class="bz-empty">
           <i class="fa-solid fa-briefcase"></i>
           <b>Nemaš nijedan biznis.</b>
-          Otvori bilo koji bankomat ili market i u meniju izaberi <b>Biznis</b> da vidiš cenu, vlasnika i zaradu.
+          Otvori bilo koji bankomat, market ili perionicu i u meniju izaberi <b>Biznis</b> da vidiš cenu, vlasnika i zaradu.
         </div>`;
       return;
     }
@@ -204,7 +206,7 @@
           <button class="bz-btn primary" data-bz="take"><i class="fa-solid fa-arrow-down"></i> Podigni</button>
           <button class="bz-btn" data-bz="put"><i class="fa-solid fa-arrow-up"></i> Uloži</button>
         </div>
-        <button class="bz-btn wide success" data-bz="takeAll" ${b.balance < 1 ? 'disabled' : ''}><i class="fa-solid fa-hand-holding-dollar"></i> ${isMarket(b) ? "Podigni sav novac" : "Podigni svu proviziju"} (${money(b.balance)})</button>
+        <button class="bz-btn wide success" data-bz="takeAll" ${b.balance < 1 ? 'disabled' : ''}><i class="fa-solid fa-hand-holding-dollar"></i> ${isMarket(b) || isCarwash(b) ? "Podigni sav novac" : "Podigni svu proviziju"} (${money(b.balance)})</button>
         <div class="bz-section-sub">Novac ide ${bz.account === 'bank' ? '<b>na tvoj račun</b>' : '<b>u gotovinu</b>'}. Kod sebe: ${money(d.cash)} · Račun: ${money(d.bank)}</div>
       </div>`;
   }
@@ -250,8 +252,8 @@
     return `
       <div class="bz-section">
         <div class="bz-section-head">
-          <div class="bz-section-title"><i class="fa-solid fa-chart-column"></i> ${isMarket(b) ? 'Zarada od prodaje' : 'Zarada od provizije'}, 7 dana</div>
-          <span class="bz-section-sub"><b>${b.count7}</b> ${isMarket(b) ? 'prodaja' : 'podizanja'}</span>
+          <div class="bz-section-title"><i class="fa-solid fa-chart-column"></i> ${isMarket(b) ? 'Zarada od prodaje' : (isCarwash(b) ? 'Zarada od pranja' : 'Zarada od provizije')}, 7 dana</div>
+          <span class="bz-section-sub"><b>${b.count7}</b> ${isMarket(b) ? 'prodaja' : (isCarwash(b) ? 'pranja' : 'podizanja')}</span>
         </div>
         <div class="bz-chart">${bars}</div>
       </div>`;
@@ -291,6 +293,7 @@
     sale: l => ({ ic: 'fa-basket-shopping', cls: 'fee', t: `Prodaja, ${esc(l.actor || 'kupac')}`, s: esc(l.note || ''), v: `+${money(l.fee)}`, vc: 'pos' }),
     order: l => ({ ic: 'fa-cart-plus', cls: 'out', t: 'Narudžbina robe', s: esc(l.note || ''), v: `-${money(l.amount)}`, vc: 'neg' }),
     delivery: l => ({ ic: 'fa-truck-ramp-box', cls: 'ref', t: 'Roba dovezena', s: `${esc(l.note || '')}${l.actor ? ' · ' + esc(l.actor) : ''}`, v: '', vc: '' }),
+    wash: l => ({ ic: 'fa-spray-can-sparkles', cls: 'fee', t: `Pranje, ${esc(l.actor || 'vozač')}`, s: `${esc(l.note || '')} · cena ${money(l.amount)}`, v: `+${money(l.fee)}`, vc: 'pos' }),
     sold: l => ({ ic: 'fa-handshake', cls: 'in', t: 'Prodato igraču', s: esc(l.actor || ''), v: money(l.amount), vc: '' })
   };
   function tierLabel(id) {
@@ -396,7 +399,40 @@
       </div>`;
   }
 
+  // ---------- perionica: zarada po paketu pranja ----------
+  function renderWashEarn(b) {
+    const rows = (b.packages || []).map(p => `
+      <div class="bz-wash-row"><span>${esc(p.label)}</span><span>${money(p.price)}</span><b>+${money(p.earn)}</b></div>`).join('');
+    return `
+      <div class="bz-section">
+        <div class="bz-section-head">
+          <div class="bz-section-title"><i class="fa-solid fa-spray-can-sparkles"></i> Zarada po pranju</div>
+          <span class="bz-badge ok">${b.share || 35}% od cene</span>
+        </div>
+        <div class="bz-wash-row head"><span>Paket</span><span>Cena</span><span>Ti dobijaš</span></div>
+        ${rows || '<div class="bz-section-sub">Nema paketa u configu perionice.</div>'}
+        <div class="bz-section-sub">Svaki put kad neko opere vozilo na tvojoj perionici, <b>${b.share || 35}%</b> cene pranja ide u kasu. Perionica nema robu ni narudžbine.</div>
+      </div>`;
+  }
+
   function renderDetail(b, d) {
+    if (isCarwash(b)) {
+      return `
+      ${renderHero(b)}
+      <div class="bz-grid">
+        <div class="bz-stat"><div class="bz-stat-label"><i class="fa-solid fa-cash-register"></i> Kasa</div><div class="bz-stat-value">${money(b.balance)}</div></div>
+        <div class="bz-stat"><div class="bz-stat-label"><i class="fa-solid fa-sun"></i> Danas</div><div class="bz-stat-value pos">+${money(b.today)}</div></div>
+        <div class="bz-stat"><div class="bz-stat-label"><i class="fa-solid fa-calendar-week"></i> 7 dana</div><div class="bz-stat-value pos">+${money(b.week)}</div></div>
+        <div class="bz-stat"><div class="bz-stat-label"><i class="fa-solid fa-trophy"></i> Ukupno zarađeno</div><div class="bz-stat-value">${money(b.earned)}</div></div>
+      </div>
+      <div class="bz-two">
+        ${renderKasa(b, d)}
+        ${renderWashEarn(b)}
+      </div>
+      ${renderChart(b)}
+      ${renderLogs(b)}
+      ${renderSellState(b)}`;
+    }
     if (isMarket(b)) {
       return `
       ${renderHero(b)}
@@ -470,7 +506,7 @@
     switch (btn.dataset.bz) {
       case 'gps':
         post('setWaypoint', { x: b.coords.x, y: b.coords.y });
-        toast(`Navigacija je postavljena do ${isMarket(b) ? 'marketa' : 'bankomata'}.`, 'info');
+        toast(`Navigacija je postavljena do ${isMarket(b) ? 'marketa' : (isCarwash(b) ? 'perionice' : 'bankomata')}.`, 'info');
         break;
       case 'take':
       case 'put': {

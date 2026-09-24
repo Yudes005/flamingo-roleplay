@@ -61,21 +61,67 @@ local function findPackage(id)
 end
 
 -- Klijent moze da posalje bilo sta, zato se ovde jos jednom proverava da
--- igrac stvarno stoji na nekoj od lokacija iz config-a.
+-- igrac stvarno stoji na nekoj od lokacija iz config-a. Vraca tu lokaciju.
 local function isAtCarWash(playerId)
     local ped = GetPlayerPed(playerId)
-    if not ped or ped == 0 then return false end
+    if not ped or ped == 0 then return nil end
 
     local coords = GetEntityCoords(ped)
 
     for i = 1, #config.locations do
         if #(coords - config.locations[i].coords) <= (config.washRange + 5.0) then
-            return true
+            return config.locations[i]
         end
     end
 
-    return false
+    return nil
 end
+
+-------------------------------------------------
+-- flamingo_biznisi: svaka perionica je poseban biznis.
+-- Vlasnik dobija udeo od svakog pranja (Config.Carwash.share u flamingo_biznisi).
+-- Bez flamingo_biznisi perionica radi kao i ranije.
+-------------------------------------------------
+
+local function biz(fn, ...)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then return nil end
+    local args = { ... }
+    local ok, a, b = pcall(function() return exports['flamingo_biznisi'][fn](nil, table.unpack(args)) end)
+    if not ok then
+        print(('[flamingo_perionica] flamingo_biznisi:%s greska: %s'):format(fn, tostring(a)))
+        return nil
+    end
+    return a, b
+end
+
+local function registerBusiness()
+    if GetResourceState('flamingo_biznisi') ~= 'started' then return end
+    local packages = {}
+    for i = 1, #config.packages do
+        local p = config.packages[i]
+        packages[#packages + 1] = { id = p.id, label = p.label, price = p.price }
+    end
+    local list = {}
+    for i = 1, #config.locations do
+        local l = config.locations[i]
+        list[#list + 1] = { coords = l.coords, label = l.label, price = l.bizPrice, packages = packages }
+    end
+    biz('RegisterCarwashes', list)
+end
+
+AddEventHandler('onResourceStart', function(res)
+    if res == GetCurrentResourceName() or res == 'flamingo_biznisi' then
+        SetTimeout(1000, registerBusiness)
+    end
+end)
+AddEventHandler('flamingo_biznisi:ready', registerBusiness)
+
+-- Vlasnik perionice + cena biznisa (za meni)
+lib.callback.register('flamingo_perionica:info', function(source)
+    local location = isAtCarWash(source)
+    if not location then return nil end
+    return biz('GetCarwashInfo', location.coords, source)
+end)
 
 -------------------------------------------------
 -- Pranje
@@ -88,7 +134,8 @@ lib.callback.register('flamingo_perionica:wash', function(source, packageId)
     local package = findPackage(packageId)
     if not package then return false end
 
-    if not isAtCarWash(source) then
+    local location = isAtCarWash(source)
+    if not location then
         TriggerClientEvent('esx:showNotification', source, 'Nisi na perionici.', 'error')
         return false
     end
@@ -107,6 +154,9 @@ lib.callback.register('flamingo_perionica:wash', function(source, packageId)
     end
 
     lastWash[source] = now
+
+    -- udeo od pranja ide u kasu vlasnika perionice
+    biz('CarwashSale', location.coords, package.price, package.label, xPlayer.getName())
 
     return true
 end)

@@ -94,6 +94,17 @@ Config.Market = {
     stateCut     = 0,        -- % od prodaje koji ide drzavi (0 = sve ide u kasu)
 }
 
+-- ============================================================
+--  Perionice (flamingo_perionica)
+--  Svaka perionica iz flamingo_perionica configa je poseban biznis.
+-- ============================================================
+Config.Carwash = {
+    label        = 'Perionica',
+    defaultPrice = 500000,   -- cena perionice ako u flamingo_perionica configu nema bizPrice
+    share        = 35,       -- % od cene pranja koji ide u kasu vlasnika
+    distance     = 14.0,     -- server provera za kupovinu iz menija (igrac je u vozilu na perionici)
+}
+
 -- Dostava robe (transport) - TVOJA skripta
 -- resource = nil  -> narucena roba stize odmah (za test)
 -- resource = 'ime_skripte' -> narudzbina ceka dostavu:

@@ -16,6 +16,16 @@ const dirtTrack = dirtFill.parentElement;
 const packagesEl = el('packages');
 const washBtn = el('wash');
 const washText = el('washText');
+const ownerTag = el('ownerTag');
+const bizBtn = el('bizBtn');
+const bizPanel = el('bizPanel');
+const washView = el('washView');
+
+let biz = null;          // flamingo_biznisi: vlasnik, cena, udeo (null = bez sistema biznisa)
+let bizArmed = false;
+let bizArmTimer = null;
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // Nazivi koji se vide u meniju za ono sto paket stvarno radi u igri.
 const FEATURES = {
@@ -38,7 +48,7 @@ function post(name, data) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json; charset=UTF-8' },
         body: JSON.stringify(data || {}),
-    }).catch(() => {});
+    }).then((r) => r.json()).catch(() => null);
 }
 
 function money(value) {
@@ -118,6 +128,94 @@ washBtn.addEventListener('click', () => {
     close();
 });
 
+/* ---------------- Biznis (flamingo_biznisi) ---------------- */
+
+function renderBizHeader() {
+    const show = !!biz;
+    ownerTag.classList.toggle('hidden', !show);
+    bizBtn.classList.toggle('hidden', !show);
+    if (!show) return;
+    ownerTag.classList.toggle('free', !biz.owned);
+    ownerTag.innerHTML = `
+        <span class="owner-ic"><i class="fa-solid ${biz.owned ? 'fa-crown' : 'fa-tag'}"></i></span>
+        <span class="owner-t"><small>Vlasnik</small><strong>${biz.owned ? esc(biz.ownerName || 'Nepoznat') : 'Na prodaju'}</strong></span>`;
+}
+
+function renderBizPanel() {
+    if (!biz) return;
+    const share = biz.share || 35;
+    const earn = state.packages.map((p) => `
+        <div class="biz-row"><span>${esc(p.label)}</span><span>${money(p.price)}</span><b>+${money(Math.floor(p.price * share / 100))}</b></div>`).join('');
+
+    let foot;
+    if (biz.mine) {
+        foot = `<div class="biz-note"><i class="fa-solid fa-tablet-screen-button"></i><span>Ovo je tvoja perionica. Kasom i zaradom upravljaš na <b>tabletu</b>, aplikacija <b>Moj biznis</b>.</span></div>`;
+    } else if (biz.owned) {
+        foot = `<div class="biz-note"><i class="fa-solid fa-lock"></i><span>Ova perionica već ima vlasnika. Biznisi se preprodaju na <b>aukciji</b>.</span></div>`;
+    } else if (biz.canBuy) {
+        const limit = biz.maxCount > 0 && biz.myCount >= biz.maxCount;
+        const from = biz.buyFrom === 'money' ? biz.cash : (biz.buyFrom === 'bank' ? biz.bank : Math.max(biz.bank, biz.cash));
+        const enough = from >= biz.price;
+        foot = `
+            <div class="biz-note test"><i class="fa-solid fa-flask"></i><span><b>TEST:</b> kupovina iz menija je privremena. Kasnije se biznisi kupuju na aukciji.</span></div>
+            <button class="cta biz-buy ${bizArmed ? 'armed' : ''}" id="bizBuy" type="button" ${limit || !enough ? 'disabled' : ''}>
+                <i class="fa-solid ${bizArmed ? 'fa-check' : 'fa-cart-shopping'}"></i><span>${bizArmed ? 'Klikni ponovo da potvrdiš' : `Kupi perionicu za ${money(biz.price)}`}</span>
+            </button>
+            <p class="biz-sub">${limit ? 'Već imaš biznis. Možeš imati samo jedan.' : `Plaća se sa računa${enough ? '.' : '. Nemaš dovoljno novca.'}`}</p>`;
+    } else {
+        foot = `<div class="biz-note"><i class="fa-solid fa-gavel"></i><span>Ova perionica je na prodaju, ali se kupuje isključivo na <b>aukciji</b>.</span></div>`;
+    }
+
+    bizPanel.innerHTML = `
+        <div class="biz-head">
+            <span class="bar__mark"><i class="fa-solid fa-briefcase"></i></span>
+            <div class="biz-t">
+                <small>Biznis · Perionica · ID #${biz.id}</small>
+                <strong>${esc(biz.name)}</strong>
+                <span class="biz-status ${biz.mine ? 'mine' : (biz.owned ? 'owned' : 'sale')}">${biz.mine ? 'Tvoj biznis' : (biz.owned ? 'Vlasnik: ' + esc(biz.ownerName || 'Nepoznat') : 'Na prodaju')}</span>
+            </div>
+            <div class="biz-price"><small>${biz.owned ? 'Vrednost perionice' : 'Cena perionice'}</small><b>${money(biz.price)}</b></div>
+        </div>
+        <div class="biz-earn">
+            <div class="biz-earn-h"><span>Zarada vlasnika: <b>${share}%</b> od svakog pranja</span></div>
+            <div class="biz-row head"><span>Paket</span><span>Cena</span><span>Vlasnik dobija</span></div>
+            ${earn}
+        </div>
+        ${foot}
+        <button class="biz-back" id="bizBack" type="button"><i class="fa-solid fa-arrow-left"></i> Nazad na pranje</button>`;
+}
+
+function toggleBiz(show) {
+    bizArmed = false;
+    bizPanel.classList.toggle('hidden', !show);
+    washView.classList.toggle('hidden', show);
+    bizBtn.classList.toggle('active', show);
+    if (show) renderBizPanel();
+}
+
+bizBtn.addEventListener('click', () => toggleBiz(bizPanel.classList.contains('hidden')));
+
+bizPanel.addEventListener('click', async (e) => {
+    if (e.target.closest('#bizBack')) return toggleBiz(false);
+    const buy = e.target.closest('#bizBuy');
+    if (!buy || buy.disabled) return;
+    if (!bizArmed) {
+        bizArmed = true;
+        clearTimeout(bizArmTimer);
+        bizArmTimer = setTimeout(() => { bizArmed = false; renderBizPanel(); }, 3500);
+        return renderBizPanel();
+    }
+    clearTimeout(bizArmTimer);
+    bizArmed = false;
+    buy.disabled = true;
+    const info = await post('bizBuy', { id: biz.id });
+    if (info && typeof info === 'object') {
+        biz = info;
+        renderBizHeader();
+    }
+    renderBizPanel();
+});
+
 /* ---------------- Otvaranje / zatvaranje ---------------- */
 
 function close() {
@@ -135,6 +233,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 function open(data) {
+    biz = data.biz || null;
+    renderBizHeader();
+    toggleBiz(false);
     state.money = data.money || 0;
     state.packages = data.packages || [];
     state.selected = null;

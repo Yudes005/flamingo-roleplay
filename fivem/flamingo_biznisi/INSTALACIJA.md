@@ -1,4 +1,4 @@
-# flamingo_biznisi: bankomati i supermarketi kao biznis
+# flamingo_biznisi: bankomati, supermarketi i perionice kao biznis
 
 ## Kako radi
 
@@ -40,6 +40,15 @@
 7. Market **bez vlasnika** (država) radi kao i ranije, bez ograničenja zaliha.
 8. Cena marketa: `bizPrice = 900000` u marketu u `flamingo_supermarket/config.lua`, inače `Config.Market.defaultPrice`.
 
+## Perionice (flamingo_perionica)
+
+1. Svaka lokacija iz `flamingo_perionica/config.lua` je **poseban biznis** (prepoznaje se po `coords`).
+2. **Zarada:** vlasnik dobija **35% od cene svakog pranja** u kasu (`Config.Carwash.share = 35`). Detailing 1.400$ → 490$.
+3. Perionica **nema robu ni narudžbine**, samo zaradu od pranja.
+4. U meniju perionice (E) gore piše **VLASNIK**, a dugme **Biznis** prikazuje cenu, zaradu po paketu i test kupovinu.
+5. Na tabletu: kasa, zarada danas/7 dana, zarada po paketu, grafik, istorija pranja i prodaja.
+6. Cena: `bizPrice = 600000` u lokaciji, inače `Config.Carwash.defaultPrice` (500.000$).
+
 ## Instalacija
 
 1. Ubaci `flamingo_biznisi` u resources i zameni `flamingo_banke`, `flamingo_tablet` i `flamingo_radialmenu` ovim verzijama.
@@ -50,6 +59,7 @@
    ensure flamingo_banke
    ensure flamingo_biznisi
    ensure flamingo_supermarket
+   ensure flamingo_perionica
    ensure flamingo_radialmenu
    ```
 3. SQL se ne pokreće ručno. Tabele `flamingo_biznisi` i `flamingo_biznisi_log` se prave same pri prvom startu,

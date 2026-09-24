@@ -241,24 +241,46 @@ local function openMenu()
 
     isMenuOpen = true
     exports['esx_keyprompt']:HideKeyPrompt()
-    SetNuiFocus(true, true)
 
-    SendNUIMessage({
-        action = 'open',
-        location = nearestLocation and nearestLocation.label or 'Auto perionica',
-        money = getMoney(),
-        packages = config.packages,
-        vehicle = {
-            plate = GetVehicleNumberPlateText(vehicle):gsub('^%s*(.-)%s*$', '%1'),
-            model = GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))),
-            dirt = dirtPercent(vehicle),
-        },
-    })
+    -- vlasnik perionice (flamingo_biznisi); bez njega meni radi kao ranije
+    lib.callback('flamingo_perionica:info', false, function(bizInfo)
+        if not isMenuOpen then return end
+        SetNuiFocus(true, true)
+
+        SendNUIMessage({
+            action = 'open',
+            location = nearestLocation and nearestLocation.label or 'Auto perionica',
+            money = getMoney(),
+            packages = config.packages,
+            biz = bizInfo,
+            vehicle = {
+                plate = GetVehicleNumberPlateText(vehicle):gsub('^%s*(.-)%s*$', '%1'),
+                model = GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(vehicle))),
+                dirt = dirtPercent(vehicle),
+            },
+        })
+    end)
 end
 
 RegisterNUICallback('close', function(_, cb)
     closeMenu()
     cb('ok')
+end)
+
+-- Biznis (TEST kupovina perionice iz menija, kasnije aukcija) - ide na flamingo_biznisi
+RegisterNUICallback('bizBuy', function(data, cb)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then
+        notify('Biznisi trenutno nisu dostupni.', 'error')
+        return cb(false)
+    end
+    ESX.TriggerServerCallback('flamingo_biznisi:buy', function(res)
+        res = res or { ok = false, msg = 'Greška u komunikaciji sa serverom.' }
+        if res.msg then notify(res.msg, res.ok and 'success' or 'error') end
+        if not res.ok then return cb(false) end
+        lib.callback('flamingo_perionica:info', false, function(info)
+            cb(info or false)
+        end)
+    end, type(data) == 'table' and data.id or nil)
 end)
 
 RegisterNUICallback('wash', function(data, cb)

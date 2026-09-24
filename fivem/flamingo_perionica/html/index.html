@@ -23,6 +23,9 @@
             </div>
 
             <div class="bar__right">
+                <!-- flamingo_biznisi: vlasnik perionice + dugme Biznis -->
+                <div class="owner-tag hidden" id="ownerTag"></div>
+                <button class="biz-btn hidden" id="bizBtn" type="button"><i class="fa-solid fa-briefcase"></i> Biznis</button>
                 <div class="wallet">
                     <small>Stanje</small>
                     <strong id="money">$0</strong>
@@ -33,6 +36,10 @@
             </div>
         </header>
 
+        <!-- flamingo_biznisi: detalji perionice kao biznisa -->
+        <section class="biz-panel hidden" id="bizPanel"></section>
+
+        <div id="washView">
         <section class="vehicle">
             <div class="vehicle__id">
                 <span class="plate" id="plate">—</span>
@@ -57,6 +64,7 @@
             </button>
             <p class="foot__hint"><kbd>Esc</kbd> zatvara meni</p>
         </footer>
+        </div>
 
     </div>
 </div>

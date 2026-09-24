@@ -48,6 +48,7 @@ end
 local function bizName(b)
     if b.label and b.label ~= '' then return b.label end
     if b.type == 'market' then return ('%s #%d'):format(b.shopLabel or Config.Market.label, b.id) end
+    if b.type == 'carwash' then return ('%s #%d'):format(b.shopLabel or Config.Carwash.label, b.id) end
     return ('%s #%d'):format(Config.ATM.label, b.id)
 end
 
@@ -66,7 +67,8 @@ end
 local function nearBiz(src, b, dist)
     local ped = GetPlayerPed(src)
     if ped == 0 then return false end
-    return #(GetEntityCoords(ped) - b.coords) <= (dist or Config.ServerDistance)
+    local max = dist or (b.type == 'carwash' and Config.Carwash.distance) or Config.ServerDistance
+    return #(GetEntityCoords(ped) - b.coords) <= max
 end
 
 local function ownedCount(identifier)
@@ -356,6 +358,14 @@ local function addStock(b, item, delta)
     return new
 end
 
+local function carwashPackages(b)
+    local list = {}
+    for _, pk in ipairs(b.packages or {}) do
+        list[#list + 1] = { label = pk.label, price = pk.price, earn = math.floor(pk.price * (Config.Carwash.share or 0) / 100) }
+    end
+    return list
+end
+
 local function marketProducts(b)
     local list = {}
     for _, it in ipairs(b.items or {}) do
@@ -496,7 +506,7 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:list', function(src, cb)
         local dayRows = MySQL.query.await(([[
             SELECT biz_id, DATEDIFF(CURDATE(), DATE(created_at)) AS ago, COALESCE(SUM(fee), 0) AS f, COUNT(*) AS c
             FROM flamingo_biznisi_log
-            WHERE biz_id IN (%s) AND type IN ('withdraw', 'sale') AND created_at >= CURDATE() - INTERVAL 6 DAY
+            WHERE biz_id IN (%s) AND type IN ('withdraw', 'sale', 'wash') AND created_at >= CURDATE() - INTERVAL 6 DAY
             GROUP BY biz_id, ago
         ]]):format(ph), ids) or {}
         for _, r in ipairs(dayRows) do
@@ -551,7 +561,9 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:list', function(src, cb)
             chart    = chart,
             tiers    = tiers[b.id] or {},
             logs     = logs,
-            products = b.type == 'market' and marketProducts(b) or nil
+            products = b.type == 'market' and marketProducts(b) or nil,
+            packages = b.type == 'carwash' and carwashPackages(b) or nil,
+            share    = b.type == 'carwash' and Config.Carwash.share or nil
         }
     end
 
@@ -1047,29 +1059,37 @@ end)
 -- ============================================================
 local marketQueue = {}
 
-local function marketKey(coords)
-    return 'm_' .. seedKey(coords)
+-- Marketi i perionice se registruju isto: svaki je poseban biznis, prepoznaje se po poziciji.
+local KINDS = {
+    market  = { prefix = 'm_', price = function() return Config.Market.defaultPrice end },
+    carwash = { prefix = 'c_', price = function() return Config.Carwash.defaultPrice end },
+}
+
+local function typedKey(kind, coords)
+    return KINDS[kind].prefix .. seedKey(coords)
 end
 
-local function findMarket(coords)
+local function findTyped(kind, coords)
     if not coords then return nil end
-    local key = marketKey(vector3(coords.x + 0.0, coords.y + 0.0, coords.z + 0.0))
+    local key = typedKey(kind, vector3(coords.x + 0.0, coords.y + 0.0, coords.z + 0.0))
     for _, b in pairs(BIZ) do
-        if b.type == 'market' and b.seedKey == key and not b.disabled then return b end
+        if b.type == kind and b.seedKey == key and not b.disabled then return b end
     end
 end
 
-local function registerMarkets(list)
+local function findMarket(coords) return findTyped('market', coords) end
+
+local function registerTyped(kind, list)
     for _, m in ipairs(list) do
         local c = vector3(m.coords.x + 0.0, m.coords.y + 0.0, m.coords.z + 0.0)
-        local key = marketKey(c)
-        local price = toAmount(m.price) or Config.Market.defaultPrice
+        local key = typedKey(kind, c)
+        local price = toAmount(m.price) or KINDS[kind].price()
 
         MySQL.query.await([[
             INSERT INTO flamingo_biznisi (type, seed_key, x, y, z, price, atm_cash, calibrated)
-            VALUES ('market', ?, ?, ?, ?, ?, 0, 1)
+            VALUES (?, ?, ?, ?, ?, ?, 0, 1)
             ON DUPLICATE KEY UPDATE price = IF(owner IS NULL, VALUES(price), price)
-        ]], { key, c.x, c.y, c.z, price })
+        ]], { kind, key, c.x, c.y, c.z, price })
 
         local row = MySQL.single.await('SELECT *, UNIX_TIMESTAMP(bought_at) AS bought_ts FROM flamingo_biznisi WHERE seed_key = ?', { key })
         if row then
@@ -1083,36 +1103,51 @@ local function registerMarkets(list)
             b.seedKey   = key
             b.shopLabel = m.label
 
-            -- artikli iz configa; svaki novi artikal dobija pocetnu zalihu
-            b.items = {}
-            for _, it in ipairs(m.items or {}) do
-                local p = toAmount(it.price)
-                if type(it.name) == 'string' and p then
-                    b.items[#b.items + 1] = { name = it.name, label = it.label or it.name, price = p }
-                    if b.stock[it.name] == nil then
-                        b.stock[it.name] = Config.Market.startStock
-                        MySQL.insert.await('INSERT IGNORE INTO flamingo_biznisi_stock (biz_id, item, stock) VALUES (?, ?, ?)',
-                            { b.id, it.name, Config.Market.startStock })
+            if kind == 'market' then
+                -- artikli iz configa; svaki novi artikal dobija pocetnu zalihu
+                b.items = {}
+                for _, it in ipairs(m.items or {}) do
+                    local p = toAmount(it.price)
+                    if type(it.name) == 'string' and p then
+                        b.items[#b.items + 1] = { name = it.name, label = it.label or it.name, price = p }
+                        if b.stock[it.name] == nil then
+                            b.stock[it.name] = Config.Market.startStock
+                            MySQL.insert.await('INSERT IGNORE INTO flamingo_biznisi_stock (biz_id, item, stock) VALUES (?, ?, ?)',
+                                { b.id, it.name, Config.Market.startStock })
+                        end
                     end
+                end
+            else
+                -- perionica: paketi pranja (samo za prikaz zarade na tabletu)
+                b.packages = {}
+                for _, pk in ipairs(m.packages or {}) do
+                    local p = toAmount(pk.price)
+                    if p then b.packages[#b.packages + 1] = { id = pk.id, label = pk.label or pk.id, price = p } end
                 end
             end
         end
     end
-    print(('[flamingo_biznisi] Registrovano marketa: %d'):format(#list))
+    print(('[flamingo_biznisi] Registrovano (%s): %d'):format(kind, #list))
     syncAll()
 end
 
--- exports['flamingo_biznisi']:RegisterMarkets({ { coords = vector3, label = 'Flamingo Market', price = 750000, items = { {name, label, price} } } })
-exports('RegisterMarkets', function(list)
+local function registerMarkets(list) registerTyped('market', list) end
+
+local function queueRegister(kind, list)
     if type(list) ~= 'table' then return false end
-    marketQueue[#marketQueue + 1] = list
+    marketQueue[#marketQueue + 1] = { kind = kind, list = list }
     CreateThread(function()
         while not ready do Wait(250) end
         local q = marketQueue
         marketQueue = {}
-        for _, l in ipairs(q) do registerMarkets(l) end
+        for _, e in ipairs(q) do registerTyped(e.kind, e.list) end
     end)
     return true
+end
+
+-- exports['flamingo_biznisi']:RegisterMarkets({ { coords = vector3, label = 'Flamingo Market', price = 750000, items = { {name, label, price} } } })
+exports('RegisterMarkets', function(list)
+    return queueRegister('market', list)
 end)
 
 -- Podaci za meni marketa: vlasnik, cena, zalihe (samo ako market ima vlasnika)
@@ -1193,4 +1228,39 @@ exports('GetPendingOrders', function(bizId)
         return MySQL.query.await("SELECT * FROM flamingo_biznisi_orders WHERE status = 'pending' AND biz_id = ? ORDER BY id", { bizId }) or {}
     end
     return MySQL.query.await("SELECT * FROM flamingo_biznisi_orders WHERE status = 'pending' ORDER BY id") or {}
+end)
+
+
+-- ============================================================
+--  Perionice (flamingo_perionica)
+--  Vlasnik dobija Config.Carwash.share % od cene svakog pranja u kasu.
+--  Nema robe ni narudzbina.
+-- ============================================================
+
+-- exports['flamingo_biznisi']:RegisterCarwashes({ { coords = vector3, label = 'Hands On Car Wash', price = 500000, packages = { {id, label, price} } } })
+exports('RegisterCarwashes', function(list)
+    return queueRegister('carwash', list)
+end)
+
+-- Podaci za meni perionice: vlasnik, cena, udeo
+exports('GetCarwashInfo', function(coords, src)
+    local b = findTyped('carwash', coords)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not b or not xPlayer then return nil end
+    local info = publicInfo(b, xPlayer)
+    info.share = Config.Carwash.share
+    return info
+end)
+
+-- Pranje je placeno: udeo ide u kasu vlasnika
+exports('CarwashSale', function(coords, price, packageLabel, actor)
+    local b = findTyped('carwash', coords)
+    if not b or not b.owner then return false end
+    price = math.floor(tonumber(price) or 0)
+    local revenue = math.floor(price * (Config.Carwash.share or 0) / 100)
+    b.balance = b.balance + revenue
+    b.earned  = b.earned + revenue
+    addMoney(b, { balance = revenue, earned = revenue })
+    logTx(b.id, 'wash', price, revenue, nil, actor, packageLabel)
+    return true, revenue
 end)

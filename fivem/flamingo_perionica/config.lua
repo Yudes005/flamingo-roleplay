@@ -5,6 +5,11 @@ return {
     -- coords = tacka gde se pojavljuje [E] prompt (ulaz u perionicu)
     -- label  = ime koje se vidi na blipu i u meniju
     --
+    -- BIZNIS (flamingo_biznisi): svaka lokacija je poseban biznis, prepoznaje se po coords
+    -- (ne pomeraj ih posle kupovine). Vlasnik dobija 35% od svakog pranja
+    -- (Config.Carwash.share u flamingo_biznisi). Cena perionice: dodaj bizPrice = 600000
+    -- u lokaciju, inace vazi Config.Carwash.defaultPrice.
+    --
     -- NAPOMENA: koordinate su standardne GTA perionice. Ako neka kod tebe
     -- na mapi nije tacno na mestu (custom MLO, promenjena mapa...), samo
     -- stani na zeljeno mesto i iskucaj koordinate pa ih zameni ovde.
