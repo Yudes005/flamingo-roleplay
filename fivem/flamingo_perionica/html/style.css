@@ -1,0 +1,487 @@
+/* =========================================================
+   flamingo_perionica — NUI meni
+   Redizajn: isti vizuelni sistem kao flamingo_pumpa - miran, neutralan
+   tamni panel, bez neon/glow efekata, roze samo kao akcenat.
+   ========================================================= */
+
+:root {
+    --bg:         rgba(20, 20, 23, 0.94);
+    --surface:    #1C1C20;
+    --surface-2:  #232328;
+    --surface-3:  #2B2B31;
+    --border:     rgba(255, 255, 255, 0.07);
+    --border-2:   rgba(255, 255, 255, 0.12);
+
+    --text:       #F2F2F4;
+    --text-2:     #A9A9B2;
+    --text-3:     #6E6E78;
+
+    --accent:     #D9DAE0;
+    --accent-2:   #FFFFFF;
+    --accent-ink: #2A0D19;
+    --accent-bg:  rgba(255,255,255,0.08);
+
+    --ok:         #6FCF97;
+    --bad:        #F07171;
+    --mud:        #C49A6C;
+
+    --r-xl: 22px;
+    --r-lg: 16px;
+    --r-md: 12px;
+    --r-sm: 9px;
+
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+}
+
+.hidden { display: none !important; }
+
+button { font: inherit; }
+
+#root {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(120% 100% at 50% 50%, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.65) 100%);
+}
+
+/* ---------------- Panel ---------------- */
+
+.panel {
+    width: 760px;
+    max-width: 94vw;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    box-shadow:
+        0 30px 80px -20px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+}
+
+#root.is-open .panel {
+    animation: enter 0.32s var(--ease) both;
+}
+
+@keyframes enter {
+    from { opacity: 0; transform: translateY(12px) scale(0.99); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #root.is-open .panel { animation: none; }
+    * { transition: none !important; animation: none !important; }
+}
+
+/* ---------------- Zaglavlje ---------------- */
+
+.bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.bar__id {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.bar__mark {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 17px;
+}
+
+.bar h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--text);
+}
+
+.bar p {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-3);
+    margin-top: 2px;
+}
+
+.bar__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wallet {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+}
+
+.wallet small {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+}
+
+.wallet strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.iconbtn {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.iconbtn:hover {
+    background: var(--surface-3);
+    color: var(--text);
+}
+
+/* ---------------- Vozilo ---------------- */
+
+.vehicle {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 28px;
+    margin: 24px 24px 0;
+    padding: 18px 20px;
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.vehicle__id {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.plate {
+    align-self: flex-start;
+    padding: 5px 11px;
+    border-radius: 6px;
+    background: var(--surface-3);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text);
+}
+
+.model {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dirt__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+}
+
+.dirt__head b {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.dirt__track {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    overflow: hidden;
+}
+
+.dirt__track span {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: var(--mud);
+    transition: width 0.45s var(--ease), background 0.25s;
+}
+
+.dirt__track.is-clean span { background: var(--ok); }
+
+/* ---------------- Paketi ---------------- */
+
+.section-title {
+    margin: 22px 24px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--text-3);
+}
+
+.packages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    grid-auto-flow: column;
+    gap: 12px;
+    padding: 0 24px;
+}
+
+.pack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 16px;
+    text-align: left;
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.12s var(--ease);
+}
+
+.pack:hover:not(.is-broke) {
+    border-color: var(--border-2);
+    background: var(--surface-2);
+}
+
+.pack:active:not(.is-broke) { transform: scale(0.99); }
+
+.pack.is-active {
+    border-color: var(--accent);
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.pack.is-broke {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.pack__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.pack__radio {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--text-3);
+    transition: border-color 0.15s, border-width 0.15s;
+}
+
+.pack.is-active .pack__radio {
+    border-color: var(--accent);
+    border-width: 5px;
+}
+
+.pack__time {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.pack__time i { font-size: 10px; }
+
+.pack__name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.pack__desc {
+    min-height: 34px;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--text-3);
+}
+
+.pack__price {
+    margin-top: 8px;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.6px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.pack.is-active .pack__price { color: var(--accent-2); }
+
+.pack__list {
+    list-style: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.pack__list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-2);
+}
+
+.pack__list li i {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(111, 207, 151, 0.14);
+    color: var(--ok);
+    font-size: 8px;
+}
+
+.pack__list li.is-off { color: var(--text-3); opacity: 0.55; }
+
+.pack__list li.is-off i {
+    background: var(--surface-3);
+    color: var(--text-3);
+}
+
+/* ---------------- Dno ---------------- */
+
+.foot {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 24px 22px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 54px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.08s;
+}
+
+.cta:hover:not(:disabled) { background: var(--accent-2); }
+
+.cta:active:not(:disabled) { transform: scale(0.99); }
+
+.cta:disabled {
+    background: var(--surface-2);
+    color: var(--text-3);
+    cursor: default;
+}
+
+.foot__hint {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+}
+
+kbd {
+    display: inline-block;
+    padding: 2px 7px;
+    margin-right: 4px;
+    border-radius: 5px;
+    background: var(--surface-3);
+    border: 1px solid var(--border-2);
+    border-bottom-width: 2px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-2);
+}
+
+/* ---------------- Manji ekrani ---------------- */
+
+@media (max-height: 760px) {
+    .vehicle { margin: 18px 20px 0; padding: 14px 16px; }
+    .section-title { margin: 16px 20px 10px; }
+    .packages { padding: 0 20px; }
+    .pack { padding: 14px; }
+    .foot { padding: 16px 20px 18px; margin-top: 16px; }
+}
+
+@media (max-width: 720px) {
+    .packages { grid-auto-flow: row; grid-template-columns: 1fr; }
+    .vehicle { grid-template-columns: 1fr; gap: 14px; }
+}
