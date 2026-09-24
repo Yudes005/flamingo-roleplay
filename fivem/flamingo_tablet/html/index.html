@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="kuce.css">
 <link rel="stylesheet" href="market.css">
 <link rel="stylesheet" href="fmdt.css">
+<link rel="stylesheet" href="biznis.css">
 </head>
 <body>
 
@@ -138,6 +139,12 @@
             <div class="app-icon" id="app-kuce">
               <div class="app-icon-glyph kuce"><i class="fa-solid fa-house-chimney"></i></div>
               <span class="app-icon-label">Nekretnine</span>
+            </div>
+            <!-- FLAMINGO_BIZNISI: Moj biznis - kasa, provizija, gotovina u bankomatu -->
+            <div class="app-icon" id="app-biznis">
+              <div class="app-icon-glyph biznis"><i class="fa-solid fa-briefcase"></i></div>
+              <span class="app-icon-label">Moj biznis</span>
+              <span class="app-badge hidden" id="biznis-badge">!</span>
             </div>
           </div>
 
@@ -325,6 +332,24 @@
           </div>
         </div>
 
+        <!-- ============ APLIKACIJA: MOJ BIZNIS (flamingo_biznisi) ============
+             Biznisi igrača (za sada bankomati): kasa, provizija po kartici,
+             gotovina u bankomatu, dopuna, istorija. Crta biznis.js, sve provere
+             radi flamingo_biznisi server. -->
+        <div id="app-screen-biznis" class="app-screen hidden">
+          <div class="app-topbar">
+            <button class="app-back" id="biznis-back"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="app-icon-mini biznis"><i class="fa-solid fa-briefcase"></i></span>
+            <span class="app-title">Moj biznis</span>
+            <span class="app-title-spacer"></span>
+            <button class="bz-refresh" id="biznis-refresh" title="Osveži"><i class="fa-solid fa-rotate-right"></i></button>
+          </div>
+          <div class="bz-shell">
+            <div class="bz-side" id="bz-side"></div>
+            <div class="bz-main" id="bz-main"></div>
+          </div>
+        </div>
+
         <div class="home-indicator" title="Zatvori"></div>
       </div>
 
@@ -334,6 +359,7 @@
 <script src="script.js"></script>
 <script src="kuce.js"></script>
 <script src="market.js"></script>
+<script src="biznis.js"></script>
 <script src="mdt_core.js"></script>
 <script src="mdt_vlada.js"></script>
 <script src="mdt_policija.js"></script>

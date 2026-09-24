@@ -27,6 +27,8 @@ files {
     'html/kuce.css',
     'html/market.js',
     'html/market.css',
+    'html/biznis.js',
+    'html/biznis.css',
     'html/fmdt.css',
     'html/fonts/*.woff2',
     'html/img/*.svg',

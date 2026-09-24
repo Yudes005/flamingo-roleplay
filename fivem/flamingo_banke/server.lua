@@ -130,6 +130,24 @@ local function passCooldown(src)
     return true
 end
 
+-- ============================================================
+--  flamingo_biznisi: bankomati koji su biznisi (gotovina u bankomatu + provizija vlasniku)
+-- ============================================================
+local function bizReady()
+    return GetResourceState('flamingo_biznisi') == 'started'
+end
+
+local function bizCall(fn, ...)
+    if not bizReady() then return nil end
+    local args = { ... }
+    local ok, a, b = pcall(function() return exports['flamingo_biznisi'][fn](nil, table.unpack(args)) end)
+    if not ok then
+        print(('[flamingo_banke] flamingo_biznisi:%s greska: %s'):format(fn, tostring(a)))
+        return nil
+    end
+    return a, b
+end
+
 -- 240000 -> "240.000$" (isto kao u UI-ju)
 local function fmt(n)
     local s = tostring(math.floor(n))
@@ -303,6 +321,10 @@ ESX.RegisterServerCallback('flamingo_banke:open', function(src, cb, kind)
         place = 'Bankomat'
     end
 
+    -- bankomat koji je biznis (flamingo_biznisi)
+    local atmBiz = kind == 'atm' and bizCall('GetAtmAt', coords) or nil
+    if atmBiz then place = atmBiz.name end
+
     getAccount(xPlayer.identifier, function(acc)
         if kind == 'atm' then
             -- bankomat trazi racun, karticu u inventaru i PIN
@@ -321,7 +343,7 @@ ESX.RegisterServerCallback('flamingo_banke:open', function(src, cb, kind)
                 end
             end
 
-            sessions[src] = { kind = 'atm', coords = coords, place = place, pinOk = acc.virtual == true }
+            sessions[src] = { kind = 'atm', coords = coords, place = place, pinOk = acc.virtual == true, biz = atmBiz and atmBiz.id or nil }
 
             if not acc.virtual then
                 local num = acc.card_number or ''
@@ -599,6 +621,9 @@ local function doAction(src, s, xPlayer, acc, payload, cb)
         -- uplata je uvek bez provizije (i na bankomatu)
         xPlayer.removeAccountMoney('money', amount, 'Bank deposit')
         xPlayer.addAccountMoney('bank', amount, 'Bank deposit')
+        if isAtm and s.biz then
+            bizCall('AtmDeposit', s.biz, amount, xPlayer.getName())
+        end
         logTx(xPlayer.identifier, 'deposit', 'Uplata na račun', memo or 'Gotovina na račun', s.place, amount)
         msg = ('Uplaćeno %s na račun.'):format(fmt(amount))
 
@@ -613,8 +638,19 @@ local function doAction(src, s, xPlayer, acc, payload, cb)
             return fail(fee > 0 and ('Nemaš dovoljno na računu (%s sa provizijom).'):format(fmt(total)) or 'Nemaš toliko novca na računu.')
         end
 
+        -- bankomat-biznis: mora imati dovoljno gotovine u sebi
+        if isAtm and s.biz then
+            local can, why = bizCall('AtmCanWithdraw', s.biz, amount)
+            if can == false then return fail(why or 'Bankomat nema dovoljno gotovine.') end
+        end
+
         xPlayer.removeAccountMoney('bank', total, 'Bank withdraw')
         xPlayer.addAccountMoney('money', amount, 'Bank withdraw')
+
+        -- provizija ide u kasu biznisa, gotovina izlazi iz bankomata
+        if isAtm and s.biz then
+            bizCall('AtmWithdraw', s.biz, amount, fee, tier.id, xPlayer.getName())
+        end
         logTx(xPlayer.identifier, 'withdraw', 'Podizanje novca', memo or 'Račun u gotovinu', s.place, amount)
         if fee > 0 then
             logTx(xPlayer.identifier, 'fee', 'Provizija bankomata', ('Podizanje, %d%%'):format(tier.atmFee), s.place, fee)
@@ -857,4 +893,16 @@ exports('CardPayment', function(src, amount, title, party)
         logTx(xPlayer.identifier, 'income', 'Cashback', ('%d%% povrata, %s kartica'):format(tier.cashback, tier.label), sanitize(party, 64), back)
     end
     return true, 'Plaćeno karticom.', back
+end)
+
+-- ============================================================
+--  Paketi kartica za druge resurse (flamingo_biznisi prikazuje proviziju po kartici)
+--  exports['flamingo_banke']:GetCardTiers()
+-- ============================================================
+exports('GetCardTiers', function()
+    local out = {}
+    for _, c in ipairs(Config.Cards) do
+        out[#out + 1] = { id = c.id, label = c.label, atmFee = c.atmFee or 0, theme = c.theme }
+    end
+    return out
 end)

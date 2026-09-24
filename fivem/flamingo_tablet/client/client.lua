@@ -1111,6 +1111,47 @@ for nuiName, serverCallback in pairs(MARKET_ROUTES) do
     end)
 end
 
+-------------------------------------------------
+-- MOJ BIZNIS (flamingo_biznisi) - aplikacija "Moj biznis" u tabletu.
+-- Tablet samo prosleđuje zahteve; vlasništvo, kasa i novac se proveravaju
+-- na flamingo_biznisi serveru. Ovde se samo dodaju nazivi ulica.
+-------------------------------------------------
+local function bizStreet(c)
+    local s1, s2 = GetStreetNameAtCoord(c.x + 0.0, c.y + 0.0, c.z + 0.0)
+    local street = GetStreetNameFromHashKey(s1)
+    local cross = s2 ~= 0 and GetStreetNameFromHashKey(s2) or ''
+    local zone = GetLabelText(GetNameOfZone(c.x + 0.0, c.y + 0.0, c.z + 0.0))
+    return street .. (cross ~= '' and (' / ' .. cross) or ''), (zone ~= 'NULL' and zone or nil)
+end
+
+RegisterNUICallback('biznis:list', function(data, cb)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then
+        cb({ ok = false, error = 'Sistem biznisa trenutno nije dostupan.' })
+        return
+    end
+
+    ESX.TriggerServerCallback('flamingo_biznisi:tablet:list', function(result)
+        result = result or { ok = false, error = 'Nema odgovora sa servera.' }
+        if result.ok and result.businesses then
+            for _, b in ipairs(result.businesses) do
+                if b.coords then b.street, b.zone = bizStreet(b.coords) end
+            end
+        end
+        cb(result)
+    end)
+end)
+
+RegisterNUICallback('biznis:action', function(data, cb)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then
+        cb({ ok = false, error = 'Sistem biznisa trenutno nije dostupan.' })
+        return
+    end
+
+    ESX.TriggerServerCallback('flamingo_biznisi:tablet:action', function(result)
+        cb(result or { ok = false, error = 'Nema odgovora sa servera.' })
+    end, data and data.payload)
+end)
+
 -- Nazivi, marke i slike vozila (natives + flamingo_autosalon) za kartice u Marketu.
 RegisterNUICallback('market:vehicleInfo', function(data, cb)
     local out = {}
