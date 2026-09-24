@@ -1,0 +1,14 @@
+FLAMINGO SUPERMARKET - FIXES
+
+1. UI je sada pravi fullscreen:
+   - 100vw x 100vh
+   - uklonjen border/radius/spoljna margina
+
+2. NPC spawn/visina:
+   - collision se ucitava pre pozicioniranja
+   - koristi se PlaceObjectOnGroundProperly + GetGroundZFor_3dCoord
+   - heading se cuva iz configa
+   - FreezeEntityPosition se poziva TEK nakon finalnog X/Y/Z pozicioniranja
+   - NPC vise ne bi trebalo da ostaje u vazduhu zbog prerano postavljenog freeze-a
+
+3. Postojece X/Y/heading koordinate u config.lua nisu menjane.
