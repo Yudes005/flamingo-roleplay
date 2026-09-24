@@ -46,6 +46,19 @@ const repairPlus = el('repairPlus');
 const repairBuy = el('repairBuy');
 const repairBuyText = el('repairBuyText');
 
+/* flamingo_biznisi: vlasnik pumpe + gorivo u rezervoaru stanice */
+const ownerTag = el('ownerTag');
+const bizBtn = el('bizBtn');
+const bizPanel = el('bizPanel');
+const pumpView = el('pumpView');
+const stationFuel = el('stationFuel');
+
+let biz = null;          // null = pumpa bez sistema biznisa
+let bizArmed = false;
+let bizArmTimer = null;
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 const state = {
     open: false,
     netId: null,
@@ -72,7 +85,7 @@ function post(name, data) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json; charset=UTF-8' },
         body: JSON.stringify(data || {}),
-    }).catch(() => {});
+    }).then((r) => r.json()).catch(() => null);
 }
 
 function money(value) {
@@ -146,9 +159,12 @@ function render(instant) {
     paintTank(state.currentLiters, liters);
 
     const canAfford = price <= state.money;
-    refuelBtn.disabled = liters <= 0 || !canAfford;
+    const stationEmpty = biz && typeof biz.liters === 'number' && biz.liters <= 0;
+    refuelBtn.disabled = liters <= 0 || !canAfford || stationEmpty;
 
-    if (liters > 0 && !canAfford) {
+    if (stationEmpty) {
+        refuelText.textContent = 'Pumpa nema goriva';
+    } else if (liters > 0 && !canAfford) {
         refuelText.textContent = `Fali ti ${money(price - state.money)}`;
     } else if (!state.netId) {
         refuelText.textContent = 'Nema vozila u blizini';
@@ -242,6 +258,106 @@ repairBuy.addEventListener('click', () => {
     close();
 });
 
+/* ---------------- Biznis (flamingo_biznisi) ---------------- */
+
+function renderBizHeader() {
+    const show = !!biz;
+    ownerTag.classList.toggle('hidden', !show);
+    bizBtn.classList.toggle('hidden', !show);
+
+    const hasTank = show && typeof biz.liters === 'number';
+    stationFuel.classList.toggle('hidden', !hasTank);
+    if (hasTank) {
+        stationFuel.classList.toggle('is-low', biz.liters < (biz.maxLiters || 5000) * 0.1);
+        stationFuel.innerHTML = `<i class="fa-solid fa-oil-can"></i>Na pumpi ${Math.floor(biz.liters).toLocaleString('sr-RS')} L`;
+    }
+    if (!show) return;
+
+    ownerTag.classList.toggle('free', !biz.owned);
+    ownerTag.innerHTML = `
+        <span class="owner-ic"><i class="fa-solid ${biz.owned ? 'fa-crown' : 'fa-tag'}"></i></span>
+        <span class="owner-t"><small>Vlasnik</small><strong>${biz.owned ? esc(biz.ownerName || 'Nepoznat') : 'Na prodaju'}</strong></span>`;
+}
+
+function renderBizPanel() {
+    if (!biz) return;
+    const max = biz.maxLiters || 5000;
+    const orderPrice = Math.round(state.pricePerLiter * (biz.orderRatio || 0.5));
+    const tank = typeof biz.liters === 'number' ? biz.liters : max;
+    const pct = Math.min(100, Math.round(tank / max * 100));
+
+    let foot;
+    if (biz.mine) {
+        foot = `<div class="biz-note"><i class="fa-solid fa-tablet-screen-button"></i><span>Ovo je tvoja pumpa. Kasom i narudžbinom goriva upravljaš na <b>tabletu</b>, aplikacija <b>Moj biznis</b>.</span></div>`;
+    } else if (biz.owned) {
+        foot = `<div class="biz-note"><i class="fa-solid fa-lock"></i><span>Ova pumpa već ima vlasnika. Biznisi se preprodaju na <b>aukciji</b>.</span></div>`;
+    } else if (biz.canBuy) {
+        const limit = biz.maxCount > 0 && biz.myCount >= biz.maxCount;
+        const from = biz.buyFrom === 'money' ? biz.cash : (biz.buyFrom === 'bank' ? biz.bank : Math.max(biz.bank, biz.cash));
+        const enough = from >= biz.price;
+        foot = `
+            <div class="biz-note test"><i class="fa-solid fa-flask"></i><span><b>TEST:</b> kupovina iz menija je privremena. Kasnije se biznisi kupuju na aukciji.</span></div>
+            <button class="cta biz-buy ${bizArmed ? 'armed' : ''}" id="bizBuy" type="button" ${limit || !enough ? 'disabled' : ''}>
+                <i class="fa-solid ${bizArmed ? 'fa-check' : 'fa-cart-shopping'}"></i><span>${bizArmed ? 'Klikni ponovo da potvrdiš' : `Kupi pumpu za ${money(biz.price)}`}</span>
+            </button>
+            <p class="biz-sub">${limit ? 'Već imaš biznis. Možeš imati samo jedan.' : `Plaća se sa računa${enough ? '.' : '. Nemaš dovoljno novca.'}`}</p>`;
+    } else {
+        foot = `<div class="biz-note"><i class="fa-solid fa-gavel"></i><span>Ova pumpa je na prodaju, ali se kupuje isključivo na <b>aukciji</b>.</span></div>`;
+    }
+
+    bizPanel.innerHTML = `
+        <div class="biz-head">
+            <span class="bar__mark"><i class="fa-solid fa-briefcase"></i></span>
+            <div class="biz-t">
+                <small>Biznis · Pumpa · ID #${biz.id}</small>
+                <strong>${esc(biz.name)}</strong>
+                <span class="biz-status ${biz.mine ? 'mine' : (biz.owned ? 'owned' : 'sale')}">${biz.mine ? 'Tvoj biznis' : (biz.owned ? 'Vlasnik: ' + esc(biz.ownerName || 'Nepoznat') : 'Na prodaju')}</span>
+            </div>
+            <div class="biz-price"><small>${biz.owned ? 'Vrednost pumpe' : 'Cena pumpe'}</small><b>${money(biz.price)}</b></div>
+        </div>
+        <div class="biz-earn">
+            <div class="biz-earn-h"><span>Rezervoar stanice</span><b>${Math.floor(tank).toLocaleString('sr-RS')} / ${max.toLocaleString('sr-RS')} L</b></div>
+            <div class="biz-tank"><div style="width:${pct}%"></div></div>
+            <div class="biz-row head"><span></span><span>Po litru</span><span>Na 1.000 L</span></div>
+            <div class="biz-row"><span>Prodaja igračima</span><span>${money(state.pricePerLiter)}</span><b>+${money(state.pricePerLiter * 1000)}</b></div>
+            <div class="biz-row"><span>Nabavka goriva (transport)</span><span>${money(orderPrice)}</span><b class="neg">-${money(orderPrice * 1000)}</b></div>
+            <p class="biz-hint">Cela cena sipanja ide u kasu vlasnika. Kad rezervoar ostane prazan, pumpa ne toči gorivo dok vlasnik ne naruči novo.</p>
+        </div>
+        ${foot}
+        <button class="biz-back" id="bizBack" type="button"><i class="fa-solid fa-arrow-left"></i> Nazad na pumpu</button>`;
+}
+
+function toggleBiz(show) {
+    bizArmed = false;
+    bizPanel.classList.toggle('hidden', !show);
+    pumpView.classList.toggle('hidden', show);
+    bizBtn.classList.toggle('active', show);
+    if (show) renderBizPanel();
+}
+
+bizBtn.addEventListener('click', () => toggleBiz(bizPanel.classList.contains('hidden')));
+
+bizPanel.addEventListener('click', async (e) => {
+    if (e.target.closest('#bizBack')) return toggleBiz(false);
+    const buy = e.target.closest('#bizBuy');
+    if (!buy || buy.disabled) return;
+    if (!bizArmed) {
+        bizArmed = true;
+        clearTimeout(bizArmTimer);
+        bizArmTimer = setTimeout(() => { bizArmed = false; renderBizPanel(); }, 3500);
+        return renderBizPanel();
+    }
+    clearTimeout(bizArmTimer);
+    bizArmed = false;
+    buy.disabled = true;
+    const info = await post('bizBuy', { id: biz.id });
+    if (info && typeof info === 'object') {
+        biz = info;
+        renderBizHeader();
+    }
+    renderBizPanel();
+});
+
 /* ---------------- Otvaranje / zatvaranje ---------------- */
 
 function close() {
@@ -259,6 +375,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 function open(data) {
+    biz = data.biz || null;
+    renderBizHeader();
+    toggleBiz(false);
     state.pricePerLiter = data.pricePerLiter || 20;
     state.money = data.money || 0;
 
@@ -270,7 +389,9 @@ function open(data) {
         state.currentLiters = data.vehicle.currentLiters;
         state.maxLiters = data.vehicle.maxLiters;
 
-        const remaining = Math.max(0, data.vehicle.maxLiters - data.vehicle.currentLiters);
+        let remaining = Math.max(0, data.vehicle.maxLiters - data.vehicle.currentLiters);
+        // pumpa koja je biznis ne moze da natoci vise nego sto ima u rezervoaru stanice
+        if (biz && typeof biz.liters === 'number') remaining = Math.max(0, Math.min(remaining, Math.floor(biz.liters)));
 
         lcdVeil.classList.add('hidden');
         mark.classList.add('is-live');

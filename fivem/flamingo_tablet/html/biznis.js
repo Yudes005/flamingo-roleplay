@@ -30,8 +30,11 @@
   const TYPE = {
     atm: { icon: 'fa-money-bill-transfer', label: 'Bankomat' },
     market: { icon: 'fa-store', label: 'Market' },
-    carwash: { icon: 'fa-spray-can-sparkles', label: 'Perionica' }
+    carwash: { icon: 'fa-spray-can-sparkles', label: 'Perionica' },
+    fuel: { icon: 'fa-gas-pump', label: 'Pumpa' }
   };
+  const isFuel = b => b.type === 'fuel';
+  const hasStock = b => isMarket(b) || isFuel(b);
   const typeOf = b => TYPE[b.type] || TYPE.atm;
   const lowProducts = b => (b.products || []).filter(p => p.low);
   const itemImg = name => `nui://ox_inventory/web/images/${encodeURIComponent(name)}.png`;
@@ -122,7 +125,8 @@
     const items = list.map(b => {
       const pct = Math.round(b.atmCash / Math.max(1, b.atmMax) * 100);
       const low = lowProducts(b).length;
-      const warn = isMarket(b) ? (low > 0 ? `<i class="fa-solid fa-triangle-exclamation"></i> Ponestaje: ${low} ${low === 1 ? 'artikal' : 'artikla'}` : '')
+      const warn = isFuel(b) ? (low > 0 ? `<i class="fa-solid fa-triangle-exclamation"></i> Malo goriva: ${(b.products[0] || {}).stock || 0} L` : '')
+                 : isMarket(b) ? (low > 0 ? `<i class="fa-solid fa-triangle-exclamation"></i> Ponestaje: ${low} ${low === 1 ? 'artikal' : 'artikla'}` : '')
                                : (b.lowCash ? `<i class="fa-solid fa-triangle-exclamation"></i> Bankomat ${pct}% pun` : '');
       return `
         <button class="bz-item ${b.id === bz.selected ? 'active' : ''}" data-bz-select="${b.id}">
@@ -157,7 +161,7 @@
         <div class="bz-empty">
           <i class="fa-solid fa-briefcase"></i>
           <b>Nemaš nijedan biznis.</b>
-          Otvori bilo koji bankomat, market ili perionicu i u meniju izaberi <b>Biznis</b> da vidiš cenu, vlasnika i zaradu.
+          Otvori bilo koji bankomat, market, perionicu ili pumpu i u meniju izaberi <b>Biznis</b> da vidiš cenu, vlasnika i zaradu.
         </div>`;
       return;
     }
@@ -206,7 +210,7 @@
           <button class="bz-btn primary" data-bz="take"><i class="fa-solid fa-arrow-down"></i> Podigni</button>
           <button class="bz-btn" data-bz="put"><i class="fa-solid fa-arrow-up"></i> Uloži</button>
         </div>
-        <button class="bz-btn wide success" data-bz="takeAll" ${b.balance < 1 ? 'disabled' : ''}><i class="fa-solid fa-hand-holding-dollar"></i> ${isMarket(b) || isCarwash(b) ? "Podigni sav novac" : "Podigni svu proviziju"} (${money(b.balance)})</button>
+        <button class="bz-btn wide success" data-bz="takeAll" ${b.balance < 1 ? 'disabled' : ''}><i class="fa-solid fa-hand-holding-dollar"></i> ${hasStock(b) || isCarwash(b) ? "Podigni sav novac" : "Podigni svu proviziju"} (${money(b.balance)})</button>
         <div class="bz-section-sub">Novac ide ${bz.account === 'bank' ? '<b>na tvoj račun</b>' : '<b>u gotovinu</b>'}. Kod sebe: ${money(d.cash)} · Račun: ${money(d.bank)}</div>
       </div>`;
   }
@@ -252,8 +256,8 @@
     return `
       <div class="bz-section">
         <div class="bz-section-head">
-          <div class="bz-section-title"><i class="fa-solid fa-chart-column"></i> ${isMarket(b) ? 'Zarada od prodaje' : (isCarwash(b) ? 'Zarada od pranja' : 'Zarada od provizije')}, 7 dana</div>
-          <span class="bz-section-sub"><b>${b.count7}</b> ${isMarket(b) ? 'prodaja' : (isCarwash(b) ? 'pranja' : 'podizanja')}</span>
+          <div class="bz-section-title"><i class="fa-solid fa-chart-column"></i> ${isMarket(b) ? 'Zarada od prodaje' : (isCarwash(b) ? 'Zarada od pranja' : (isFuel(b) ? 'Zarada od goriva' : 'Zarada od provizije'))}, 7 dana</div>
+          <span class="bz-section-sub"><b>${b.count7}</b> ${isMarket(b) ? 'prodaja' : (isCarwash(b) ? 'pranja' : (isFuel(b) ? 'sipanja' : 'podizanja'))}</span>
         </div>
         <div class="bz-chart">${bars}</div>
       </div>`;
@@ -291,9 +295,10 @@
     state: l => ({ ic: 'fa-landmark', cls: 'out', t: 'Vraćeno državi', s: esc(l.actor || ''), v: '', vc: '' }),
     sell_state: l => ({ ic: 'fa-landmark', cls: 'out', t: 'Prodato državi', s: esc(l.actor || ''), v: money(l.amount), vc: '' }),
     sale: l => ({ ic: 'fa-basket-shopping', cls: 'fee', t: `Prodaja, ${esc(l.actor || 'kupac')}`, s: esc(l.note || ''), v: `+${money(l.fee)}`, vc: 'pos' }),
-    order: l => ({ ic: 'fa-cart-plus', cls: 'out', t: 'Narudžbina robe', s: esc(l.note || ''), v: `-${money(l.amount)}`, vc: 'neg' }),
-    delivery: l => ({ ic: 'fa-truck-ramp-box', cls: 'ref', t: 'Roba dovezena', s: `${esc(l.note || '')}${l.actor ? ' · ' + esc(l.actor) : ''}`, v: '', vc: '' }),
+    order: l => ({ ic: 'fa-cart-plus', cls: 'out', t: /goriva/.test(l.note || '') ? 'Narudžbina goriva' : 'Narudžbina robe', s: esc(l.note || ''), v: `-${money(l.amount)}`, vc: 'neg' }),
+    delivery: l => ({ ic: 'fa-truck-ramp-box', cls: 'ref', t: /goriva/.test(l.note || '') ? 'Gorivo dovezeno' : 'Roba dovezena', s: `${esc(l.note || '')}${l.actor ? ' · ' + esc(l.actor) : ''}`, v: '', vc: '' }),
     wash: l => ({ ic: 'fa-spray-can-sparkles', cls: 'fee', t: `Pranje, ${esc(l.actor || 'vozač')}`, s: `${esc(l.note || '')} · cena ${money(l.amount)}`, v: `+${money(l.fee)}`, vc: 'pos' }),
+    fuel: l => ({ ic: 'fa-gas-pump', cls: 'fee', t: `Sipanje, ${esc(l.actor || 'vozač')}`, s: esc(l.note || ''), v: `+${money(l.fee)}`, vc: 'pos' }),
     sold: l => ({ ic: 'fa-handshake', cls: 'in', t: 'Prodato igraču', s: esc(l.actor || ''), v: money(l.amount), vc: '' })
   };
   function tierLabel(id) {
@@ -339,6 +344,8 @@
   // ---------- market: magacin i narudžbina robe ----------
   function renderStorage(b, d) {
     const prods = b.products || [];
+    const fuel = isFuel(b);
+    const unit = fuel ? 'L' : 'kom.';
     const have = prods.reduce((s, p) => s + p.stock, 0);
     const cap = prods.reduce((s, p) => s + p.max, 0) || 1;
     const pending = prods.reduce((s, p) => s + p.pending, 0);
@@ -346,22 +353,26 @@
     const empty = prods.filter(p => p.stock <= 0).length;
     const pct = Math.min(100, Math.round(have / cap * 100));
     const state = empty > 0 ? 'empty' : (low > 0 ? 'low' : 'ok');
-    const label = { empty: `Nema ${empty} ${empty === 1 ? 'artikla' : 'artikala'}`, low: 'Ponestaje robe', ok: 'Magacin je pun' }[state];
+    const label = fuel
+      ? { empty: 'Nema goriva', low: 'Malo goriva', ok: 'Rezervoar pun' }[state]
+      : { empty: `Nema ${empty} ${empty === 1 ? 'artikla' : 'artikala'}`, low: 'Ponestaje robe', ok: 'Magacin je pun' }[state];
+    const nf = n => Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     return `
       <div class="bz-section bz-atm ${state}">
         <div class="bz-section-head">
-          <div class="bz-section-title"><i class="fa-solid fa-boxes-stacked"></i> Magacin</div>
+          <div class="bz-section-title"><i class="fa-solid ${fuel ? 'fa-oil-can' : 'fa-boxes-stacked'}"></i> ${fuel ? 'Rezervoar stanice' : 'Magacin'}</div>
           <span class="bz-badge ${state}">${label}</span>
         </div>
         <div class="bz-atm-ring" style="--p:${pct}">
           <div class="bz-atm-ring-in"><b>${pct}%</b><span>pun</span></div>
         </div>
         <div class="bz-atm-nums">
-          <div><span>Na stanju</span><b>${have} kom.</b></div>
-          <div><span>U dolasku</span><b>${pending} kom.</b></div>
+          <div><span>${fuel ? 'U rezervoaru' : 'Na stanju'}</span><b>${nf(have)} ${unit}</b></div>
+          <div><span>U dolasku</span><b>${nf(pending)} ${unit}</b></div>
         </div>
-        <div class="bz-section-sub">Roba se naručuje ispod, za <b>${Math.round((d.orderRatio || 0.5) * 100)}%</b> prodajne cene, i plaća se iz kase.
-          ${d.supply ? 'Roba stiže transportom.' : 'Dok transport ne proradi, roba stiže odmah.'} Artikal koga nema ne može da se kupi.</div>
+        <div class="bz-section-sub">${fuel ? 'Gorivo' : 'Roba'} se naručuje ispod, za <b>${Math.round((d.orderRatio || 0.5) * 100)}%</b> prodajne cene, i plaća se iz kase.
+          ${d.supply ? `${fuel ? 'Gorivo stiže' : 'Roba stiže'} transportom.` : `Dok transport ne proradi, ${fuel ? 'gorivo stiže' : 'roba stiže'} odmah.`}
+          ${fuel ? 'Kad je rezervoar prazan, pumpa ne toči gorivo.' : 'Artikal koga nema ne može da se kupi.'}</div>
       </div>`;
   }
 
@@ -372,18 +383,18 @@
       const cls = p.stock <= 0 ? 'empty' : (p.low ? 'low' : '');
       return `
         <div class="bz-prod ${cls}">
-          <div class="bz-prod-img"><i class="fa-solid fa-box"></i><img src="${esc(itemImg(p.name))}" onerror="this.remove()"></div>
+          <div class="bz-prod-img">${p.unit === 'L' ? '<i class="fa-solid fa-gas-pump bz-fuel-ic"></i>' : `<i class="fa-solid fa-box"></i><img src="${esc(itemImg(p.name))}" onerror="this.remove()">`}</div>
           <div class="bz-prod-info">
             <b>${esc(p.label)}</b>
-            <span>Prodaja ${money(p.price)} · Nabavka <b>${money(p.orderPrice)}</b> / kom.</span>
+            <span>Prodaja ${money(p.price)} · Nabavka <b>${money(p.orderPrice)}</b> / ${p.unit === 'L' ? 'litar' : 'kom.'}</span>
             <div class="bz-prod-bar"><div style="width:${pct}%"></div></div>
-            <span class="bz-prod-stock">${p.stock} / ${p.max} kom.${p.pending > 0 ? ` · <i class="fa-solid fa-truck-fast"></i> u dolasku ${p.pending}` : ''}</span>
+            <span class="bz-prod-stock">${p.stock} / ${p.max} ${p.unit || 'kom.'}${p.pending > 0 ? ` · <i class="fa-solid fa-truck-fast"></i> u dolasku ${p.pending}` : ''}</span>
           </div>
           <div class="bz-prod-order">
-            <input class="bz-input bz-qty" data-bz-qty="${esc(p.name)}" data-unit="${p.orderPrice}" inputmode="numeric" placeholder="Kom." ${room <= 0 ? 'disabled' : ''}>
+            <input class="bz-input bz-qty" data-bz-qty="${esc(p.name)}" data-unit="${p.orderPrice}" inputmode="numeric" placeholder="${p.unit === 'L' ? 'Litara' : 'Kom.'}" ${room <= 0 ? 'disabled' : ''}>
             <button class="bz-btn primary" data-bz="order" data-item="${esc(p.name)}" ${room <= 0 ? 'disabled' : ''}><i class="fa-solid fa-cart-plus"></i> Naruči</button>
             <button class="bz-btn" data-bz="orderFill" data-item="${esc(p.name)}" ${room <= 0 ? 'disabled' : ''} title="Naruči do punog magacina">
-              ${room > 0 ? `Do punog: ${room} kom. · ${money(room * p.orderPrice)}` : 'Magacin pun'}
+              ${room > 0 ? `Do punog: ${room} ${p.unit || 'kom.'} · ${money(room * p.orderPrice)}` : (p.unit === 'L' ? 'Rezervoar pun' : 'Magacin pun')}
             </button>
             <span class="bz-prod-cost" data-bz-cost="${esc(p.name)}"></span>
           </div>
@@ -392,7 +403,7 @@
     return `
       <div class="bz-section">
         <div class="bz-section-head">
-          <div class="bz-section-title"><i class="fa-solid fa-truck-ramp-box"></i> Naruči robu</div>
+          <div class="bz-section-title"><i class="fa-solid fa-truck-ramp-box"></i> ${isFuel(b) ? 'Naruči gorivo' : 'Naruči robu'}</div>
           <span class="bz-section-sub">U kasi: <b>${money(b.balance)}</b></span>
         </div>
         ${rows || '<div class="bz-section-sub">Ovaj market nema artikala u configu.</div>'}
@@ -433,7 +444,7 @@
       ${renderLogs(b)}
       ${renderSellState(b)}`;
     }
-    if (isMarket(b)) {
+    if (hasStock(b)) {
       return `
       ${renderHero(b)}
       <div class="bz-grid">
@@ -506,7 +517,7 @@
     switch (btn.dataset.bz) {
       case 'gps':
         post('setWaypoint', { x: b.coords.x, y: b.coords.y });
-        toast(`Navigacija je postavljena do ${isMarket(b) ? 'marketa' : (isCarwash(b) ? 'perionice' : 'bankomata')}.`, 'info');
+        toast(`Navigacija je postavljena do ${isMarket(b) ? 'marketa' : (isCarwash(b) ? 'perionice' : (isFuel(b) ? 'pumpe' : 'bankomata'))}.`, 'info');
         break;
       case 'take':
       case 'put': {
@@ -554,7 +565,7 @@
 
   mainEl.addEventListener('input', e => {
     if (e.target.dataset && e.target.dataset.bzQty) {
-      const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+      const digits = e.target.value.replace(/\D/g, '').slice(0, 5);
       e.target.value = digits;
       const cost = mainEl.querySelector(`[data-bz-cost="${CSS.escape(e.target.dataset.bzQty)}"]`);
       const n = parseInt(digits, 10) || 0;

@@ -1,4 +1,4 @@
-# flamingo_biznisi: bankomati, supermarketi i perionice kao biznis
+# flamingo_biznisi: bankomati, supermarketi, perionice i pumpe kao biznis
 
 ## Kako radi
 
@@ -49,6 +49,20 @@
 5. Na tabletu: kasa, zarada danas/7 dana, zarada po paketu, grafik, istorija pranja i prodaja.
 6. Cena: `bizPrice = 600000` u lokaciji, inače `Config.Carwash.defaultPrice` (500.000$).
 
+## Benzinske pumpe (flamingo_pumpa)
+
+1. Svaka stanica iz `flamingo_pumpa/data/stations.lua` je **poseban biznis** sa rezervoarom od **5.000 L**
+   (`Config.Fuel.maxLiters`, na početku `Config.Fuel.startLiters`).
+2. **Zarada:** kad igrač sipa, litri izlaze iz rezervoara stanice, a **cela cena** (20$/L) ide u kasu vlasnika.
+3. **Prazan rezervoar:** pumpa ne toči gorivo dok vlasnik ne naruči novo. Igrač ne može sipati više nego što stanica ima.
+4. **Tablet → Naruči gorivo:** vlasnik plaća iz kase **10$/L** (`Config.Fuel.orderRatio = 0.5`). Upiše litre ili klikne „Do punog“.
+5. **Transport goriva:** ide kroz isti sistem kao roba za market (`Config.Supply.resource`, event `flamingo_biznisi:orderCreated`
+   sa `item = 'fuel'`, pa `DeliverOrder(orderId)`). Dok je `resource = nil`, gorivo stiže odmah.
+6. U meniju pumpe gore piše **VLASNIK**, na displeju piše **„Na pumpi X L“**, a dugme **Biznis** prikazuje cenu, rezervoar i računicu.
+7. Kanister i repair kit se plaćaju kao i ranije i ne idu vlasniku.
+8. Pumpa **bez vlasnika** (država) radi kao i ranije, bez ograničenja goriva.
+9. Cena pumpe: `Config.Fuel.defaultPrice` (800.000$).
+
 ## Instalacija
 
 1. Ubaci `flamingo_biznisi` u resources i zameni `flamingo_banke`, `flamingo_tablet` i `flamingo_radialmenu` ovim verzijama.
@@ -60,6 +74,7 @@
    ensure flamingo_biznisi
    ensure flamingo_supermarket
    ensure flamingo_perionica
+   ensure flamingo_pumpa
    ensure flamingo_radialmenu
    ```
 3. SQL se ne pokreće ručno. Tabele `flamingo_biznisi` i `flamingo_biznisi_log` se prave same pri prvom startu,

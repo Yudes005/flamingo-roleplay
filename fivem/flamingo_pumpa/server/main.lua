@@ -1,6 +1,98 @@
 local ox_inventory = exports.ox_inventory
 local ESX = exports['es_extended']:getSharedObject()
 local config = require 'config'
+local stations = lib.load('data.stations') or {}
+
+-------------------------------------------------
+-- flamingo_biznisi: svaka stanica je poseban biznis sa rezervoarom
+-- (Config.Fuel u flamingo_biznisi). Kad igrac sipa, litri izlaze iz
+-- rezervoara stanice, a cela cena ide u kasu vlasnika. Bez flamingo_biznisi
+-- pumpa radi kao i ranije.
+-------------------------------------------------
+
+local function biz(fn, ...)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then return nil end
+    local args = { ... }
+    local ok, a, b, c = pcall(function() return exports['flamingo_biznisi'][fn](nil, table.unpack(args)) end)
+    if not ok then
+        print(('[flamingo_pumpa] flamingo_biznisi:%s greska: %s'):format(fn, tostring(a)))
+        return nil
+    end
+    return a, b, c
+end
+
+-- Stanica na kojoj je igrac (centar stanice iz data/stations.lua)
+local STATION_RANGE = 40.0
+
+local function stationOf(playerId)
+    local ped = GetPlayerPed(playerId)
+    if not ped or ped == 0 then return nil end
+    local coords = GetEntityCoords(ped)
+    local best, bestDist
+    for center, pumps in pairs(stations) do
+        local d = #(coords - center)
+        for i = 1, #pumps do
+            d = math.min(d, #(coords - pumps[i]))
+        end
+        if d <= STATION_RANGE and (not bestDist or d < bestDist) then
+            best, bestDist = center, d
+        end
+    end
+    return best
+end
+
+local function registerBusiness()
+    if GetResourceState('flamingo_biznisi') ~= 'started' then return end
+    local list = {}
+    for center in pairs(stations) do
+        list[#list + 1] = { coords = center, label = 'Pumpa', pricePerLiter = config.pricePerLiter }
+    end
+    biz('RegisterFuelStations', list)
+end
+
+AddEventHandler('onResourceStart', function(res)
+    if res == GetCurrentResourceName() or res == 'flamingo_biznisi' then
+        SetTimeout(1000, registerBusiness)
+    end
+end)
+AddEventHandler('flamingo_biznisi:ready', registerBusiness)
+
+-- Vlasnik stanice + gorivo u rezervoaru (za meni)
+lib.callback.register('flamingo_pumpa:info', function(source)
+    local station = stationOf(source)
+    if not station then return nil end
+    return biz('GetFuelInfo', station, source)
+end)
+
+-- Pre placanja: da li stanica ima dovoljno goriva. Zapamti sipanje, pa kad
+-- ox_fuel naplati tacno tu cenu (payMoney ispod), litri se skidaju sa stanice.
+local pendingFuel = {}
+
+lib.callback.register('flamingo_pumpa:reserve', function(source, liters)
+    liters = math.floor(tonumber(liters) or 0)
+    if liters <= 0 then return false end
+
+    local station = stationOf(source)
+    if not station then return true end -- van stanice: ox_fuel sam odlucuje, biznis se ne dira
+
+    local ok, msg = biz('FuelCheck', station, liters)
+    if ok == false then
+        TriggerClientEvent('esx:showNotification', source, msg or 'Pumpa nema dovoljno goriva.', 'error')
+        return false
+    end
+
+    pendingFuel[source] = {
+        station = station,
+        liters = liters,
+        price = math.ceil(liters * config.pricePerLiter),
+        at = os.time(),
+    }
+    return true
+end)
+
+AddEventHandler('playerDropped', function()
+    pendingFuel[source] = nil
+end)
 
 -- Vraca da li igrac trenutno drzi kanister goriva u ruci i koliko je pun.
 -- (isto ogranicenje kao u ox_fuel-u: kanister mora biti opremljen kao oruzje
@@ -73,6 +165,13 @@ local function payMoney(playerId, price)
         end
 
         removeAccountMoney(xPlayer, fallback, price - primaryMoney)
+    end
+
+    -- sipanje na stanici koja je biznis: gorivo izlazi iz rezervoara, novac ide u kasu vlasnika
+    local p = pendingFuel[playerId]
+    if p and p.price == price and os.time() - p.at <= 120 then
+        pendingFuel[playerId] = nil
+        biz('FuelSale', p.station, p.liters, price, xPlayer.getName())
     end
 
     return true

@@ -126,6 +126,9 @@ local function openMenu()
 
     local canisterData = lib.callback.await('flamingo_pumpa:getCanisterData', false) or { hasCanister = false, ammo = 0 }
 
+    -- vlasnik stanice + gorivo u rezervoaru (flamingo_biznisi); bez njega meni radi kao ranije
+    local bizInfo = lib.callback.await('flamingo_pumpa:info', false)
+
     isMenuOpen = true
     exports['esx_keyprompt']:HideKeyPrompt()
     SetNuiFocus(true, true)
@@ -139,6 +142,7 @@ local function openMenu()
         money = getMoney(),
         repairKitConfig = config.repairKit,
         repairKitAvailable = config.repairKit.enabled and GetResourceState('flamingo_repair') == 'started',
+        biz = bizInfo,
     })
 end
 
@@ -190,11 +194,30 @@ RegisterNUICallback('refuel', function(data, cb)
         if not DoesEntityExist(vehicle) then return end
     end
 
+    -- stanica koja je biznis mora imati dovoljno goriva u rezervoaru
+    if not lib.callback.await('flamingo_pumpa:reserve', false, liters) then return end
+
     local currentFuel = GetVehicleFuelLevel(vehicle)
     local newFuel = math.min(100, currentFuel + (liters / config.tankLiters) * 100)
 
     TriggerServerEvent('ox_fuel:pay', price, newFuel, netId)
     notify(('Sipali ste %d litara goriva za $%s.'):format(liters, price), 'success')
+end)
+
+-- Biznis (TEST kupovina pumpe iz menija, kasnije aukcija) - ide na flamingo_biznisi
+RegisterNUICallback('bizBuy', function(data, cb)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then
+        notify('Biznisi trenutno nisu dostupni.', 'error')
+        return cb(false)
+    end
+    ESX.TriggerServerCallback('flamingo_biznisi:buy', function(res)
+        res = res or { ok = false, msg = 'Greška u komunikaciji sa serverom.' }
+        if res.msg then notify(res.msg, res.ok and 'success' or 'error') end
+        if not res.ok then return cb(false) end
+        lib.callback('flamingo_pumpa:info', false, function(info)
+            cb(info or false)
+        end)
+    end, type(data) == 'table' and data.id or nil)
 end)
 
 RegisterNUICallback('buyCanister', function(data, cb)

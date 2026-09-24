@@ -23,6 +23,9 @@
             </div>
 
             <div class="bar__right">
+                <!-- flamingo_biznisi: vlasnik pumpe + dugme Biznis -->
+                <div class="owner-tag hidden" id="ownerTag"></div>
+                <button class="biz-btn hidden" id="bizBtn" type="button"><i class="fa-solid fa-briefcase"></i> Biznis</button>
                 <div class="wallet">
                     <small>Stanje</small>
                     <strong id="money">$0</strong>
@@ -33,7 +36,10 @@
             </div>
         </header>
 
-        <div class="grid">
+        <!-- flamingo_biznisi: detalji pumpe kao biznisa -->
+        <section class="biz-panel hidden" id="bizPanel"></section>
+
+        <div class="grid" id="pumpView">
 
             <!-- ======================= GORIVO ======================= -->
             <section class="dispenser">
@@ -52,6 +58,7 @@
 
                     <div class="lcd__foot">
                         <span id="lcdPlate">Nema vozila</span>
+                        <span class="station-fuel hidden" id="stationFuel"></span>
                         <span id="lcdRate">$20 / litar</span>
                     </div>
 

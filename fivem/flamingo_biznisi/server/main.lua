@@ -49,6 +49,7 @@ local function bizName(b)
     if b.label and b.label ~= '' then return b.label end
     if b.type == 'market' then return ('%s #%d'):format(b.shopLabel or Config.Market.label, b.id) end
     if b.type == 'carwash' then return ('%s #%d'):format(b.shopLabel or Config.Carwash.label, b.id) end
+    if b.type == 'fuel' then return ('%s #%d'):format(b.shopLabel or Config.Fuel.label, b.id) end
     return ('%s #%d'):format(Config.ATM.label, b.id)
 end
 
@@ -67,7 +68,7 @@ end
 local function nearBiz(src, b, dist)
     local ped = GetPlayerPed(src)
     if ped == 0 then return false end
-    local max = dist or (b.type == 'carwash' and Config.Carwash.distance) or Config.ServerDistance
+    local max = dist or (b.type == 'carwash' and Config.Carwash.distance) or (b.type == 'fuel' and Config.Fuel.distance) or Config.ServerDistance
     return #(GetEntityCoords(ped) - b.coords) <= max
 end
 
@@ -344,8 +345,21 @@ local function marketItem(b, name)
     end
 end
 
-local function orderPrice(it)
-    return math.max(1, math.floor(it.price * Config.Market.orderRatio + 0.5))
+-- Magacin po tipu: market (komadi) ili pumpa (litri goriva)
+local function stockCfg(b)
+    if b and b.type == 'fuel' then
+        return { max = Config.Fuel.maxLiters, low = Config.Fuel.lowLiters, ratio = Config.Fuel.orderRatio, unit = 'L' }
+    end
+    return { max = Config.Market.maxStock, low = Config.Market.lowStock, ratio = Config.Market.orderRatio, unit = 'kom.' }
+end
+
+local function orderPrice(it, b)
+    return math.max(1, math.floor(it.price * stockCfg(b).ratio + 0.5))
+end
+
+local function stockNote(b, amount, it)
+    if b.type == 'fuel' then return ('%d L goriva'):format(amount) end
+    return ('%dx %s'):format(amount, it.label)
 end
 
 local function addStock(b, item, delta)
@@ -369,10 +383,11 @@ end
 local function marketProducts(b)
     local list = {}
     for _, it in ipairs(b.items or {}) do
+        local sc = stockCfg(b)
         list[#list + 1] = {
-            name = it.name, label = it.label, price = it.price, orderPrice = orderPrice(it),
+            name = it.name, label = it.label, price = it.price, orderPrice = orderPrice(it, b),
             stock = b.stock[it.name] or 0, pending = b.pending[it.name] or 0,
-            max = Config.Market.maxStock, low = (b.stock[it.name] or 0) < Config.Market.lowStock
+            max = sc.max, low = (b.stock[it.name] or 0) < sc.low, unit = sc.unit
         }
     end
     return list
@@ -506,7 +521,7 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:list', function(src, cb)
         local dayRows = MySQL.query.await(([[
             SELECT biz_id, DATEDIFF(CURDATE(), DATE(created_at)) AS ago, COALESCE(SUM(fee), 0) AS f, COUNT(*) AS c
             FROM flamingo_biznisi_log
-            WHERE biz_id IN (%s) AND type IN ('withdraw', 'sale', 'wash') AND created_at >= CURDATE() - INTERVAL 6 DAY
+            WHERE biz_id IN (%s) AND type IN ('withdraw', 'sale', 'wash', 'fuel') AND created_at >= CURDATE() - INTERVAL 6 DAY
             GROUP BY biz_id, ago
         ]]):format(ph), ids) or {}
         for _, r in ipairs(dayRows) do
@@ -561,7 +576,7 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:list', function(src, cb)
             chart    = chart,
             tiers    = tiers[b.id] or {},
             logs     = logs,
-            products = b.type == 'market' and marketProducts(b) or nil,
+            products = (b.type == 'market' or b.type == 'fuel') and marketProducts(b) or nil,
             packages = b.type == 'carwash' and carwashPackages(b) or nil,
             share    = b.type == 'carwash' and Config.Carwash.share or nil
         }
@@ -643,18 +658,23 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:action', function(src, cb, p
         return cb({ ok = true, message = label and ('Biznis se sada zove "%s".'):format(label) or 'Vraćen je podrazumevani naziv.' })
 
     elseif action == 'order' or action == 'orderFill' then
-        if b.type ~= 'market' then return fail('Ovaj biznis nema robu.') end
+        if b.type ~= 'market' and b.type ~= 'fuel' then return fail('Ovaj biznis nema robu.') end
         local it = marketItem(b, payload.item)
         if not it then return fail('Nepoznat artikal.') end
 
-        local room = Config.Market.maxStock - (b.stock[it.name] or 0) - (b.pending[it.name] or 0)
+        local sc = stockCfg(b)
+        local room = sc.max - (b.stock[it.name] or 0) - (b.pending[it.name] or 0)
         local amount = action == 'orderFill' and room or toAmount(payload.amount)
         if not amount or amount < 1 then
-            return fail(room <= 0 and 'Magacin za ovaj artikal je pun.' or 'Unesi koliko komada naručuješ.')
+            if room <= 0 then return fail(b.type == 'fuel' and 'Rezervoar pumpe je pun.' or 'Magacin za ovaj artikal je pun.') end
+            return fail(b.type == 'fuel' and 'Unesi koliko litara naručuješ.' or 'Unesi koliko komada naručuješ.')
         end
-        if amount > room then return fail(('Može još najviše %d kom. (magacin %d).'):format(math.max(0, room), Config.Market.maxStock)) end
+        if amount > room then
+            return fail(('Može još najviše %d %s (%s %d %s).'):format(math.max(0, room), sc.unit,
+                b.type == 'fuel' and 'rezervoar' or 'magacin', sc.max, sc.unit))
+        end
 
-        local unit = orderPrice(it)
+        local unit = orderPrice(it, b)
         local cost = unit * amount
         if cost > b.balance then
             return fail(('Narudžbina košta %s, a u kasi ima %s. Uloži novac u kasu.'):format(fmt(cost), fmt(b.balance)))
@@ -662,7 +682,7 @@ ESX.RegisterServerCallback('flamingo_biznisi:tablet:action', function(src, cb, p
 
         b.balance = b.balance - cost
         addMoney(b, { balance = -cost })
-        local note = ('%dx %s'):format(amount, it.label)
+        local note = stockNote(b, amount, it)
         logTx(b.id, 'order', cost, 0, nil, name, note)
 
         local supply = Config.Supply.resource
@@ -1063,6 +1083,7 @@ local marketQueue = {}
 local KINDS = {
     market  = { prefix = 'm_', price = function() return Config.Market.defaultPrice end },
     carwash = { prefix = 'c_', price = function() return Config.Carwash.defaultPrice end },
+    fuel    = { prefix = 'f_', price = function() return Config.Fuel.defaultPrice end },
 }
 
 local function typedKey(kind, coords)
@@ -1116,6 +1137,14 @@ local function registerTyped(kind, list)
                                 { b.id, it.name, Config.Market.startStock })
                         end
                     end
+                end
+            elseif kind == 'fuel' then
+                -- pumpa: jedan "artikal" = gorivo u litrima, rezervoar Config.Fuel.maxLiters
+                b.items = { { name = 'fuel', label = 'Gorivo', price = toAmount(m.pricePerLiter) or 20 } }
+                if b.stock.fuel == nil then
+                    b.stock.fuel = Config.Fuel.startLiters
+                    MySQL.insert.await('INSERT IGNORE INTO flamingo_biznisi_stock (biz_id, item, stock) VALUES (?, ?, ?)',
+                        { b.id, 'fuel', Config.Fuel.startLiters })
                 end
             else
                 -- perionica: paketi pranja (samo za prikaz zarade na tabletu)
@@ -1218,7 +1247,7 @@ exports('DeliverOrder', function(orderId, actor)
     b.pending[row.item] = math.max(0, (b.pending[row.item] or 0) - row.amount)
     addStock(b, row.item, row.amount)
     local item = marketItem(b, row.item)
-    logTx(b.id, 'delivery', row.amount, 0, nil, actor or 'Transport', ('%dx %s'):format(row.amount, item and item.label or row.item))
+    logTx(b.id, 'delivery', row.amount, 0, nil, actor or 'Transport', stockNote(b, row.amount, item or { label = row.item }))
     return true
 end)
 
@@ -1262,5 +1291,66 @@ exports('CarwashSale', function(coords, price, packageLabel, actor)
     b.earned  = b.earned + revenue
     addMoney(b, { balance = revenue, earned = revenue })
     logTx(b.id, 'wash', price, revenue, nil, actor, packageLabel)
+    return true, revenue
+end)
+
+
+-- ============================================================
+--  Benzinske pumpe (flamingo_pumpa)
+--  Svaka stanica ima rezervoar (Config.Fuel.maxLiters). Kad igrac sipa,
+--  litri izlaze iz rezervoara, a cela cena ide u kasu vlasnika.
+--  Vlasnik narucuje gorivo na tabletu za Config.Fuel.orderRatio cene po litru.
+--  Pumpa bez vlasnika (drzava) radi kao i ranije, bez ogranicenja.
+-- ============================================================
+
+-- exports['flamingo_biznisi']:RegisterFuelStations({ { coords = vector3, label = 'Pumpa', price = 800000, pricePerLiter = 20 } })
+exports('RegisterFuelStations', function(list)
+    return queueRegister('fuel', list)
+end)
+
+-- Podaci za meni pumpe: vlasnik, cena, gorivo u rezervoaru stanice
+exports('GetFuelInfo', function(coords, src)
+    local b = findTyped('fuel', coords)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not b or not xPlayer then return nil end
+    local info = publicInfo(b, xPlayer)
+    info.liters    = b.owner and (b.stock.fuel or 0) or nil   -- nil = drzavna pumpa, bez ogranicenja
+    info.maxLiters = Config.Fuel.maxLiters
+    info.orderRatio = Config.Fuel.orderRatio
+    return info
+end)
+
+-- Da li stanica ima dovoljno goriva. Vraca ok, poruka, koliko ima
+exports('FuelCheck', function(coords, liters)
+    local b = findTyped('fuel', coords)
+    if not b or not b.owner then return true end
+    local have = b.stock.fuel or 0
+    liters = math.floor(tonumber(liters) or 0)
+    if have <= 0 then return false, 'Pumpa je ostala bez goriva. Vlasnik mora da naruči gorivo.', 0 end
+    if liters > have then return false, ('Na pumpi je ostalo samo %d L goriva.'):format(have), have end
+    return true, nil, have
+end)
+
+-- Sipanje je placeno: litri izlaze iz rezervoara, cela cena ide u kasu
+exports('FuelSale', function(coords, liters, price, actor)
+    local b = findTyped('fuel', coords)
+    if not b or not b.owner then return false end
+    liters = math.floor(tonumber(liters) or 0)
+    price  = math.floor(tonumber(price) or 0)
+
+    local before = b.stock.fuel or 0
+    local left = addStock(b, 'fuel', -liters)
+    local revenue = math.floor(price * (100 - (Config.Fuel.stateCut or 0)) / 100)
+    b.balance = b.balance + revenue
+    b.earned  = b.earned + revenue
+    addMoney(b, { balance = revenue, earned = revenue })
+    logTx(b.id, 'fuel', price, revenue, nil, actor, ('%d L goriva'):format(liters))
+
+    if left < Config.Fuel.lowLiters and before >= Config.Fuel.lowLiters then
+        local xOwner = ESX.GetPlayerFromIdentifier(b.owner)
+        if xOwner then
+            notify(xOwner.source, ('%s: u rezervoaru je ostalo %d L. Naruči gorivo na tabletu.'):format(bizName(b), left), 'error')
+        end
+    end
     return true, revenue
 end)

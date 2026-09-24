@@ -105,7 +105,22 @@ Config.Carwash = {
     distance     = 14.0,     -- server provera za kupovinu iz menija (igrac je u vozilu na perionici)
 }
 
--- Dostava robe (transport) - TVOJA skripta
+-- ============================================================
+--  Benzinske pumpe (flamingo_pumpa)
+--  Svaka stanica iz flamingo_pumpa/data/stations.lua je poseban biznis.
+-- ============================================================
+Config.Fuel = {
+    label        = 'Pumpa',
+    defaultPrice = 800000,   -- cena pumpe ako u flamingo_pumpa nema bizPrice
+    maxLiters    = 5000,     -- rezervoar stanice
+    startLiters  = 5000,     -- sa koliko litara stanica krece
+    lowLiters    = 500,      -- ispod ovoga vlasnik dobija upozorenje
+    orderRatio   = 0.5,      -- gorivo se narucuje za ovaj deo cene po litru (20$ -> 10$)
+    stateCut     = 0,        -- % od sipanja koji ide drzavi (0 = cela cena ide u kasu)
+    distance     = 40.0,     -- server provera za kupovinu iz menija (stanica je velika)
+}
+
+-- Dostava robe i goriva (transport) - TVOJA skripta
 -- resource = nil  -> narucena roba stize odmah (za test)
 -- resource = 'ime_skripte' -> narudzbina ceka dostavu:
 --     AddEventHandler('flamingo_biznisi:orderCreated', function(src, orderId, bizId, item, amount) ... end)
