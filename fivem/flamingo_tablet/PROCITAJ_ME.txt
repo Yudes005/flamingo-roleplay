@@ -1,0 +1,19 @@
+FLAMINGO TABLET 1.0 (iPadOS redizajn)
+=====================================
+Logika aplikacija (script.js, kuce.js, market.js, mdt_*.js) i client.lua
+NISU menjani - menjan je samo izgled.
+
+NOVO
+----
+- Sistemski iPadOS sloj (na kraju style.css i script.js): iPad Pro ram, iPadOS status bar, zaključani ekran
+  (datum iznad velikog sata), početni ekran sa widgetima (analogni sat,
+  kalendar, "Hitna pomoć" statistika za doktore), ikonice u iOS stilu i
+  dock (Organizacija, Bolnica, Market, Nekretnine, promena pozadine).
+- 3 nove iPad pozadine (img/ipad1-3.svg) + stara (wallpaper.jpg);
+  menja se dugmetom sa slikom u dock-u.
+- Sve aplikacije u iOS tamnoj temi: nav bar sa plavim "nazad",
+  Organizacija / boss meni kao iPadOS "Podešavanja" (sidebar sa obojenim
+  ikonicama), iOS dugmad, polja, kvadratići za čekiranje, segmentirani
+  tabovi; MDT Policija/Vlada, Market i Nekretnine kao iPadOS split view.
+- Font Inter (lokalno, html/fonts).
+- Tablet se sam smanji na manjim rezolucijama.

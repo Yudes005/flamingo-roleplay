@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flamingo Banka</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <!-- Otvaranje racuna: paket kartice -> PIN -> potvrda -->
+        <div class="screen hidden" id="onboard"></div>
+
+        <!-- Bankomat: unos PIN-a -->
+        <div class="screen hidden" id="pinScreen"></div>
+
+        <div class="bank hidden" id="bank">
+            <aside class="side">
+                <div class="brand">
+                    <div class="logo" data-i="bank"></div>
+                    <div class="brand-t"><strong>Flamingo</strong><span id="brandSub">Banka</span></div>
+                </div>
+                <nav class="nav">
+                    <button class="nav-btn nav-bank" data-view="overview"><span data-i="grid"></span>Pregled</button>
+                    <button class="nav-btn nav-bank" data-view="history"><span data-i="list"></span>Istorija</button>
+                    <button class="nav-btn nav-bank" data-view="actions"><span data-i="swap"></span>Uplata i transfer</button>
+                    <button class="nav-btn nav-bank" data-view="card"><span data-i="card"></span>Moja kartica<i class="nav-dot hidden" id="cardDot"></i></button>
+                    <button class="nav-btn nav-bank" id="navFines" data-view="fines"><span data-i="fine"></span>Kazne</button>
+                    <button class="nav-btn nav-atm" data-atm-mode="withdraw"><span data-i="withdraw"></span>Podizanje novca</button>
+                    <button class="nav-btn nav-atm" data-atm-mode="deposit"><span data-i="deposit"></span>Uplata novca</button>
+                </nav>
+                <div class="side-card" id="sideCard"></div>
+                <div class="me">
+                    <div class="avatar" id="avatar">--</div>
+                    <div class="me-t"><strong id="meName">-</strong><span id="meSub">Vlasnik računa</span></div>
+                </div>
+            </aside>
+
+            <main class="main">
+                <header class="top">
+                    <div class="acct">
+                        <div class="acct-ic" data-i="user"></div>
+                        <div class="acct-t">
+                            <strong>Lični račun</strong>
+                            <span id="acctPlace">Banka</span>
+                        </div>
+                    </div>
+
+                    <div class="bal">
+                        <span class="label"><i class="dot"></i>Stanje na računu</span>
+                        <div class="bal-value"><span id="balBank">0$</span></div>
+                    </div>
+
+                    <div class="bal cash">
+                        <span class="label">Gotovina kod sebe</span>
+                        <div class="cash-value" id="balCash">0$</div>
+                    </div>
+
+                    <div class="top-actions">
+                        <button class="btn primary" id="btnTransfer"><span data-i="swap"></span>Transfer</button>
+                        <button class="btn" id="btnHistory"><span data-i="activity"></span>Istorija</button>
+                        <button class="btn icon-only" id="btnClose" title="Zatvori (ESC)"><span data-i="x"></span></button>
+                    </div>
+                </header>
+
+                <section class="view" id="view"></section>
+            </main>
+        </div>
+
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
