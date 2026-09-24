@@ -1,0 +1,359 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: transparent;
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Sakrij ceo chat kad je otvoren ESC meni, market, telefon ili bilo koji drugi NUI */
+body.hud-hidden > div {
+    display: none !important;
+}
+
+/* Rucno gasenje chat-a iz Podesavanja */
+body.chat-manual-hidden #chat-wrapper {
+    display: none !important;
+}
+
+:root {
+    --card-bg: rgba(17, 17, 19, 0.88);
+    --card-border: rgba(255, 255, 255, 0.06);
+    --primary: rgba(255, 255, 255, 0.85);
+    --primary-bg: rgba(255, 255, 255, 0.1);
+    --yellow: #e8c94a;
+    --yellow-bg: #453d22;
+    --green: #3ddc97;
+    --red: #f2545b;
+    --purple: #d9b8ff;
+    --cyan: #4db8ff;
+}
+
+/* ================= CHAT ================= */
+
+#chat-wrapper {
+    position: absolute;
+    top: 100px;
+    left: 16px;
+    width: 420px;
+}
+
+#chat-messages {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 4px;
+    height: 190px;
+    overflow: hidden;
+}
+
+.chat-msg {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #ffffff;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
+    background: transparent;
+    border-left: 3px solid transparent;
+    padding: 1px 2px;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.6s ease;
+    animation: chat-msg-in 0.2s ease;
+}
+
+@keyframes chat-msg-in {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.chat-author {
+    font-weight: 700;
+}
+
+.chat-nonrp-tag {
+    color: var(--yellow);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-right: 4px;
+}
+
+.chat-rp-tag {
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-right: 4px;
+}
+
+.chat-tag {
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-right: 4px;
+}
+
+.chat-tag-me {
+    color: var(--purple);
+}
+
+.chat-tag-do,
+.chat-tag-todo {
+    color: #9aa0a8;
+}
+
+.chat-tag-try {
+    color: var(--cyan);
+}
+
+.chat-staff-tag {
+    color: var(--yellow);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-right: 4px;
+}
+
+.chat-text {
+    color: #e6e6e8;
+}
+
+.chat-me {
+    color: var(--purple);
+    font-style: italic;
+}
+
+.chat-ooc {
+    color: #9aa0a8;
+    font-style: italic;
+}
+
+.chat-try {
+    color: #ffffff;
+}
+
+.chat-try-success {
+    color: var(--green);
+    font-weight: 700;
+}
+
+.chat-try-fail {
+    color: var(--red);
+    font-weight: 700;
+}
+
+.chat-system {
+    background: transparent;
+    padding: 2px 4px;
+    font-weight: 600;
+}
+
+/* ---------- Reklama - ista kartica kao notify sistem ---------- */
+.chat-ad {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+    width: fit-content;
+    max-width: 86%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 9px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    padding: 9px 12px;
+    margin: 4px 0;
+    text-shadow: none;
+}
+
+.chat-ad-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chat-ad-head i {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.chat-ad-subtitle {
+    color: #f0f0f2;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.chat-ad-meta {
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.chat-ad-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.chat-ad-meta-item i {
+    width: 9px;
+    font-size: 9px;
+    text-align: center;
+}
+
+.chat-ad-meta-item:first-child {
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 600;
+}
+
+.chat-ad-meta-sep {
+    opacity: 0.35;
+}
+
+/* ================= KONTROLE (tabovi + input + komande) ================= */
+/* Pune tamne kartice, bez glass/blur - isti jezik kao notify sistem */
+
+#chat-controls {
+    margin-top: 10px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity 0.15s ease;
+}
+
+#chat-controls.hidden {
+    display: none;
+}
+
+#chat-tabs {
+    display: flex;
+    gap: 6px;
+}
+
+.chat-tab {
+    padding: 6px 16px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.chat-tab:hover {
+    color: #ffffff;
+}
+
+.chat-tab.active {
+    background: var(--card-bg);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.chat-tab-staff {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.chat-tab-staff.active {
+    background: var(--card-bg);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+#chat-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 10px 13px;
+    color: #ffffff;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    outline: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    transition: border-color 0.15s ease;
+}
+
+#chat-input:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+#chat-input.channel-nonrp {
+    border-color: var(--card-border);
+}
+
+#chat-input.channel-nonrp:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+#chat-input.channel-staff {
+    border-color: var(--card-border);
+}
+
+#chat-input.channel-staff:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+#chat-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+#chat-quick-cmds {
+    display: flex;
+    gap: 6px;
+}
+
+.chat-cmd-btn {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 7px 0;
+    color: rgba(255, 255, 255, 0.55);
+    font-family: 'Manrope', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.chat-cmd-btn i {
+    font-size: 10px;
+}
+
+.chat-cmd-btn:hover {
+    background: var(--card-bg);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+}

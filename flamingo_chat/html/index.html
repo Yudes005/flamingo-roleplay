@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="chat-wrapper">
+    <div id="chat-messages"></div>
+
+    <div id="chat-controls" class="hidden">
+        <div id="chat-tabs">
+            <div class="chat-tab active" data-channel="rp">RP</div>
+            <div class="chat-tab" data-channel="nonrp">NON-RP</div>
+            <div class="chat-tab chat-tab-staff" data-channel="staff" id="chat-tab-staff" style="display:none;">STAFF</div>
+        </div>
+
+        <input id="chat-input" type="text" placeholder="Message..." maxlength="150" autocomplete="off">
+
+        <div id="chat-quick-cmds">
+            <button class="chat-cmd-btn" data-cmd="/me "><i class="fa-solid fa-person-walking"></i> ME</button>
+            <button class="chat-cmd-btn" data-cmd="/do "><i class="fa-solid fa-quote-right"></i> DO</button>
+            <button class="chat-cmd-btn" data-cmd="/try "><i class="fa-solid fa-dice"></i> TRY</button>
+            <button class="chat-cmd-btn" data-cmd="/todo "><i class="fa-solid fa-list-check"></i> TODO</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
