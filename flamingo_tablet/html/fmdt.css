@@ -5,15 +5,15 @@
 .app-icon-glyph.pdmdt { background: linear-gradient(155deg, #1f4fd1, #4f86ff); }
 .app-icon-glyph.mdt { background: linear-gradient(155deg, #b8860b, #f2c14e); }
 
-.fm-app.app-screen { background: #08090d; backdrop-filter: none; padding-top: 30px; }
+.fm-app.app-screen { background: #000; backdrop-filter: none; padding-top: 30px; }
 .fm {
-  --acc: #4f86ff; --acc2: #86abff; --accbg: rgba(79, 134, 255, .14); --accln: rgba(79, 134, 255, .38); --accgrad: linear-gradient(145deg, #2c5ce0, #4f86ff);
-  --bg: #0b0c11; --side: #0e0f15; --card: #14161d; --card2: #1a1c25; --line: rgba(255,255,255,.065); --line2: rgba(255,255,255,.11);
-  --text: #eef0f6; --dim: #8b90a3; --faint: #5a5f70; --red: #ff5a73; --redbg: rgba(255,90,115,.13); --warn: #ffb547; --warnbg: rgba(255,181,71,.13);
-  --ok: #3dd6a0; --okbg: rgba(61,214,160,.13); --gold: #ffcc4d;
-  position: relative; flex: 1; min-height: 0; display: flex; color: var(--text); font-family: 'Segoe UI', Roboto, Arial, sans-serif; overflow: hidden;
+  --acc: #0a84ff; --acc2: #64aaff; --accbg: rgba(10, 132, 255, .16); --accln: rgba(10, 132, 255, .45); --accgrad: linear-gradient(180deg, #3d9bff, #0a6fe0);
+  --bg: #000000; --side: #1c1c1e; --card: #1c1c1e; --card2: #2c2c2e; --line: rgba(84,84,88,.45); --line2: rgba(84,84,88,.7);
+  --text: #ffffff; --dim: #98989f; --faint: #6e6e73; --red: #ff453a; --redbg: rgba(255,69,58,.16); --warn: #ff9f0a; --warnbg: rgba(255,159,10,.16);
+  --ok: #30d158; --okbg: rgba(48,209,88,.16); --gold: #ffd60a;
+  position: relative; flex: 1; min-height: 0; display: flex; color: var(--text); font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif; overflow: hidden;
 }
-.fm.gov { --acc: #f2b43c; --acc2: #ffd27a; --accbg: rgba(242, 180, 60, .13); --accln: rgba(242, 180, 60, .4); --accgrad: linear-gradient(145deg, #c98a12, #f2b43c); }
+.fm.gov { --acc: #ff9f0a; --acc2: #ffc266; --accbg: rgba(255, 159, 10, .16); --accln: rgba(255, 159, 10, .45); --accgrad: linear-gradient(180deg, #ffb340, #e08600); }
 .fm *::-webkit-scrollbar { width: 0; height: 0; }
 .fm button { font-family: inherit; cursor: pointer; border: none; color: inherit; background: none; }
 .fm input, .fm textarea, .fm select { font-family: inherit; color: var(--text); outline: none; }

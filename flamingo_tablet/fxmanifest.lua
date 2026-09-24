@@ -4,7 +4,7 @@ lua54 'yes'
 
 author 'ESX Phone Design'
 description 'Flamingo Tablet - Bolnica, Lifeinvader i Organizacija (lider/clan, Zahtevi za Vladu), MDT Vlada + MDT Policija aplikacije + frame/pozadina'
-version '0.7.0'
+version '1.0.0'
 
 dependencies {
     'es_extended',
@@ -28,6 +28,10 @@ files {
     'html/market.js',
     'html/market.css',
     'html/fmdt.css',
+    'html/ios.css',
+    'html/ios.js',
+    'html/fonts/*.woff2',
+    'html/img/*.svg',
     'html/mdt_core.js',
     'html/mdt_vlada.js',
     'html/mdt_policija.js',

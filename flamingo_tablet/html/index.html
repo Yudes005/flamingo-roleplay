@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="kuce.css">
 <link rel="stylesheet" href="market.css">
 <link rel="stylesheet" href="fmdt.css">
+<link rel="stylesheet" href="ios.css">
 </head>
 <body>
 
@@ -35,15 +36,15 @@
 
         <!-- ============ STATUSNA TRAKA (uvek vidljiva, kao pravi tablet) ============ -->
         <div id="tablet-statusbar">
-          <span></span>
-          <div class="statusbar-right">
-            <span id="statusbar-date">--</span>
-            <span class="statusbar-dot"></span>
+          <div class="statusbar-left">
             <span id="statusbar-clock">--:--</span>
-            <span class="statusbar-icons">
-              <i class="fa-solid fa-wifi"></i>
-              <i class="fa-solid fa-battery-three-quarters"></i>
-            </span>
+            <span id="statusbar-date">--</span>
+          </div>
+          <div class="statusbar-right">
+            <span class="sb-signal"><i></i><i></i><i></i><i></i></span>
+            <i class="fa-solid fa-wifi"></i>
+            <span class="sb-pct">87%</span>
+            <span class="sb-battery"><i></i></span>
           </div>
         </div>
 
@@ -53,26 +54,48 @@
         <!-- ============ LOCK SCREEN (prikazuje se svaki put kad se tablet otvori) ============ -->
         <div id="lock-screen">
           <div class="lock-center">
-            <div class="lock-clock" id="lock-clock">--:--</div>
+            <i class="fa-solid fa-lock lock-ic"></i>
             <div class="lock-date" id="lock-date">--</div>
+            <div class="lock-clock" id="lock-clock">--:--</div>
           </div>
 
           <div class="lock-bottom-hint">
-            <div class="lock-swipe-arrow"><i class="fa-solid fa-chevron-up"></i></div>
-            <div class="lock-hint">
-              <i class="fa-solid fa-lock"></i>
-              <span>Dodirnite ekran za otključavanje</span>
-            </div>
-          </div>
-
-          <div class="lock-bottom-dots">
-            <span class="lock-dot active"></span>
-            <span class="lock-dot"></span>
+            <div class="lock-hint">Pritisni ekran da otključaš</div>
           </div>
         </div>
 
         <!-- ============ HOME EKRAN ============ -->
         <div id="home-screen">
+          <div class="home-widgets">
+            <div class="widget w-clock">
+              <div class="wcl-face" id="ios-clock-face"></div>
+              <div class="wcl-info"><b id="ios-w-city">Los Santos</b><span id="ios-w-time">--:--</span></div>
+            </div>
+            <div class="widget w-cal">
+              <div class="wca-left"><span id="ios-w-day">SREDA</span><b id="ios-w-num">1</b><em id="ios-w-month">januar</em></div>
+              <div class="wca-grid" id="ios-w-grid"></div>
+            </div>
+            <div class="widget w-org hidden" id="ios-w-org">
+              <div class="wo-head"><span class="wo-ic"><i class="fa-solid fa-truck-medical"></i></span><b>Hitna pomoć</b></div>
+              <div id="home-quickstats" class="home-quickstats hidden">
+                <div class="quickstat-card">
+                  <span class="quickstat-icon calls"><i class="fa-solid fa-phone-volume"></i></span>
+                  <div class="quickstat-text">
+                    <span class="quickstat-value" id="quickstat-calls">0</span>
+                    <span class="quickstat-label">Aktivnih poziva</span>
+                  </div>
+                </div>
+                <div class="quickstat-card">
+                  <span class="quickstat-icon medkit"><i class="fa-solid fa-suitcase-medical"></i></span>
+                  <div class="quickstat-text">
+                    <span class="quickstat-value" id="quickstat-medkits">–</span>
+                    <span class="quickstat-label">MedKit u zalihi</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div id="app-grid">
             <div class="app-icon hidden" id="app-bolnica">
               <div class="app-icon-glyph bolnica"><i class="fa-solid fa-truck-medical"></i></div>
@@ -89,7 +112,7 @@
                  Prikazuje se svima (skida se "hidden" u script.js kad server potvrdi
                  da je igrac zaposlen preko flamingo_ds:server:getMyPermissions). -->
             <div class="app-icon hidden" id="app-lifeinvader">
-              <div class="app-icon-glyph bolnica" style="background:linear-gradient(135deg,#ff3d81,#ff70a6);"><i class="fa-solid fa-bullhorn"></i></div>
+              <div class="app-icon-glyph lifeinvader"><i class="fa-solid fa-bullhorn"></i></div>
               <span class="app-icon-label">Lifeinvader</span>
               <span class="app-badge hidden" id="lifeinvader-badge">0</span>
             </div>
@@ -119,25 +142,13 @@
             </div>
           </div>
 
-          <div id="home-quickstats" class="home-quickstats hidden">
-            <div class="quickstat-card">
-              <span class="quickstat-icon calls"><i class="fa-solid fa-phone-volume"></i></span>
-              <div class="quickstat-text">
-                <span class="quickstat-value" id="quickstat-calls">0</span>
-                <span class="quickstat-label">Aktivnih poziva</span>
-              </div>
-            </div>
-            <div class="quickstat-card">
-              <span class="quickstat-icon medkit"><i class="fa-solid fa-suitcase-medical"></i></span>
-              <div class="quickstat-text">
-                <span class="quickstat-value" id="quickstat-medkits">–</span>
-                <span class="quickstat-label">MedKit u zalihi</span>
-              </div>
-            </div>
-          </div>
           <div id="home-dock" class="home-dock hidden">
             <button class="dock-icon dock-organizacija hidden" id="dock-organizacija" title="Organizacija"><i class="fa-solid fa-hospital" id="dock-organizacija-icon"></i></button>
             <button class="dock-icon dock-bolnica hidden" id="dock-bolnica" title="Bolnica"><i class="fa-solid fa-truck-medical"></i></button>
+            <button class="dock-icon dock-market" data-ios-open="app-market" title="Market"><i class="fa-solid fa-store"></i></button>
+            <button class="dock-icon dock-kuce" data-ios-open="app-kuce" title="Nekretnine"><i class="fa-solid fa-house-chimney"></i></button>
+            <span class="dock-sep"></span>
+            <button class="dock-icon dock-settings" id="ios-dock-wall" title="Pozadina"><i class="fa-solid fa-image"></i></button>
           </div>
         </div>
 
@@ -327,5 +338,6 @@
 <script src="mdt_core.js"></script>
 <script src="mdt_vlada.js"></script>
 <script src="mdt_policija.js"></script>
+<script src="ios.js"></script>
 </body>
 </html>
