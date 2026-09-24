@@ -271,3 +271,64 @@
 #tablet .fm.gov .fm-nav-btn.active { background: rgba(227, 179, 106, .14) !important; border-color: rgba(227, 179, 106, .4) !important; }
 #tablet .fm.gov .fm-nav-btn.active::before { background: #e3b36a; }
 #tablet .fm-exit { color: var(--fl-bad); }
+
+
+/* =====================================================================
+   PROVIDNO STAKLO - kao M meni: iza tableta se vidi zamucena igra,
+   preko nje taman sloj. Blur je SAMO na celom ramu (veliki element),
+   ne na karticama - tako ga FiveM (CEF) ne crta kao crni kvadrat.
+   ===================================================================== */
+#tablet-frame {
+  padding: 0;
+  border: 16px solid rgba(8, 8, 10, .92);
+  background: transparent;
+  background-clip: padding-box;
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+}
+#tablet.fl-glass {
+  background:
+    radial-gradient(900px 560px at 8% -12%, rgba(201, 168, 106, .16), transparent 60%),
+    radial-gradient(700px 500px at 110% 110%, rgba(255, 255, 255, .04), transparent 60%),
+    linear-gradient(180deg, rgba(9, 9, 11, .66) 0%, rgba(9, 9, 11, .84) 100%) !important;
+}
+.front-camera { top: -11px; }
+
+/* Aplikacije vise nisu pune crne - leze na providnom staklu tableta */
+#tablet .app-screen {
+  background:
+    radial-gradient(900px 520px at 0% -12%, rgba(201, 168, 106, .10), transparent 60%),
+    linear-gradient(180deg, rgba(9, 9, 11, .28) 0%, rgba(9, 9, 11, .42) 100%) !important;
+}
+/* Kad je izabrana slika umesto stakla, aplikacije dobijaju taman sloj preko slike */
+#tablet:not(.fl-glass) .app-screen {
+  background:
+    radial-gradient(900px 520px at 0% -12%, rgba(201, 168, 106, .10), transparent 60%),
+    linear-gradient(180deg, rgba(9, 9, 11, .8) 0%, rgba(9, 9, 11, .9) 100%) !important;
+}
+#tablet .app-topbar { background: transparent; border-bottom: 1px solid var(--fl-line); }
+#tablet .fm-head { background: transparent; }
+
+/* Bocni meniji kao leva traka M menija */
+#tablet .fl-settings-sidenav, #tablet .mk-side, #tablet .kc-side, #tablet .fm-side, #tablet .bz-side {
+  background: linear-gradient(180deg, rgba(14, 14, 17, .62), rgba(12, 12, 15, .74)) !important;
+}
+#tablet .bz-shell, #tablet .kc-shell, #tablet .mk-shell { background: transparent; }
+#tablet .bz-shell::before, #tablet .kc-shell::before, #tablet .mk-shell::before { display: none; }
+
+/* Kartice: poluprovidne kao u M meniju (--panel), bez blur-a */
+#tablet .fl-settings-main, #tablet .fm-me, #tablet .kc-cap,
+#tablet .kc-section, #tablet .kc-stat, #tablet .kc-hero,
+#tablet .bz-section, #tablet .bz-stat, #tablet .bz-sum, #tablet .bz-hero,
+#tablet .duty-status-bar, #tablet .call-item {
+  background: rgba(21, 21, 25, .72);
+}
+#tablet .bz-hero, #tablet .kc-hero {
+  background:
+    radial-gradient(420px 220px at 0% 0%, rgba(201, 168, 106, .16), transparent 70%),
+    rgba(21, 21, 25, .76);
+}
+#tablet .kc-item, #tablet .bz-item { background: rgba(21, 21, 25, .5); }
+
+.home-dock, #home-dock.home-dock.hidden { background: rgba(16, 16, 19, .7); }
+.widget, .w-cal { background: rgba(20, 20, 24, .66); }

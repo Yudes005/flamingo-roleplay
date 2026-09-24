@@ -2741,15 +2741,20 @@ window.addEventListener('message', (event) => {
   window.addEventListener('resize', fit); fit();
 
   /* ---------- pozadina ---------- */
-  // Prva pozadina je Flamingo (isti stil kao M meni) - podrazumevana za sve
-  const WALLS = ['img/flamingo_bg.jpg', 'img/ipad1.svg', 'img/ipad2.svg', 'img/ipad3.svg', 'img/wallpaper.jpg'];
+  // Prva "pozadina" je providno staklo kao M meni (vidi se igra iza tableta) - podrazumevana za sve.
+  // Ostale su slike (dugme sa slikom u dock-u ih menja).
+  const WALLS = ['staklo', 'img/flamingo_bg.jpg', 'img/ipad1.svg', 'img/ipad2.svg', 'img/ipad3.svg', 'img/wallpaper.jpg'];
   let wall = 0;
-  try { wall = Math.max(0, WALLS.indexOf(localStorage.getItem('fl_tab_wall2'))); } catch (e) {}
-  function applyWall() { $('tablet').style.backgroundImage = `url('${WALLS[wall]}'), url('img/wallpaper.jpg')`; }
+  try { wall = Math.max(0, WALLS.indexOf(localStorage.getItem('fl_tab_wall3'))); } catch (e) {}
+  function applyWall() {
+    const glass = WALLS[wall] === 'staklo';
+    $('tablet').classList.toggle('fl-glass', glass);
+    $('tablet').style.backgroundImage = glass ? '' : `url('${WALLS[wall]}'), url('img/wallpaper.jpg')`;
+  }
   applyWall();
   $('ios-dock-wall').addEventListener('click', () => {
     wall = (wall + 1) % WALLS.length;
-    try { localStorage.setItem('fl_tab_wall2', WALLS[wall]); } catch (e) {}
+    try { localStorage.setItem('fl_tab_wall3', WALLS[wall]); } catch (e) {}
     applyWall();
   });
 
