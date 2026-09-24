@@ -280,15 +280,9 @@ local function setOwner(b, identifier, name, reason)
 end
 
 -- ============================================================
---  Meni kod markera (info + kupovina)
+--  Meni bankomata (flamingo_banke): kategorija "Biznis" + kupovina
 -- ============================================================
 local function publicInfo(b, xPlayer)
-    local stats = MySQL.single.await([[
-        SELECT COUNT(*) AS c, COALESCE(SUM(fee), 0) AS f, COALESCE(SUM(amount), 0) AS a
-        FROM flamingo_biznisi_log
-        WHERE biz_id = ? AND type = 'withdraw' AND created_at >= NOW() - INTERVAL 7 DAY
-    ]], { b.id }) or {}
-
     local mine = b.owner ~= nil and b.owner == xPlayer.identifier
     return {
         id        = b.id,
@@ -298,10 +292,6 @@ local function publicInfo(b, xPlayer)
         owned     = b.owner ~= nil,
         mine      = mine,
         ownerName = b.ownerName,
-        atmCash   = b.atmCash,
-        atmMax    = Config.ATM.maxCash,
-        lowCash   = b.atmCash < Config.ATM.lowCash,
-        week      = { count = tonumber(stats.c) or 0, fees = tonumber(stats.f) or 0, volume = tonumber(stats.a) or 0 },
         cards     = cardTiers(),
         stateCut  = Config.StateCut,
         canBuy    = Config.AllowDirectBuy and b.owner == nil,
@@ -314,15 +304,12 @@ local function publicInfo(b, xPlayer)
     }
 end
 
-ESX.RegisterServerCallback('flamingo_biznisi:info', function(src, cb, id)
+-- flamingo_banke: podaci za kategoriju "Biznis" i "Vlasnik" u meniju bankomata
+exports('GetAtmInfo', function(id, src)
     local xPlayer = ESX.GetPlayerFromId(src)
     local b = BIZ[tonumber(id) or -1]
-    if not xPlayer or not b or b.disabled then return cb({ ok = false, msg = 'Biznis nije pronađen.' }) end
-    if not nearBiz(src, b) then return cb({ ok = false, msg = 'Previše si daleko od biznisa.' }) end
-
-    local info = publicInfo(b, xPlayer)
-    info.ok = true
-    cb(info)
+    if not xPlayer or not b or b.disabled then return nil end
+    return publicInfo(b, xPlayer)
 end)
 
 ESX.RegisterServerCallback('flamingo_biznisi:buy', function(src, cb, id)
@@ -338,7 +325,7 @@ ESX.RegisterServerCallback('flamingo_biznisi:buy', function(src, cb, id)
     if b.owner then return fail('Ovaj biznis već ima vlasnika.') end
 
     if Config.MaxPerPlayer > 0 and ownedCount(xPlayer.identifier) >= Config.MaxPerPlayer then
-        return fail(('Možeš imati najviše %d biznisa.'):format(Config.MaxPerPlayer))
+        return fail(Config.MaxPerPlayer == 1 and 'Već imaš biznis. Možeš imati samo jedan.' or ('Možeš imati najviše %d biznisa.'):format(Config.MaxPerPlayer))
     end
 
     local price = b.price

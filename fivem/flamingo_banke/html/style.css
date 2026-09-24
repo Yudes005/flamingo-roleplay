@@ -853,3 +853,59 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
     .act-right { position: static; }
     .modes { grid-template-columns: 1fr !important; }
 }
+
+/* ============================================================
+   Bankomat koji je biznis (flamingo_biznisi): Vlasnik + kategorija "Biznis"
+   ============================================================ */
+.owner-tag {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 10px;
+    height: 40px; padding: 0 14px 0 6px;
+    border-radius: 11px;
+    border: 1px solid var(--accent-line);
+    background: var(--accent-soft);
+    flex: none;
+}
+.owner-tag:not(.hidden) + .top-actions { margin-left: 0; }
+.owner-ic { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--accent-deep); color: #fff; }
+.owner-ic .ic { width: 14px; height: 14px; }
+.owner-t { display: flex; flex-direction: column; line-height: 1.15; }
+.owner-t small { font-size: 9.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-hi); }
+.owner-t strong { font-size: 12.5px; font-weight: 800; color: #fff; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+.owner-tag.free { border-color: rgba(61, 220, 151, .34); background: var(--in-soft); }
+.owner-tag.free .owner-ic { background: #1e8f5e; }
+.owner-tag.free small { color: var(--in); }
+
+.biz-head { display: flex; align-items: center; gap: 16px; }
+.biz-ic { flex: none; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: var(--accent-deep); color: #fff; }
+.biz-ic .ic { width: 24px; height: 24px; }
+.biz-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.biz-eyebrow { font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-hi); }
+.biz-t strong { font-size: 20px; font-weight: 800; }
+.biz-status { align-self: flex-start; margin-top: 4px; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 800; border: 1px solid; }
+.biz-status.sale { color: var(--in); background: var(--in-soft); border-color: rgba(61, 220, 151, .34); }
+.biz-status.mine { color: var(--accent-hi); background: var(--accent-soft); border-color: var(--accent-line); }
+.biz-status.owned { color: #8fb8ff; background: rgba(100, 150, 255, .12); border-color: rgba(100, 150, 255, .34); }
+.biz-price { text-align: right; display: flex; flex-direction: column; gap: 2px; }
+.biz-price b { font-family: var(--mono); font-size: 26px; font-weight: 700; letter-spacing: -.5px; }
+.biz-price small { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+.biz-tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.biz-tier { border-radius: 14px; padding: 14px 16px; min-height: 112px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(255,255,255,.1); }
+.biz-tier.green { background: #17784a; }
+.biz-tier.dark  { background: #2c2c33; }
+.biz-tier.gold  { background: #a07a22; }
+.biz-tier-n { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.biz-chip { width: 18px; height: 13px; border-radius: 3px; background: #d9b865; }
+.biz-tier-p { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1; margin-top: 10px; }
+.biz-tier-e { font-size: 11.5px; opacity: .85; font-weight: 600; }
+
+.biz-note { display: flex; gap: 10px; align-items: flex-start; padding: 13px 15px; border-radius: 13px; border: 1px solid var(--line); background: var(--card); font-size: 12px; line-height: 1.55; color: var(--muted); font-weight: 600; }
+.biz-note .ic { flex: none; width: 16px; height: 16px; margin-top: 1px; color: var(--accent-hi); }
+.biz-note b { color: #fff; }
+.biz-note.test { border-style: dashed; border-color: rgba(255, 193, 77, .35); background: rgba(255, 193, 77, .06); }
+.biz-note.test .ic { color: #ffc14d; }
+.go.biz-buy { box-shadow: none; background: var(--accent-deep); }
+.go.biz-buy.armed { background: #1e9e43; }
+.biz-sub { text-align: center; font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.go.biz-buy:disabled { background: var(--card); color: var(--dim); }

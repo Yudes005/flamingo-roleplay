@@ -159,6 +159,19 @@ RegisterNUICallback('action', function(payload, cb)
     end, payload)
 end)
 
+-- Kategorija "Biznis" na bankomatu: kupovina (TEST, kasnije aukcija) ide na flamingo_biznisi
+RegisterNUICallback('bizBuy', function(data, cb)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then
+        notify('Biznisi trenutno nisu dostupni.', 'error')
+        return cb({ ok = false })
+    end
+    ESX.TriggerServerCallback('flamingo_biznisi:buy', function(res)
+        res = res or { ok = false, msg = 'Greška u komunikaciji sa serverom.' }
+        if res.msg then notify(res.msg, res.ok and 'success' or 'error', 'fa-solid fa-briefcase') end
+        cb(res)
+    end, type(data) == 'table' and data.id or nil)
+end)
+
 RegisterNUICallback('getFines', function(_, cb)
     ESX.TriggerServerCallback('flamingo_banke:getFines', function(list)
         cb(list or {})

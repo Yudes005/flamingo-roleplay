@@ -34,6 +34,9 @@ const I = {
     arrowL: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
     arrowR: '<path d="M5 12h14M13 6l6 6-6 6"/>',
     star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 13h18"/>',
+    crown: '<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>',
+    tag: '<path d="M3 12V4a1 1 0 011-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
     shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>'
 };
 const icon = (n) => `<svg class="ic" viewBox="0 0 24 24">${I[n] || ''}</svg>`;
@@ -89,7 +92,10 @@ const state = {
     activePad: null,
     pinError: '',
     // Moja kartica
-    cardTier: null
+    cardTier: null,
+    // Biznis (bankomat koji je biznis)
+    bizArmed: false,
+    bizBusy: false
 };
 
 /* ---------------- helpers ---------------- */
@@ -462,7 +468,19 @@ function renderHeader() {
     $('#cardDot').classList.toggle('hidden', !cardIssue());
 
     document.querySelectorAll('.nav-btn[data-view]').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
-    document.querySelectorAll('.nav-btn[data-atm-mode]').forEach((b) => b.classList.toggle('active', b.dataset.atmMode === state.mode));
+    document.querySelectorAll('.nav-btn[data-atm-mode]').forEach((b) => b.classList.toggle('active', state.view === 'actions' && b.dataset.atmMode === state.mode));
+
+    // bankomat koji je biznis: "VLASNIK" gore u uglu + kategorija "Biznis"
+    const biz = isAtm() ? d.biz : null;
+    $('#navBiz').classList.toggle('hidden', !biz);
+    const tag = $('#ownerTag');
+    tag.classList.toggle('hidden', !biz);
+    if (biz) {
+        tag.classList.toggle('free', !biz.owned);
+        tag.innerHTML = `
+            <span class="owner-ic">${icon(biz.owned ? 'crown' : 'tag')}</span>
+            <span class="owner-t"><small>Vlasnik</small><strong>${biz.owned ? esc(biz.ownerName || 'Nepoznat') : 'Na prodaju'}</strong></span>`;
+    }
 }
 
 // Sta nije u redu sa karticom (za upozorenja)
@@ -1055,6 +1073,93 @@ async function submit() {
     renderActions();
 }
 
+/* ---------------- Biznis (bankomat koji je biznis, flamingo_biznisi) ---------------- */
+let bizArmTimer;
+function renderBusiness() {
+    const b = state.data.biz;
+    if (!b) { state.view = 'actions'; return renderActions(); }
+
+    const tiles = (b.cards || []).map((c) => {
+        const cut = Math.round((c.atmFee || 0) * (100 - (b.stateCut || 0))) / 100;
+        return `
+        <div class="biz-tier ${esc(c.theme || 'dark')}">
+            <div class="biz-tier-n"><span class="biz-chip"></span>${esc(c.label)}</div>
+            <div class="biz-tier-p">${cut}%</div>
+            <div class="biz-tier-e">Na 10.000$ dobijaš ${money(10000 * cut / 100)}</div>
+        </div>`;
+    }).join('');
+
+    let foot;
+    if (b.mine) {
+        foot = `<div class="biz-note">${icon('briefcase')}<span>Ovo je tvoj biznis. Kasom, zaradom i dopunom bankomata upravljaš na <b>tabletu</b>, aplikacija <b>Moj biznis</b>.</span></div>`;
+    } else if (b.owned) {
+        foot = `<div class="biz-note">${icon('lock')}<span>Ovaj bankomat već ima vlasnika. Biznisi se preprodaju na <b>aukciji</b>.</span></div>`;
+    } else if (b.canBuy) {
+        const limit = b.maxCount > 0 && b.myCount >= b.maxCount;
+        const from = b.buyFrom === 'money' ? state.data.cash : (b.buyFrom === 'bank' ? state.data.bank : Math.max(state.data.bank, state.data.cash));
+        const enough = from >= b.price;
+        foot = `
+        <div class="biz-note test">${icon('alert')}<span><b>TEST:</b> kupovina iz menija je privremena. Kasnije se biznisi kupuju na aukciji.</span></div>
+        <button class="go biz-buy ${state.bizArmed ? 'armed' : ''}" data-biz-buy ${limit || !enough || state.bizBusy ? 'disabled' : ''}>
+            ${icon(state.bizArmed ? 'check' : 'briefcase')}${state.bizArmed ? 'Klikni ponovo da potvrdiš' : `Kupi za ${money(b.price)}`}
+        </button>
+        <div class="biz-sub">${limit
+            ? (b.maxCount === 1 ? 'Već imaš biznis. Možeš imati samo jedan.' : `Već imaš ${b.myCount} od najviše ${b.maxCount} biznisa.`)
+            : `Plaća se ${b.buyFrom === 'money' ? 'gotovinom' : (b.buyFrom === 'bank' ? 'sa računa' : 'sa računa ili gotovinom')}${enough ? '.' : '. Nemaš dovoljno novca.'}`}</div>`;
+    } else {
+        foot = `<div class="biz-note">${icon('lock')}<span>Ovaj biznis je na prodaju, ali se kupuje isključivo na <b>aukciji</b>.</span></div>`;
+    }
+
+    $('#view').innerHTML = `
+    <div class="card biz-head">
+        <div class="biz-ic">${icon('briefcase')}</div>
+        <div class="biz-t">
+            <span class="biz-eyebrow">Biznis · Bankomat · ID #${b.id}</span>
+            <strong>${esc(b.name)}</strong>
+            <span class="biz-status ${b.mine ? 'mine' : (b.owned ? 'owned' : 'sale')}">${b.mine ? 'Tvoj biznis' : (b.owned ? `Vlasnik: ${esc(b.ownerName || 'Nepoznat')}` : 'Na prodaju')}</span>
+        </div>
+        <div class="biz-price">
+            <span class="label">${b.owned ? 'Vrednost biznisa' : 'Cena biznisa'}</span>
+            <b>${money(b.price)}</b>
+            <small>Zarada: provizija sa svakog podizanja</small>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-h"><div><h3>Koliko zarađuješ po kartici</h3><p>Provizija sa podizanja na ovom bankomatu ide u kasu biznisa. Uplate su bez provizije.</p></div></div>
+        <div class="biz-tiers">${tiles}</div>
+    </div>
+
+    ${foot}`;
+}
+
+async function buyBusiness() {
+    const b = state.data.biz;
+    if (!b || state.bizBusy) return;
+    if (!state.bizArmed) {
+        state.bizArmed = true;
+        clearTimeout(bizArmTimer);
+        bizArmTimer = setTimeout(() => { state.bizArmed = false; if (state.view === 'business') renderBusiness(); }, 3500);
+        return renderBusiness();
+    }
+    clearTimeout(bizArmTimer);
+    state.bizArmed = false;
+    state.bizBusy = true;
+    renderBusiness();
+
+    const res = IN_GAME ? await post('bizBuy', { id: b.id }) : { ok: true, msg: 'Kupljeno (demo).', ...b, owned: true, mine: true, ownerName: state.data.name, canBuy: false, bank: state.data.bank - b.price, cash: state.data.cash };
+    state.bizBusy = false;
+    if (res && res.ok) {
+        state.data.bank = res.bank;
+        state.data.cash = res.cash;
+        state.data.biz = res;
+        toast(res.msg || 'Biznis je kupljen.');
+    } else {
+        toast((res && res.msg) || 'Kupovina nije uspela.', false);
+    }
+    render();
+}
+
 /* ---------------- routing ---------------- */
 function render() {
     renderHeader();
@@ -1063,6 +1168,7 @@ function render() {
     else if (state.view === 'actions') renderActions();
     else if (state.view === 'fines') renderFines();
     else if (state.view === 'card') renderCard();
+    else if (state.view === 'business') renderBusiness();
     else renderOverview();
     $('#view').scrollTop = 0;
 }
@@ -1085,6 +1191,7 @@ function resetState(data, cfg) {
     state.amount = 0; state.target = ''; state.memo = ''; state.busy = false;
     state.fines = []; state.finesLoaded = false; state.finesBusy = false;
     state.pads = {}; state.pinError = ''; state.cardTier = null;
+    state.bizArmed = false; state.bizBusy = false;
 }
 
 function openUI(data, cfg) {
@@ -1143,7 +1250,9 @@ document.addEventListener('click', (e) => {
         return renderHistoryList();
     }
     const atmNav = e.target.closest('[data-atm-mode]');
-    if (atmNav) { state.mode = atmNav.dataset.atmMode; state.amount = 0; renderHeader(); return renderActions(); }
+    if (atmNav) { state.mode = atmNav.dataset.atmMode; state.amount = 0; state.view = 'actions'; return render(); }
+    const bizBuy = e.target.closest('[data-biz-buy]');
+    if (bizBuy && !bizBuy.disabled) return buyBusiness();
     const mode = e.target.closest('[data-mode]');
     if (mode && !mode.disabled) { state.mode = mode.dataset.mode; state.amount = 0; renderHeader(); return renderActions(); }
     const add = e.target.closest('[data-add]');
@@ -1233,6 +1342,10 @@ function demoData(kind) {
     return {
         name: 'Dušan Dimitrijević', bank: 185750, cash: 12400, transactions: tx, now,
         kind, place: kind === 'atm' ? 'Bankomat' : 'Fleeca Banka', hasAccount: true,
+        biz: kind === 'atm' ? {
+            id: 12, name: 'Bankomat #12', price: 450000, owned: location.search.includes('owned'), mine: false, ownerName: 'Marko Petrović',
+            cards: DEFAULT_CARDS, stateCut: 0, canBuy: !location.search.includes('owned'), directBuy: true, myCount: 0, maxCount: 1, buyFrom: 'bank'
+        } : null,
         card: { number: '4716 2291 0843 5520', tier: 'premium', hasPin: true, blocked: false, triesLeft: 3, hasItem: !location.search.includes('lost'), feeDue: now + 5 * day }
     };
 }

@@ -144,7 +144,7 @@
         <div class="bz-empty">
           <i class="fa-solid fa-briefcase"></i>
           <b>Nemaš nijedan biznis.</b>
-          Bankomati koji su biznisi imaju roze marker <b>BIZNIS</b> ispred sebe. Priđi i pritisni <span class="bz-kbd">E</span> da vidiš cenu i zaradu.
+          Otvori bilo koji bankomat i u meniju izaberi kategoriju <b>Biznis</b> da vidiš cenu, vlasnika i zaradu.
         </div>`;
       return;
     }

@@ -238,13 +238,18 @@ local function buildData(xPlayer, acc, cb)
         'SELECT id, type, title, memo, party, amount, UNIX_TIMESTAMP(created_at) AS ts FROM flamingo_bank_transactions WHERE identifier = ? ORDER BY id DESC LIMIT ?',
         { xPlayer.identifier, Config.HistoryLimit },
         function(rows)
+            -- bankomat koji je biznis: vlasnik + kategorija "Biznis" (flamingo_biznisi)
+            local s = sessions[xPlayer.source]
+            local biz = (s and s.kind == 'atm' and s.biz) and bizCall('GetAtmInfo', s.biz, xPlayer.source) or nil
+
             cb({
                 name         = xPlayer.getName(),
                 bank         = xPlayer.getAccount('bank').money,
                 cash         = xPlayer.getAccount('money').money,
                 transactions = rows or {},
                 now          = os.time(),
-                card         = cardInfo(acc, xPlayer)
+                card         = cardInfo(acc, xPlayer),
+                biz          = biz
             })
         end
     )

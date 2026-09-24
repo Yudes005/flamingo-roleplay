@@ -2,10 +2,12 @@
 
 ## Kako radi
 
-1. Ispred svakog bankomata koji je biznis nalazi se roze marker **BIZNIS**. Priđi mu i pritisni **E**.
-   Otvara se meni sa cenom, gotovinom u bankomatu, prometom za 7 dana i zaradom po kartici.
-2. **Kupovina (TEST):** dugme „Kupi“ je u meniju samo za testiranje (`Config.AllowDirectBuy = true`).
+1. Nema markera ni posebnog menija. Sve se vidi u **meniju bankomata** (`flamingo_banke`):
+   - gore desno piše **VLASNIK** i ime vlasnika tog bankomata (ili „Na prodaju“)
+   - u levom meniju je nova kategorija **Biznis**: cena, status i zarada po kartici
+2. **Kupovina (TEST):** dugme „Kupi“ je u kategoriji Biznis samo za testiranje (`Config.AllowDirectBuy = true`).
    Kad napraviš aukciju, stavi `false`. Vlasnika onda postavlja aukcija preko exporta `SetOwner`.
+   Jedan igrač može imati samo **jedan** biznis (`Config.MaxPerPlayer = 1`).
 3. Kad neko podigne novac na tvom bankomatu, provizija njegove kartice ide u **kasu biznisa**:
    Standard 15%, Premium 10%, Gold 5%. Procenti se čitaju iz `flamingo_banke` (`Config.Cards`).
    Uplate su bez provizije i pune bankomat gotovinom (do 2.500.000$).
@@ -22,7 +24,6 @@
 2. Proveri redosled u `server.cfg`:
    ```
    ensure esx_notify
-   ensure esx_keyprompt
    ensure flamingo_tablet
    ensure flamingo_banke
    ensure flamingo_biznisi
@@ -69,8 +70,6 @@ exports['flamingo_biznisi']:GetAtmMissing(bizId) -- koliko fali do punog
 ## Napomene
 
 - Koordinate bankomata u `Config.ATMs` su približne. Skripta sama nađe pravi bankomat u krugu od 3 m i upiše
-  njegovu tačnu poziciju u bazu, čim prvi igrač dođe u blizinu. Ako marker nije ispred bankomata,
-  obriši taj biznis i dodaj ga komandom `/biznis_dodaj`.
-- Ako marker stoji sa pogrešne strane bankomata, promeni `Config.ATM.offset` (npr. `vector3(0.0, 1.9, 0.0)`).
+  njegovu tačnu poziciju u bazu, čim prvi igrač dođe u blizinu. Ako na nekom bankomatu ne piše „Vlasnik“ a trebalo bi,
+  stani ispred njega i dodaj ga komandom `/biznis_dodaj`.
 - Bankomati koji nisu biznis rade kao i ranije, bez limita gotovine, a provizija ide državi.
-- Font i ikonice za meni se uzimaju iz `flamingo_tablet`, tako da on mora biti pokrenut.

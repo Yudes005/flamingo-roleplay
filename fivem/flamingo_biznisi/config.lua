@@ -6,17 +6,14 @@ Config = {}
 Config.NotifyTitle = 'Biznis'
 Config.NotifyIcon  = 'fa-solid fa-briefcase'
 
-Config.InteractKey      = 38    -- E
-Config.InteractDistance = 1.0   -- koliko blizu markera moras da budes (po zemlji, bez visine)
-Config.DrawDistance     = 12.0  -- od koliko metara se vidi marker i natpis
-Config.ServerDistance   = 6.0   -- server provera: koliko daleko od biznisa sme da bude igrac kad ga gleda / kupuje
+Config.ServerDistance   = 6.0   -- server provera: koliko daleko od bankomata sme da bude igrac kad kupuje
 
--- TEST: kupovina direktno iz menija kod markera.
+-- TEST: kupovina direktno iz menija bankomata (kategorija "Biznis").
 -- Kad napravis aukciju stavi na false - dugme "Kupi" nestaje, a vlasnika postavlja
 -- aukcija preko exports['flamingo_biznisi']:SetOwner(id, identifier, ime)
 Config.AllowDirectBuy = true
 Config.BuyFrom        = 'bank'  -- 'bank' | 'money' | 'any' (prvo racun pa gotovina)
-Config.MaxPerPlayer   = 3       -- koliko biznisa sme da ima jedan igrac (0 = bez limita)
+Config.MaxPerPlayer   = 1       -- koliko biznisa sme da ima jedan igrac (0 = bez limita)
 
 -- Deo provizije koji ide drzavi (0 = cela provizija ide u kasu biznisa)
 Config.StateCut = 0
@@ -52,11 +49,8 @@ Config.ATM = {
     -- Koliko daleko (od mesta gde igrac stoji) trazimo biznis-bankomat kad igrac koristi bankomat
     linkRadius = 3.0,
 
-    -- Marker ispred bankomata. Pravi bankomat (prop) se trazi u ovom radijusu oko koordinata iz liste,
-    -- pa se marker postavlja "offset" metara ispred njega (-Y = ispred ekrana bankomata).
+    -- Pravi bankomat (prop) se trazi u ovom radijusu oko koordinata iz liste
     snapRadius = 3.0,
-    offset     = vector3(0.0, -1.9, 0.0),
-    blockNearAtm = 1.35,     -- ne prikazuj [E] za biznis dok stojis na bankomatu (da se E ne sudara sa bankom)
     models = {
         `prop_atm_01`,
         `prop_atm_02`,

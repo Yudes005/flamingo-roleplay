@@ -31,6 +31,7 @@
                     <button class="nav-btn nav-bank" id="navFines" data-view="fines"><span data-i="fine"></span>Kazne</button>
                     <button class="nav-btn nav-atm" data-atm-mode="withdraw"><span data-i="withdraw"></span>Podizanje novca</button>
                     <button class="nav-btn nav-atm" data-atm-mode="deposit"><span data-i="deposit"></span>Uplata novca</button>
+                    <button class="nav-btn nav-atm hidden" id="navBiz" data-view="business"><span data-i="briefcase"></span>Biznis</button>
                 </nav>
                 <div class="side-card" id="sideCard"></div>
                 <div class="me">
@@ -58,6 +59,8 @@
                         <span class="label">Gotovina kod sebe</span>
                         <div class="cash-value" id="balCash">0$</div>
                     </div>
+
+                    <div class="owner-tag hidden" id="ownerTag"></div>
 
                     <div class="top-actions">
                         <button class="btn primary" id="btnTransfer"><span data-i="swap"></span>Transfer</button>
