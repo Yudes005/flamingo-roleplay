@@ -36,7 +36,6 @@ function render() {
     const d = state.data;
     if (!d) return;
 
-    const pct = Math.min(100, Math.round((d.atmCash / Math.max(1, d.atmMax)) * 100));
     const cards = (d.cards || []).map((c) => {
         const cut = Math.round((c.atmFee || 0) * (100 - (d.stateCut || 0))) / 100;
         return `
@@ -85,31 +84,12 @@ function render() {
         <div class="pills">
             ${status(d)}
             <span class="pill gray">ID #${d.id}</span>
-            ${d.lowCash ? `<span class="pill warn"><i class="fa-solid fa-triangle-exclamation"></i> Malo gotovine</span>` : ''}
         </div>
 
         <div class="body">
             <div class="price">
                 <div class="price-l"><span>${d.owned ? 'Vrednost biznisa' : 'Cena biznisa'}</span><b>${money(d.price)}</b></div>
                 <div class="price-r">Zarada: <b>provizija</b><br>sa svakog podizanja</div>
-            </div>
-
-            <div class="card">
-                <div class="card-h">
-                    <div class="card-t"><i class="fa-solid fa-vault"></i> Gotovina u bankomatu</div>
-                    <div class="cash-num">${short(d.atmCash)} <small>/ ${short(d.atmMax)}</small></div>
-                </div>
-                <div class="bar ${d.lowCash ? 'low' : ''}"><div style="width:${pct}%"></div></div>
-                <div class="card-s">Kad se bankomat isprazni, igrači ne mogu da podižu novac dok ga vlasnik ne dopuni <b>transportom novca</b>.</div>
-            </div>
-
-            <div class="card">
-                <div class="card-t"><i class="fa-solid fa-chart-simple"></i> Promet u poslednjih 7 dana</div>
-                <div class="stats">
-                    <div class="stat"><span><i class="fa-solid fa-arrow-right-arrow-left"></i> Podizanja</span><b>${d.week.count}</b></div>
-                    <div class="stat"><span><i class="fa-solid fa-money-bills"></i> Isplaćeno</span><b>${short(d.week.volume)}</b></div>
-                    <div class="stat"><span><i class="fa-solid fa-coins"></i> Provizija</span><b class="pos">${short(d.week.fees)}</b></div>
-                </div>
             </div>
 
             <div class="card">
