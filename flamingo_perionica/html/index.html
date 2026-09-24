@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <title>Perionica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="root" class="hidden">
+    <div class="panel">
+
+        <header class="bar">
+            <div class="bar__id">
+                <span class="bar__mark"><i class="fa-solid fa-spray-can-sparkles"></i></span>
+                <div>
+                    <h1>Auto perionica</h1>
+                    <p id="locationName">—</p>
+                </div>
+            </div>
+
+            <div class="bar__right">
+                <div class="wallet">
+                    <small>Stanje</small>
+                    <strong id="money">$0</strong>
+                </div>
+                <button id="close" class="iconbtn" type="button" aria-label="Zatvori">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </header>
+
+        <section class="vehicle">
+            <div class="vehicle__id">
+                <span class="plate" id="plate">—</span>
+                <span class="model" id="model">—</span>
+            </div>
+
+            <div class="vehicle__dirt">
+                <div class="dirt__head">
+                    <span id="dirtLabel">Prljavo</span>
+                    <b id="dirtValue">0%</b>
+                </div>
+                <div class="dirt__track"><span id="dirtFill"></span></div>
+            </div>
+        </section>
+
+        <div class="section-title">Izaberi paket</div>
+        <section class="packages" id="packages"></section>
+
+        <footer class="foot">
+            <button id="wash" class="cta" type="button" disabled>
+                <i class="fa-solid fa-droplet"></i><span id="washText">Izaberi paket</span>
+            </button>
+            <p class="foot__hint"><kbd>Esc</kbd> zatvara meni</p>
+        </footer>
+
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
