@@ -4,62 +4,84 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flamingo Market</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Market UI -->
   <div id="app" class="hidden">
-    <div class="market">
+    <div class="market" id="market">
 
+      <!-- ============ ZAGLAVLJE ============ -->
       <header class="market-header">
         <div class="brand">
-          <div class="brand-logo"><i class="fa-solid fa-basket-shopping"></i></div>
+          <div class="brand-logo" data-ic="basket"></div>
           <div class="brand-text">
             <span class="brand-small" id="welcomeTitle">Dobrodošli u</span>
             <h1 id="shopLabel">Flamingo Market</h1>
           </div>
         </div>
 
-        <div class="close-btn" id="closeBtn"><i class="fa-solid fa-xmark"></i></div>
+        <label class="search">
+          <span data-ic="search"></span>
+          <input id="search" placeholder="Pretraži artikle" autocomplete="off">
+        </label>
+
+        <button class="close-btn" id="closeBtn" title="Zatvori (ESC)"><span data-ic="x"></span></button>
       </header>
 
       <div class="market-body">
 
-        <div class="products-panel">
-          <div class="products-title">Artikli</div>
+        <!-- ============ ARTIKLI ============ -->
+        <section class="products-panel">
+          <div class="products-head">
+            <div>
+              <h2 id="productsTitle">Artikli</h2>
+              <span id="productsCount" class="muted"></span>
+            </div>
+            <div class="chips" id="chips"></div>
+          </div>
           <div id="productList" class="product-grid"></div>
-        </div>
+          <div id="productsEmpty" class="products-empty hidden">
+            <span data-ic="search"></span>
+            <b>Nema rezultata</b>
+            <span>Probaj drugi naziv artikla.</span>
+          </div>
+        </section>
 
-        <div class="cart-panel">
-          <h2 id="cartLabel">Korpa</h2>
+        <!-- ============ KORPA ============ -->
+        <aside class="cart-panel">
+          <div class="cart-head">
+            <h2 id="cartLabel">Korpa</h2>
+            <span class="cart-count hidden" id="cartCount">0</span>
+            <button class="link-btn hidden" id="clearCart">Isprazni</button>
+          </div>
 
           <div id="cartEmpty" class="cart-empty">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span id="emptyCartLabel">Vaša korpa je prazna</span>
+            <div class="cart-empty-ic" data-ic="cart"></div>
+            <b id="emptyCartLabel">Vaša korpa je prazna</b>
+            <span>Dodaj artikle klikom na +</span>
           </div>
 
-          <ul id="cartItems" class="cart-items"></ul>
+          <ul id="cartItems" class="cart-items hidden"></ul>
 
-          <div class="cart-total">
-            <span id="totalLabel">Ukupno</span>
-            <span id="totalAmount">$0</span>
-          </div>
+          <div class="cart-footer">
+            <div class="cart-sum">
+              <div class="sum-row"><span>Artikala</span><span id="itemsCount">0</span></div>
+              <div class="sum-row total"><span id="totalLabel">Ukupno</span><span id="totalAmount">0$</span></div>
+            </div>
 
-          <div class="cart-actions">
-            <button id="payCardBtn" class="pay-btn primary">
-              <i class="fa-solid fa-credit-card"></i>
-              <span id="payCard">Plati karticom</span>
-            </button>
-            <button id="payCashBtn" class="pay-btn secondary">
-              <i class="fa-solid fa-money-bill-wave"></i>
-              <span id="payCash">Plati kešom</span>
-            </button>
+            <div class="cart-actions">
+              <button id="payCardBtn" class="pay-btn card" disabled>
+                <span data-ic="card"></span>
+                <span class="pay-t"><b id="payCard">Plati karticom</b><small>Sa bankovnog računa</small></span>
+              </button>
+              <button id="payCashBtn" class="pay-btn cash" disabled>
+                <span data-ic="cash"></span>
+                <span class="pay-t"><b id="payCash">Plati kešom</b><small>Gotovinom</small></span>
+              </button>
+            </div>
           </div>
-        </div>
+        </aside>
 
       </div>
     </div>

@@ -170,7 +170,7 @@ local function buildNuiTable(shop)
                 id = itemName,
                 slika = normalizeImage(itemName, img),
                 cijena = it.price,
-                kategorija = 'artikli',
+                kategorija = it.category or 'artikli', -- opciono: category = 'hrana' u Config items
             }
         end
     end

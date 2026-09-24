@@ -35,7 +35,8 @@ Config.Locales = {
 }
 
 Config.DefaultItems = {
-    { name = 'simcard', label = 'Sim Kartica', price = 100 },
+    -- category je opciono (npr. 'hrana', 'piće') - ako ima više kategorija, u UI-ju se pojave filteri
+    { name = 'simcard', label = 'Sim Kartica', price = 100, category = 'elektronika' },
 
 }
 

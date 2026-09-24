@@ -12,3 +12,10 @@ FLAMINGO SUPERMARKET - FIXES
    - NPC vise ne bi trebalo da ostaje u vazduhu zbog prerano postavljenog freeze-a
 
 3. Postojece X/Y/heading koordinate u config.lua nisu menjane.
+
+4. UI 1.1 - redizajn u iOS stilu (isti kao telefon/tablet):
+   - pretraga artikala, filteri po kategorijama (Config: category = 'hrana' ...)
+   - − / + brojač na svakom artiklu i u korpi, dugme "Isprazni"
+   - plaćanje karticom / kešom sa zaštitom od duplog klika
+   - ikonice i font su lokalni (nema CDN-a), prozor se smanji na manjim ekranima
+   - protokol prema igri isti (openShop / closeAll / plati / zatvori_menu)
