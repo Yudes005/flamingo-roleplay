@@ -66,8 +66,9 @@ local function openBank(kind)
             return
         end
 
-        if data.noAccount and data.kind == 'atm' then
-            notify('Nemaš bankovnu karticu. Prvo otvori račun na šalteru banke.', 'error')
+        -- bankomat odbijen (nema racun / karticu / PIN / blokirana kartica)
+        if data.denied then
+            notify(data.msg or 'Bankomat trenutno nije dostupan.', 'error')
             return
         end
 
@@ -85,10 +86,16 @@ local function openBank(kind)
             config = {
                 quick       = Config.QuickAmounts,
                 atm         = Config.ATM,
-                fee         = Config.TransferFee,
-                maxTransfer = Config.MaxTransfer,
                 statsDays   = Config.StatsDays,
-                fines       = Config.Fines
+                fines       = Config.Fines,
+                cards       = Config.Cards,
+                defaultCard = Config.DefaultCard,
+                pinLength   = Config.PinLength,
+                pinMaxTries = Config.PinMaxTries,
+                reissueFee  = Config.ReissueFee,
+                pinResetFee = Config.PinResetFee,
+                maintenance = Config.Maintenance,
+                cardItem    = Config.RequireCardItem
             }
         })
     end, kind)
@@ -102,7 +109,7 @@ RegisterNUICallback('close', function(_, cb)
     cb('ok')
 end)
 
-RegisterNUICallback('openAccount', function(_, cb)
+RegisterNUICallback('openAccount', function(payload, cb)
     ESX.TriggerServerCallback('flamingo_banke:openAccount', function(res)
         res = res or { ok = false, msg = 'Greška u komunikaciji sa serverom.' }
         if res.msg then
@@ -115,7 +122,25 @@ RegisterNUICallback('openAccount', function(_, cb)
         end
 
         cb(res)
-    end)
+    end, payload)
+end)
+
+RegisterNUICallback('verifyPin', function(data, cb)
+    local pin = type(data) == 'table' and data.pin or nil
+    ESX.TriggerServerCallback('flamingo_banke:verifyPin', function(res)
+        res = res or { ok = false, msg = 'Greška u komunikaciji sa serverom.' }
+        if not res.ok and res.msg then notify(res.msg, 'error') end
+        if res.blocked then closeBank() end
+        cb(res)
+    end, pin)
+end)
+
+RegisterNUICallback('card', function(payload, cb)
+    ESX.TriggerServerCallback('flamingo_banke:card', function(res)
+        res = res or { ok = false, msg = 'Greška u komunikaciji sa serverom.' }
+        if res.msg then notify(res.msg, res.ok and 'success' or 'error') end
+        cb(res)
+    end, payload)
 end)
 
 RegisterNUICallback('action', function(payload, cb)

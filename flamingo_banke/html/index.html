@@ -11,17 +11,13 @@
 </head>
 <body>
     <div id="app" class="hidden">
-        <div class="noacc hidden" id="noacc">
-            <div class="noacc-card">
-                <div class="noacc-ic" data-i="bank"></div>
-                <h2>Dobrodošli u Flamingo Banku</h2>
-                <p id="noaccText">Izgleda da još uvek nemaš otvoren bankovni račun. Otvori ga besplatno i dobićeš bankovnu karticu za korišćenje bankomata.</p>
-                <button class="btn primary" id="btnOpenAccount"><span data-i="user"></span>Otvori bankovni račun</button>
-                <button class="btn" id="btnNoaccClose"><span data-i="x"></span>Zatvori</button>
-            </div>
-        </div>
+        <!-- Otvaranje racuna: paket kartice -> PIN -> potvrda -->
+        <div class="screen hidden" id="onboard"></div>
 
-        <div class="bank">
+        <!-- Bankomat: unos PIN-a -->
+        <div class="screen hidden" id="pinScreen"></div>
+
+        <div class="bank hidden" id="bank">
             <aside class="side">
                 <div class="brand">
                     <div class="logo" data-i="bank"></div>
@@ -31,13 +27,15 @@
                     <button class="nav-btn nav-bank" data-view="overview"><span data-i="grid"></span>Pregled</button>
                     <button class="nav-btn nav-bank" data-view="history"><span data-i="list"></span>Istorija</button>
                     <button class="nav-btn nav-bank" data-view="actions"><span data-i="swap"></span>Uplata i transfer</button>
+                    <button class="nav-btn nav-bank" data-view="card"><span data-i="card"></span>Moja kartica<i class="nav-dot hidden" id="cardDot"></i></button>
                     <button class="nav-btn nav-bank" id="navFines" data-view="fines"><span data-i="fine"></span>Kazne</button>
                     <button class="nav-btn nav-atm" data-atm-mode="withdraw"><span data-i="withdraw"></span>Podizanje novca</button>
                     <button class="nav-btn nav-atm" data-atm-mode="deposit"><span data-i="deposit"></span>Uplata novca</button>
                 </nav>
+                <div class="side-card" id="sideCard"></div>
                 <div class="me">
                     <div class="avatar" id="avatar">--</div>
-                    <div class="me-t"><strong id="meName">-</strong><span>Vlasnik računa</span></div>
+                    <div class="me-t"><strong id="meName">-</strong><span id="meSub">Vlasnik računa</span></div>
                 </div>
             </aside>
 
@@ -45,7 +43,7 @@
                 <header class="top">
                     <div class="acct">
                         <div class="acct-ic" data-i="user"></div>
-                        <div>
+                        <div class="acct-t">
                             <strong>Lični račun</strong>
                             <span id="acctPlace">Banka</span>
                         </div>
@@ -53,18 +51,18 @@
 
                     <div class="bal">
                         <span class="label"><i class="dot"></i>Stanje na računu</span>
-                        <div class="bal-value"><span id="balBank">$0</span><small>USD</small></div>
+                        <div class="bal-value"><span id="balBank">0$</span></div>
                     </div>
 
                     <div class="bal cash">
                         <span class="label">Gotovina kod sebe</span>
-                        <div class="cash-value" id="balCash">$0</div>
+                        <div class="cash-value" id="balCash">0$</div>
                     </div>
 
                     <div class="top-actions">
                         <button class="btn primary" id="btnTransfer"><span data-i="swap"></span>Transfer</button>
                         <button class="btn" id="btnHistory"><span data-i="activity"></span>Istorija</button>
-                        <button class="btn" id="btnClose"><span data-i="x"></span>Zatvori</button>
+                        <button class="btn icon-only" id="btnClose" title="Zatvori (ESC)"><span data-i="x"></span></button>
                     </div>
                 </header>
 

@@ -50,23 +50,70 @@ Config.ATMModels = {
 Config.ATMDistance       = 1.3
 
 -- Bankomat: samo podizanje i uplata (bez transfera)
+-- Provizija i limit po transakciji zavise od paketa kartice (Config.Cards)
 Config.ATM = {
-    maxWithdraw = 100000,  -- max podizanje po jednoj transakciji
-    maxDeposit  = 100000,  -- max uplata po jednoj transakciji
-    withdrawFee = 5,       -- % provizije na podizanje (placa se sa racuna, preko iznosa)
-    depositFee  = 5,       -- % provizije na uplatu (odbija se od uplacenog iznosa)
-    quick       = { 1000, 5000, 10000, 25000, 50000, 100000 } -- brzi iznosi na ekranu
+    quick = { 1000, 5000, 10000, 25000, 50000, 100000 } -- brzi iznosi na ekranu
 }
 
--- Transfer
-Config.MaxTransfer  = 10000000    -- max po jednom transferu
-Config.TransferFee  = 0           -- provizija u procentima (0 = bez provizije)
+-- Transfer: provizija i limit zavise od paketa kartice (Config.Cards)
 
 -- Bankovni racun (novi igraci moraju otvoriti racun na salteru banke pre koriscenja banke/bankomata)
 Config.RequireAccount = true                    -- ako je false, svi vec imaju "racun" kao i do sada (bez ovog sistema)
 Config.CardItem       = 'bankovna_kartica'       -- naziv ESX inventory itema koji igrac dobija otvaranjem racuna
 Config.CardLabel      = 'Bankovna kartica'       -- labela za taj item (upisuje se u "items" tabelu ako ne postoji)
 Config.WelcomeBonus   = 0                        -- pocetni bonus na racunu pri otvaranju (0 = iskljuceno), npr. 500
+
+-- ============================================================
+--  Kartica + PIN
+-- ============================================================
+Config.RequireCardItem = true   -- bankomat radi samo ako imas karticu (item) u inventaru
+Config.PinLength       = 4      -- broj cifara PIN-a
+Config.PinMaxTries     = 3      -- posle ovoliko pogresnih PIN-ova kartica se blokira (odblokira se resetom PIN-a na salteru)
+Config.ReissueFee      = 500    -- cena nove kartice (izgubljena / ukradena), skida se sa racuna
+Config.PinResetFee     = 250    -- cena reseta zaboravljenog PIN-a na salteru (0 = besplatno)
+
+-- Odrzavanje kartice: skida se sa racuna na svakih `days` dana (realno vreme, naplacuje se dok je igrac u gradu).
+-- Ako nema dovoljno novca, kartica se automatski vraca na Config.DefaultCard paket.
+Config.Maintenance = {
+    enabled = true,
+    days    = 7,
+    label   = 'nedeljno'   -- tekst na kartici, npr. "1.500$ / nedeljno"
+}
+
+Config.DefaultCard = 'standard' -- paket za stare racune (pre ovog sistema) i kad se ne plati odrzavanje
+
+-- Paketi kartica (redosled = redosled u UI-ju)
+--   price       -> jednokratna cena pri otvaranju racuna / prelasku na paket
+--   maintenance -> cena odrzavanja (vidi Config.Maintenance)
+--   atmFee      -> % provizije na bankomatu (podizanje i uplata)
+--   atmLimit    -> max iznos po jednoj transakciji na bankomatu
+--   transferFee -> % provizije na transfer (banka + telefon)
+--   maxTransfer -> max iznos po jednom transferu
+--   cashback    -> % povrata kod placanja karticom (export CardPayment, npr. iz prodavnica)
+--   theme       -> izgled kartice u UI-ju: 'green' | 'dark' | 'gold'
+Config.Cards = {
+    {
+        id = 'standard', label = 'Standard', theme = 'green',
+        price = 0, maintenance = 0,
+        atmFee = 5, atmLimit = 50000,
+        transferFee = 0, maxTransfer = 500000,
+        cashback = 0
+    },
+    {
+        id = 'premium', label = 'Premium', theme = 'dark',
+        price = 15000, maintenance = 1500,
+        atmFee = 2, atmLimit = 250000,
+        transferFee = 0, maxTransfer = 2000000,
+        cashback = 1
+    },
+    {
+        id = 'gold', label = 'Gold', theme = 'gold',
+        price = 75000, maintenance = 5000,
+        atmFee = 0, atmLimit = 1000000,
+        transferFee = 0, maxTransfer = 15000000,
+        cashback = 3
+    },
+}
 
 -- Telefon (flamingo_telefon -> aplikacija Banka)
 Config.PhoneTransfer    = true   -- dozvoli slanje novca preko telefona
