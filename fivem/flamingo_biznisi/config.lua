@@ -7,7 +7,7 @@ Config.NotifyTitle = 'Biznis'
 Config.NotifyIcon  = 'fa-solid fa-briefcase'
 
 Config.InteractKey      = 38    -- E
-Config.InteractDistance = 0.8   -- koliko blizu markera moras da budes
+Config.InteractDistance = 1.0   -- koliko blizu markera moras da budes (po zemlji, bez visine)
 Config.DrawDistance     = 12.0  -- od koliko metara se vidi marker i natpis
 Config.ServerDistance   = 6.0   -- server provera: koliko daleko od biznisa sme da bude igrac kad ga gleda / kupuje
 

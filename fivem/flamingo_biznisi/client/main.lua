@@ -145,6 +145,12 @@ local COLORS = {
     owned = { 100, 170, 255 },  -- tudji (plavo)
 }
 
+-- Razdaljina po zemlji (bez visine): pozicija igraca je ~1m iznad zemlje, a marker je na zemlji
+local function flatDist(a, b)
+    local dx, dy = a.x - b.x, a.y - b.y
+    return math.sqrt(dx * dx + dy * dy), math.abs(a.z - b.z)
+end
+
 local function drawPoint(b, p, dist)
     local col = mine[b.id] and COLORS.mine or (b.owned and COLORS.owned or COLORS.sale)
     local m = p.marker
@@ -259,11 +265,11 @@ CreateThread(function()
             local found
 
             for _, e in ipairs(near) do
-                local dist = #(pos - e.p.marker)
+                local dist, height = flatDist(pos, e.p.marker)
                 drawPoint(e.b, e.p, dist)
-                if canUse and not found and dist <= Config.InteractDistance then
+                if canUse and not found and dist <= Config.InteractDistance and height < 2.5 then
                     -- ne smetaj banci: ako stojis na samom bankomatu, E je za bankomat
-                    if not e.p.atm or #(pos - e.p.atm) > Config.ATM.blockNearAtm then
+                    if not e.p.atm or flatDist(pos, e.p.atm) > Config.ATM.blockNearAtm then
                         found = e.b.id
                     end
                 end
