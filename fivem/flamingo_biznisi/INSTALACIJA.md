@@ -1,4 +1,4 @@
-# flamingo_biznisi: bankomati kao biznis
+# flamingo_biznisi: bankomati i supermarketi kao biznis
 
 ## Kako radi
 
@@ -22,6 +22,24 @@
    Kupac dobija ponudu i ima 30 sekundi da je prihvati. Novac ide sa njegovog računa na tvoj, a kasa se isplaćuje tebi.
    Kupac ne sme već imati biznis.
 
+## Supermarketi (flamingo_supermarket)
+
+1. Svaki market iz `Config.Shops` je **poseban biznis**. Prepoznaje se po poziciji prodavca, pa isti `id` u configu nije problem.
+2. U meniju marketa (E kod prodavca) gore desno piše **VLASNIK**, a dugme **Biznis** prikazuje cenu i kupovinu (TEST).
+3. **Zalihe:** svaki artikal iz configa kreće sa **100 kom.** (`Config.Market.startStock`, max `Config.Market.maxStock`).
+   Kad igrač kupi, zaliha opada. Kad je 0, artikal se ne može kupiti. Svaki novi artikal dodat u config automatski dobija 100 kom.
+4. **Zarada:** cela cena prodaje ide u kasu vlasnika.
+5. **Tablet → Moj biznis → Naruči robu:** vlasnik naručuje robu za **pola cene** (`Config.Market.orderRatio = 0.5`),
+   plaća se iz kase. Može da upiše broj komada ili klikne „Do punog“.
+6. **Transport robe (tvoja skripta):** dok je `Config.Supply.resource = nil`, roba stiže odmah. Kad upišeš ime svoje skripte:
+   ```lua
+   AddEventHandler('flamingo_biznisi:orderCreated', function(src, orderId, bizId, item, amount) end)
+   exports['flamingo_biznisi']:DeliverOrder(orderId, 'Ime vozača')   -- kad je roba dovezena
+   exports['flamingo_biznisi']:GetPendingOrders(bizId)              -- narudžbine koje čekaju (nil = sve)
+   ```
+7. Market **bez vlasnika** (država) radi kao i ranije, bez ograničenja zaliha.
+8. Cena marketa: `bizPrice = 900000` u marketu u `flamingo_supermarket/config.lua`, inače `Config.Market.defaultPrice`.
+
 ## Instalacija
 
 1. Ubaci `flamingo_biznisi` u resources i zameni `flamingo_banke`, `flamingo_tablet` i `flamingo_radialmenu` ovim verzijama.
@@ -31,6 +49,7 @@
    ensure flamingo_tablet
    ensure flamingo_banke
    ensure flamingo_biznisi
+   ensure flamingo_supermarket
    ensure flamingo_radialmenu
    ```
 3. SQL se ne pokreće ručno. Tabele `flamingo_biznisi` i `flamingo_biznisi_log` se prave same pri prvom startu,

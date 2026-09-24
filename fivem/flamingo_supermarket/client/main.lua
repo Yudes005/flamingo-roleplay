@@ -45,8 +45,7 @@ local spawnedBlips = {}
 local pedShopId = {}
 
 local Shops = Config.Shops
-local ShopById = {}
-local NuiCacheById = {}
+local NuiCacheById = {}   -- [index marketa] = tabela za NUI (svaki market se prepoznaje po indexu u Config.Shops)
 
 local OxItems = nil
 local LoadedModels = {}
@@ -202,14 +201,11 @@ local function hidePrompt()
 end
 
 -- ===================== OTVARANJE SUPERMARKETA (klasicno - direktno na E, bez dijaloga) =====================
-local function openShopNui(shopId)
-    local shop = ShopById[shopId]
-    if not shop then return end
+local openBusy = false
 
-    isMenuOpen = true
-    currentShopId = shopId
-    hidePrompt()
-    SetNuiFocus(true, true)
+local function openShopNui(shopId)
+    local shop = Shops[shopId]
+    if not shop or openBusy then return end
 
     local tablica = NuiCacheById[shopId]
     if not tablica then
@@ -217,18 +213,29 @@ local function openShopNui(shopId)
         NuiCacheById[shopId] = tablica
     end
 
-    SendNUIMessage({
-        action = 'openShop',
-        Otvori = true,
-        Tablica = tablica,
-        id = shopId,
-        welcomeTitle = Config.Locales.welcomeTitle,
-        payCard = Config.Locales.payCard,
-        payCash = Config.Locales.payCash,
-        totalLabel = Config.Locales.total,
-        cartLabel = Config.Locales.cart,
-        emptyCartLabel = Config.Locales.emptyCart,
-    })
+    -- vlasnik marketa + zalihe (flamingo_biznisi); bez njega market radi kao ranije
+    openBusy = true
+    hidePrompt()
+    ESX.TriggerServerCallback('flamingo_supermarket:cb:info', function(bizInfo)
+        openBusy = false
+        isMenuOpen = true
+        currentShopId = shopId
+        SetNuiFocus(true, true)
+
+        SendNUIMessage({
+            action = 'openShop',
+            Otvori = true,
+            Tablica = tablica,
+            id = shopId,
+            biz = bizInfo,
+            welcomeTitle = Config.Locales.welcomeTitle,
+            payCard = Config.Locales.payCard,
+            payCash = Config.Locales.payCash,
+            totalLabel = Config.Locales.total,
+            cartLabel = Config.Locales.cart,
+            emptyCartLabel = Config.Locales.emptyCart,
+        })
+    end, shopId)
 end
 
 local function closeAll()
@@ -296,7 +303,7 @@ local function spawnShopPed(i)
     end
 
     spawnedPeds[i] = ped
-    pedShopId[i] = shop.id
+    pedShopId[i] = i
 end
 
 local function despawnShopPed(i)
@@ -309,22 +316,12 @@ local function despawnShopPed(i)
 end
 
 CreateThread(function()
-    for i = 1, #Shops do
-        local s = Shops[i]
-        if s and s.id then
-            ShopById[s.id] = s
-        end
-    end
-
     pcall(function()
         OxItems = exports.ox_inventory:Items()
     end)
 
     for i = 1, #Shops do
-        local shop = Shops[i]
-        if shop and shop.id then
-            NuiCacheById[shop.id] = buildNuiTable(shop)
-        end
+        NuiCacheById[i] = buildNuiTable(Shops[i])
     end
 
     Wait(1000)
@@ -414,6 +411,23 @@ RegisterNUICallback('plati', function(data, cb)
             cb(false)
         end
     end, data.id, data.itemi, data.vrsta)
+end)
+
+-- Biznis (TEST kupovina marketa iz menija, kasnije aukcija) - ide na flamingo_biznisi
+RegisterNUICallback('bizBuy', function(data, cb)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then
+        Notify('Biznisi trenutno nisu dostupni.', 'error')
+        return cb(false)
+    end
+    local shopId = currentShopId
+    ESX.TriggerServerCallback('flamingo_biznisi:buy', function(res)
+        res = res or { ok = false, msg = 'Greška u komunikaciji sa serverom.' }
+        if res.msg then Notify(res.msg, res.ok and 'success' or 'error', 5000, 'Biznis') end
+        if not res.ok or not shopId then return cb(false) end
+        ESX.TriggerServerCallback('flamingo_supermarket:cb:info', function(info)
+            cb(info or false)
+        end, shopId)
+    end, type(data) == 'table' and data.id or nil)
 end)
 
 -- ESC zatvara meni/market

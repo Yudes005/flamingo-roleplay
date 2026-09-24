@@ -1,6 +1,6 @@
 // ============================================================
 //  APLIKACIJA: MOJ BIZNIS (flamingo_biznisi)
-//  Lista biznisa igrača (za sada bankomati) + upravljanje:
+//  Lista biznisa igrača (bankomati i marketi) + upravljanje:
 //  kasa (podigni / uloži / podigni sve), provizija po kartici,
 //  gotovina u bankomatu + dopuna (transport), grafik i istorija.
 //  Sve provere radi flamingo_biznisi server - ovde se samo crta.
@@ -25,6 +25,14 @@
     return money(n);
   };
   const DAYS = ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'];
+  const isMarket = b => b.type === 'market';
+  const TYPE = {
+    atm: { icon: 'fa-money-bill-transfer', label: 'Bankomat' },
+    market: { icon: 'fa-store', label: 'Market' }
+  };
+  const typeOf = b => TYPE[b.type] || TYPE.atm;
+  const lowProducts = b => (b.products || []).filter(p => p.low);
+  const itemImg = name => `nui://ox_inventory/web/images/${encodeURIComponent(name)}.png`;
   const ago = ts => {
     const s = Math.max(0, Math.floor((bz.data ? bz.data.now : Date.now() / 1000) - ts));
     if (s < 60) return 'upravo';
@@ -70,7 +78,7 @@
   }
 
   function updateBadge() {
-    const low = bz.data && bz.data.businesses.some(b => b.lowCash);
+    const low = bz.data && bz.data.businesses.some(b => (!isMarket(b) && b.lowCash) || lowProducts(b).length > 0);
     badge.classList.toggle('hidden', !low);
   }
 
@@ -111,12 +119,15 @@
 
     const items = list.map(b => {
       const pct = Math.round(b.atmCash / Math.max(1, b.atmMax) * 100);
+      const low = lowProducts(b).length;
+      const warn = isMarket(b) ? (low > 0 ? `<i class="fa-solid fa-triangle-exclamation"></i> Ponestaje: ${low} ${low === 1 ? 'artikal' : 'artikla'}` : '')
+                               : (b.lowCash ? `<i class="fa-solid fa-triangle-exclamation"></i> Bankomat ${pct}% pun` : '');
       return `
         <button class="bz-item ${b.id === bz.selected ? 'active' : ''}" data-bz-select="${b.id}">
-          <div class="bz-item-ico"><i class="fa-solid fa-money-bill-transfer"></i></div>
+          <div class="bz-item-ico"><i class="fa-solid ${typeOf(b).icon}"></i></div>
           <div class="bz-item-info">
             <span class="bz-item-name">${esc(b.name)}</span>
-            <span class="bz-item-sub ${b.lowCash ? 'bz-warn' : ''}">${b.lowCash ? `<i class="fa-solid fa-triangle-exclamation"></i> Bankomat ${pct}% pun` : esc(b.street || 'Bankomat')}</span>
+            <span class="bz-item-sub ${warn ? 'bz-warn' : ''}">${warn || esc(b.street || typeOf(b).label)}</span>
           </div>
           <div class="bz-item-amt"><b>${short(b.balance)}</b><span>u kasi</span></div>
         </button>`;
@@ -144,7 +155,7 @@
         <div class="bz-empty">
           <i class="fa-solid fa-briefcase"></i>
           <b>Nemaš nijedan biznis.</b>
-          Otvori bilo koji bankomat i u meniju izaberi kategoriju <b>Biznis</b> da vidiš cenu, vlasnika i zaradu.
+          Otvori bilo koji bankomat ili market i u meniju izaberi <b>Biznis</b> da vidiš cenu, vlasnika i zaradu.
         </div>`;
       return;
     }
@@ -162,10 +173,10 @@
 
     return `
       <div class="bz-hero">
-        <div class="bz-hero-art"><i class="fa-solid fa-money-bill-transfer"></i></div>
+        <div class="bz-hero-art"><i class="fa-solid ${typeOf(b).icon}"></i></div>
         <div class="bz-hero-content">
           <div class="bz-hero-l">
-            <span class="bz-eyebrow">Bankomat · ID #${b.id}</span>
+            <span class="bz-eyebrow">${typeOf(b).label} · ID #${b.id}</span>
             ${title}
             <p><i class="fa-solid fa-location-dot"></i> ${esc(b.street || 'Los Santos')}${b.zone ? ', ' + esc(b.zone) : ''}</p>
           </div>
@@ -193,7 +204,7 @@
           <button class="bz-btn primary" data-bz="take"><i class="fa-solid fa-arrow-down"></i> Podigni</button>
           <button class="bz-btn" data-bz="put"><i class="fa-solid fa-arrow-up"></i> Uloži</button>
         </div>
-        <button class="bz-btn wide success" data-bz="takeAll" ${b.balance < 1 ? 'disabled' : ''}><i class="fa-solid fa-hand-holding-dollar"></i> Podigni svu proviziju (${money(b.balance)})</button>
+        <button class="bz-btn wide success" data-bz="takeAll" ${b.balance < 1 ? 'disabled' : ''}><i class="fa-solid fa-hand-holding-dollar"></i> ${isMarket(b) ? "Podigni sav novac" : "Podigni svu proviziju"} (${money(b.balance)})</button>
         <div class="bz-section-sub">Novac ide ${bz.account === 'bank' ? '<b>na tvoj račun</b>' : '<b>u gotovinu</b>'}. Kod sebe: ${money(d.cash)} · Račun: ${money(d.bank)}</div>
       </div>`;
   }
@@ -239,8 +250,8 @@
     return `
       <div class="bz-section">
         <div class="bz-section-head">
-          <div class="bz-section-title"><i class="fa-solid fa-chart-column"></i> Zarada od provizije, 7 dana</div>
-          <span class="bz-section-sub"><b>${b.count7}</b> podizanja</span>
+          <div class="bz-section-title"><i class="fa-solid fa-chart-column"></i> ${isMarket(b) ? 'Zarada od prodaje' : 'Zarada od provizije'}, 7 dana</div>
+          <span class="bz-section-sub"><b>${b.count7}</b> ${isMarket(b) ? 'prodaja' : 'podizanja'}</span>
         </div>
         <div class="bz-chart">${bars}</div>
       </div>`;
@@ -277,6 +288,9 @@
     owner: l => ({ ic: 'fa-crown', cls: 'in', t: 'Novi vlasnik', s: esc(l.actor || ''), v: '', vc: '' }),
     state: l => ({ ic: 'fa-landmark', cls: 'out', t: 'Vraćeno državi', s: esc(l.actor || ''), v: '', vc: '' }),
     sell_state: l => ({ ic: 'fa-landmark', cls: 'out', t: 'Prodato državi', s: esc(l.actor || ''), v: money(l.amount), vc: '' }),
+    sale: l => ({ ic: 'fa-basket-shopping', cls: 'fee', t: `Prodaja, ${esc(l.actor || 'kupac')}`, s: esc(l.note || ''), v: `+${money(l.fee)}`, vc: 'pos' }),
+    order: l => ({ ic: 'fa-cart-plus', cls: 'out', t: 'Narudžbina robe', s: esc(l.note || ''), v: `-${money(l.amount)}`, vc: 'neg' }),
+    delivery: l => ({ ic: 'fa-truck-ramp-box', cls: 'ref', t: 'Roba dovezena', s: `${esc(l.note || '')}${l.actor ? ' · ' + esc(l.actor) : ''}`, v: '', vc: '' }),
     sold: l => ({ ic: 'fa-handshake', cls: 'in', t: 'Prodato igraču', s: esc(l.actor || ''), v: money(l.amount), vc: '' })
   };
   function tierLabel(id) {
@@ -319,7 +333,88 @@
       </div>`;
   }
 
+  // ---------- market: magacin i narudžbina robe ----------
+  function renderStorage(b, d) {
+    const prods = b.products || [];
+    const have = prods.reduce((s, p) => s + p.stock, 0);
+    const cap = prods.reduce((s, p) => s + p.max, 0) || 1;
+    const pending = prods.reduce((s, p) => s + p.pending, 0);
+    const low = lowProducts(b).length;
+    const empty = prods.filter(p => p.stock <= 0).length;
+    const pct = Math.min(100, Math.round(have / cap * 100));
+    const state = empty > 0 ? 'empty' : (low > 0 ? 'low' : 'ok');
+    const label = { empty: `Nema ${empty} ${empty === 1 ? 'artikla' : 'artikala'}`, low: 'Ponestaje robe', ok: 'Magacin je pun' }[state];
+    return `
+      <div class="bz-section bz-atm ${state}">
+        <div class="bz-section-head">
+          <div class="bz-section-title"><i class="fa-solid fa-boxes-stacked"></i> Magacin</div>
+          <span class="bz-badge ${state}">${label}</span>
+        </div>
+        <div class="bz-atm-ring" style="--p:${pct}">
+          <div class="bz-atm-ring-in"><b>${pct}%</b><span>pun</span></div>
+        </div>
+        <div class="bz-atm-nums">
+          <div><span>Na stanju</span><b>${have} kom.</b></div>
+          <div><span>U dolasku</span><b>${pending} kom.</b></div>
+        </div>
+        <div class="bz-section-sub">Roba se naručuje ispod, za <b>${Math.round((d.orderRatio || 0.5) * 100)}%</b> prodajne cene, i plaća se iz kase.
+          ${d.supply ? 'Roba stiže transportom.' : 'Dok transport ne proradi, roba stiže odmah.'} Artikal koga nema ne može da se kupi.</div>
+      </div>`;
+  }
+
+  function renderProducts(b, d) {
+    const rows = (b.products || []).map(p => {
+      const room = Math.max(0, p.max - p.stock - p.pending);
+      const pct = Math.min(100, Math.round(p.stock / Math.max(1, p.max) * 100));
+      const cls = p.stock <= 0 ? 'empty' : (p.low ? 'low' : '');
+      return `
+        <div class="bz-prod ${cls}">
+          <div class="bz-prod-img"><i class="fa-solid fa-box"></i><img src="${esc(itemImg(p.name))}" onerror="this.remove()"></div>
+          <div class="bz-prod-info">
+            <b>${esc(p.label)}</b>
+            <span>Prodaja ${money(p.price)} · Nabavka <b>${money(p.orderPrice)}</b> / kom.</span>
+            <div class="bz-prod-bar"><div style="width:${pct}%"></div></div>
+            <span class="bz-prod-stock">${p.stock} / ${p.max} kom.${p.pending > 0 ? ` · <i class="fa-solid fa-truck-fast"></i> u dolasku ${p.pending}` : ''}</span>
+          </div>
+          <div class="bz-prod-order">
+            <input class="bz-input bz-qty" data-bz-qty="${esc(p.name)}" data-unit="${p.orderPrice}" inputmode="numeric" placeholder="Kom." ${room <= 0 ? 'disabled' : ''}>
+            <button class="bz-btn primary" data-bz="order" data-item="${esc(p.name)}" ${room <= 0 ? 'disabled' : ''}><i class="fa-solid fa-cart-plus"></i> Naruči</button>
+            <button class="bz-btn" data-bz="orderFill" data-item="${esc(p.name)}" ${room <= 0 ? 'disabled' : ''} title="Naruči do punog magacina">
+              ${room > 0 ? `Do punog: ${room} kom. · ${money(room * p.orderPrice)}` : 'Magacin pun'}
+            </button>
+            <span class="bz-prod-cost" data-bz-cost="${esc(p.name)}"></span>
+          </div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="bz-section">
+        <div class="bz-section-head">
+          <div class="bz-section-title"><i class="fa-solid fa-truck-ramp-box"></i> Naruči robu</div>
+          <span class="bz-section-sub">U kasi: <b>${money(b.balance)}</b></span>
+        </div>
+        ${rows || '<div class="bz-section-sub">Ovaj market nema artikala u configu.</div>'}
+      </div>`;
+  }
+
   function renderDetail(b, d) {
+    if (isMarket(b)) {
+      return `
+      ${renderHero(b)}
+      <div class="bz-grid">
+        <div class="bz-stat"><div class="bz-stat-label"><i class="fa-solid fa-cash-register"></i> Kasa</div><div class="bz-stat-value">${money(b.balance)}</div></div>
+        <div class="bz-stat"><div class="bz-stat-label"><i class="fa-solid fa-sun"></i> Danas</div><div class="bz-stat-value pos">+${money(b.today)}</div></div>
+        <div class="bz-stat"><div class="bz-stat-label"><i class="fa-solid fa-calendar-week"></i> 7 dana</div><div class="bz-stat-value pos">+${money(b.week)}</div></div>
+        <div class="bz-stat"><div class="bz-stat-label"><i class="fa-solid fa-trophy"></i> Ukupno zarađeno</div><div class="bz-stat-value">${money(b.earned)}</div></div>
+      </div>
+      <div class="bz-two">
+        ${renderKasa(b, d)}
+        ${renderStorage(b, d)}
+      </div>
+      ${renderProducts(b, d)}
+      ${renderChart(b)}
+      ${renderLogs(b)}
+      ${renderSellState(b)}`;
+    }
     return `
       ${renderHero(b)}
       <div class="bz-grid">
@@ -375,7 +470,7 @@
     switch (btn.dataset.bz) {
       case 'gps':
         post('setWaypoint', { x: b.coords.x, y: b.coords.y });
-        toast('Navigacija je postavljena do bankomata.', 'info');
+        toast(`Navigacija je postavljena do ${isMarket(b) ? 'marketa' : 'bankomata'}.`, 'info');
         break;
       case 'take':
       case 'put': {
@@ -389,6 +484,16 @@
         break;
       case 'refill':
         action('refill');
+        break;
+      case 'order': {
+        const input = mainEl.querySelector(`[data-bz-qty="${CSS.escape(btn.dataset.item)}"]`);
+        const amount = parseInt(String(input && input.value || '').replace(/\D/g, ''), 10);
+        if (!amount) { toast('Upiši koliko komada naručuješ.', 'error'); return; }
+        action('order', { item: btn.dataset.item, amount });
+        break;
+      }
+      case 'orderFill':
+        action('orderFill', { item: btn.dataset.item });
         break;
       case 'sellState':
         if (arm('sellState', btn, 'Klikni ponovo za prodaju')) action('sellState');
@@ -412,6 +517,14 @@
   });
 
   mainEl.addEventListener('input', e => {
+    if (e.target.dataset && e.target.dataset.bzQty) {
+      const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+      e.target.value = digits;
+      const cost = mainEl.querySelector(`[data-bz-cost="${CSS.escape(e.target.dataset.bzQty)}"]`);
+      const n = parseInt(digits, 10) || 0;
+      if (cost) cost.textContent = n ? `Košta ${money(n * Number(e.target.dataset.unit))}` : '';
+      return;
+    }
     if (e.target.id === 'bz-amount') {
       const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
       e.target.value = digits ? parseInt(digits, 10).toLocaleString('de-DE') : '';

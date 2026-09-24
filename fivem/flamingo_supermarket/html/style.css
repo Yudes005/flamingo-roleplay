@@ -362,3 +362,61 @@ html,body{
   .product-grid{ grid-template-columns:repeat(3, 1fr); }
   .cart-panel{ width:260px; flex:0 0 260px; padding-left:20px; }
 }
+
+/* ============= BIZNIS (flamingo_biznisi) ============= */
+.header-right{ display:flex; align-items:center; gap:10px; }
+.owner-tag{
+  display:flex; align-items:center; gap:10px;
+  height:40px; padding:0 14px 0 6px;
+  border-radius:11px;
+  border:1px solid rgba(255, 92, 138, 0.4);
+  background:var(--accent-dim);
+}
+.owner-ic{ width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:#d81b72; color:#fff; font-size:12px; }
+.owner-t{ display:flex; flex-direction:column; line-height:1.15; }
+.owner-t small{ font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+.owner-t strong{ font-size:13px; font-weight:800; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.owner-tag.free{ border-color:rgba(61, 220, 151, .4); background:rgba(61, 220, 151, .12); }
+.owner-tag.free .owner-ic{ background:#1e8f5e; }
+.owner-tag.free small{ color:var(--ok); }
+
+.biz-btn{
+  height:40px; padding:0 16px; border-radius:11px;
+  border:1px solid var(--line-strong); background:transparent; color:var(--text);
+  font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; gap:8px; transition:.15s ease;
+}
+.biz-btn:hover, .biz-btn.active{ background:#fff; color:#111; }
+
+.product-stock{ font-size:11.5px; font-weight:700; color:var(--ok); margin:-6px 0 10px; }
+.product-stock.out{ color:var(--danger); }
+.product-add:disabled{ opacity:.35; cursor:not-allowed; background:transparent; color:var(--text); }
+
+.biz-panel{ margin-top:22px; flex:1; min-height:0; overflow-y:auto; display:flex; justify-content:center; }
+.biz-card{ width:100%; max-width:720px; display:flex; flex-direction:column; gap:14px; }
+.biz-head{ display:flex; align-items:center; gap:16px; padding:18px; border-radius:16px; background:var(--card-bg); border:1px solid var(--line); }
+.biz-ic{ flex:none; width:54px; height:54px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:#d81b72; color:#fff; font-size:22px; }
+.biz-t{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.biz-eyebrow{ font-size:10.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.biz-t strong{ font-family:'Poppins', sans-serif; font-size:20px; font-weight:800; }
+.biz-status{ align-self:flex-start; margin-top:4px; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:800; border:1px solid; }
+.biz-status.sale{ color:var(--ok); background:rgba(61,220,151,.12); border-color:rgba(61,220,151,.35); }
+.biz-status.mine{ color:var(--accent); background:var(--accent-dim); border-color:rgba(255,92,138,.4); }
+.biz-status.owned{ color:#8fb8ff; background:rgba(100,150,255,.12); border-color:rgba(100,150,255,.35); }
+.biz-price{ text-align:right; display:flex; flex-direction:column; gap:2px; }
+.biz-price span{ font-size:11.5px; color:var(--text-faint); font-weight:600; }
+.biz-price b{ font-family:'Poppins', sans-serif; font-size:26px; font-weight:800; }
+.biz-info{ display:flex; flex-direction:column; gap:8px; padding:16px 18px; border-radius:16px; background:var(--card-bg); border:1px solid var(--line); }
+.biz-info div{ display:flex; gap:10px; font-size:13px; color:var(--text-dim); line-height:1.5; }
+.biz-info i{ color:var(--accent); margin-top:3px; width:16px; text-align:center; }
+.biz-info b, .biz-note b{ color:#fff; }
+.biz-note{ display:flex; gap:10px; padding:13px 16px; border-radius:13px; border:1px solid var(--line); background:var(--card-bg); font-size:12.5px; line-height:1.5; color:var(--text-dim); }
+.biz-note i{ color:var(--accent); margin-top:3px; }
+.biz-note.test{ border-style:dashed; border-color:rgba(255,193,77,.4); background:rgba(255,193,77,.06); }
+.biz-note.test i{ color:#ffc14d; }
+.biz-buy{ height:52px; border-radius:13px; border:0; background:#d81b72; color:#fff; font-family:inherit; font-size:14.5px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; }
+.biz-buy.armed{ background:#1e9e43; }
+.biz-buy:disabled{ opacity:.4; cursor:not-allowed; }
+.biz-sub{ text-align:center; font-size:12px; color:var(--text-faint); font-weight:600; }
+.biz-back{ align-self:center; height:38px; padding:0 16px; border-radius:10px; border:1px solid var(--line-strong); background:transparent; color:var(--text-dim); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; }
+.biz-back:hover{ color:#fff; }

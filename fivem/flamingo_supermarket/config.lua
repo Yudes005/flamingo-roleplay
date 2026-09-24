@@ -34,6 +34,13 @@ Config.Locales = {
     emptyCart = 'Vaša korpa je prazna',
 }
 
+-- ============================================================
+--  Biznis (flamingo_biznisi): svaki market iz Config.Shops je poseban biznis.
+--  Market se prepoznaje po poziciji prodavca (ped.coords) - ne pomeraj je posle kupovine.
+--  Cena marketa: dodaj u market  bizPrice = 900000  (bez toga vazi Config.Market.defaultPrice u flamingo_biznisi).
+--  Svaki artikal iz liste ispod krece sa 100 kom. u magacinu svakog marketa,
+--  vlasnik ga narucuje na tabletu za pola cene (1000$ -> 500$).
+-- ============================================================
 Config.DefaultItems = {
     { name = 'simcard', label = 'Sim Kartica', price = 100 },
 

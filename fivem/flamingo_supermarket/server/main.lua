@@ -1,8 +1,10 @@
 local ESX = exports['es_extended']:getSharedObject()
 
 local Shops = Config.Shops
-local ShopById = {}
-local PriceMapByShop = {}
+local PriceMapByShop = {}   -- [index marketa] = { [item] = cena }
+
+-- Koliko daleko od prodavca sme da bude igrac kad placa (anti-cheat)
+local MAX_SHOP_DISTANCE = 6.0
 
 local function notify(src, msg, notifyType)
     -- Salje kroz nas custom event, koje client hvata i prosledjuje u
@@ -19,14 +21,11 @@ local function safeNumber(n)
 end
 
 local function rebuildCaches()
-    for k in pairs(ShopById) do ShopById[k] = nil end
     for k in pairs(PriceMapByShop) do PriceMapByShop[k] = nil end
 
     for i = 1, #Shops do
         local shop = Shops[i]
-        if shop and shop.id then
-            ShopById[shop.id] = shop
-
+        if shop then
             local list = shop.items or Config.DefaultItems or {}
             local map = {}
             for j = 1, #list do
@@ -35,12 +34,73 @@ local function rebuildCaches()
                     map[it.name] = safeNumber(it.price)
                 end
             end
-            PriceMapByShop[shop.id] = map
+            PriceMapByShop[i] = map
         end
     end
 end
 
 rebuildCaches()
+
+-- ============================================================
+--  flamingo_biznisi: svaki market je poseban biznis (zalihe, kasa, vlasnik).
+--  Market se prepoznaje po poziciji prodavca (ped.coords), pa isti id u
+--  configu nije problem. Ako flamingo_biznisi nije pokrenut, market radi
+--  kao i ranije (bez zaliha).
+-- ============================================================
+local function shopCoords(shop)
+    local c = shop and shop.ped and shop.ped.coords
+    if not c then return nil end
+    return vector3(c.x + 0.0, c.y + 0.0, c.z + 0.0)
+end
+
+local function biz(fn, ...)
+    if GetResourceState('flamingo_biznisi') ~= 'started' then return nil end
+    local args = { ... }
+    local ok, a, b = pcall(function() return exports['flamingo_biznisi'][fn](nil, table.unpack(args)) end)
+    if not ok then
+        print(('[flamingo_supermarket] flamingo_biznisi:%s greska: %s'):format(fn, tostring(a)))
+        return nil
+    end
+    return a, b
+end
+
+local function registerBusiness()
+    if GetResourceState('flamingo_biznisi') ~= 'started' then return end
+    local list = {}
+    for i = 1, #Shops do
+        local shop = Shops[i]
+        local c = shopCoords(shop)
+        if c then
+            local items = {}
+            for _, it in ipairs(shop.items or Config.DefaultItems or {}) do
+                items[#items + 1] = { name = it.name, label = it.label, price = it.price }
+            end
+            list[#list + 1] = { coords = c, label = shop.label, price = shop.bizPrice, items = items }
+        end
+    end
+    biz('RegisterMarkets', list)
+end
+
+AddEventHandler('onResourceStart', function(res)
+    if res == GetCurrentResourceName() or res == 'flamingo_biznisi' then
+        SetTimeout(1000, registerBusiness)
+    end
+end)
+AddEventHandler('flamingo_biznisi:ready', registerBusiness)
+
+local function nearShop(src, shop)
+    local c = shopCoords(shop)
+    local ped = GetPlayerPed(src)
+    if not c or ped == 0 then return false end
+    return #(GetEntityCoords(ped) - c) <= MAX_SHOP_DISTANCE
+end
+
+-- Podaci za meni: vlasnik marketa, cena biznisa, zalihe
+ESX.RegisterServerCallback('flamingo_supermarket:cb:info', function(source, cb, shopIndex)
+    local shop = Shops[tonumber(shopIndex) or -1]
+    if not shop or not nearShop(source, shop) then return cb(nil) end
+    cb(biz('GetMarketInfo', shopCoords(shop), source))
+end)
 
 ESX.RegisterServerCallback('flamingo_supermarket:cb:pay', function(source, cb, shopId, basket, payType)
     local xPlayer = ESX.GetPlayerFromId(source)
@@ -49,9 +109,14 @@ ESX.RegisterServerCallback('flamingo_supermarket:cb:pay', function(source, cb, s
         return cb(false)
     end
 
-    local shop = ShopById[shopId]
+    shopId = tonumber(shopId)
+    local shop = shopId and Shops[shopId]
     if not shop then
         notify(source, 'Nepostojeci market.')
+        return cb(false)
+    end
+    if not nearShop(source, shop) then
+        notify(source, 'Previše si daleko od prodavca.')
         return cb(false)
     end
 
@@ -100,7 +165,14 @@ ESX.RegisterServerCallback('flamingo_supermarket:cb:pay', function(source, cb, s
         end
 
         total = total + (unitPrice * qty)
-        itemsToGive[#itemsToGive + 1] = { name = itemName, count = qty }
+        itemsToGive[#itemsToGive + 1] = { name = itemName, count = qty, price = unitPrice }
+    end
+
+    -- market sa vlasnikom: mora biti dovoljno robe na stanju
+    local inStock, stockMsg = biz('MarketCheck', shopCoords(shop), itemsToGive)
+    if inStock == false then
+        notify(source, stockMsg or 'Nema dovoljno robe na stanju.')
+        return cb(false)
     end
 
     if total <= 0 then
@@ -148,6 +220,9 @@ ESX.RegisterServerCallback('flamingo_supermarket:cb:pay', function(source, cb, s
             TriggerClientEvent('flamingo_misije:client:simCardBought', source)
         end
     end
+
+    -- roba izlazi iz magacina, novac ide u kasu vlasnika marketa
+    biz('MarketSale', shopCoords(shop), itemsToGive, total, xPlayer.getName())
 
     cb(true)
 end)
