@@ -17,3 +17,11 @@ NOVO
   tabovi; MDT Policija/Vlada, Market i Nekretnine kao iPadOS split view.
 - Font Inter (lokalno, html/fonts).
 - Tablet se sam smanji na manjim rezolucijama.
+
+FLAMINGO TEMA (isti izgled kao M meni)
+--------------------------------------
+- html/theme.css se ucitava poslednji i daje svim aplikacijama izgled M menija:
+  grafit + sampanj zlato, Poppins naslovi, kartice sa tankom ivicom, bez blur-a.
+- Boja akcenta se menja na jednom mestu: --fl-accent u theme.css (npr. #ff4d8d za roze).
+- Nova podrazumevana pozadina: img/flamingo_bg.jpg (zatamnjen hero banner iz M menija).
+  Stare iPad pozadine su i dalje dostupne dugmetom sa slikom u dock-u.

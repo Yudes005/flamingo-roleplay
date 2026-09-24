@@ -1,3 +1,5 @@
+@font-face { font-family: 'Poppins'; font-weight: 600; src: url('nui://flamingo_tablet/html/fonts/poppins-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Poppins'; font-weight: 600; src: url('nui://flamingo_tablet/html/fonts/poppins-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-024F; }
 @font-face { font-family: 'Inter'; font-weight: 400; src: url('nui://flamingo_tablet/html/fonts/inter-latin-400-normal.woff2') format('woff2'); }
 @font-face { font-family: 'Inter'; font-weight: 400; src: url('nui://flamingo_tablet/html/fonts/inter-latin-ext-400-normal.woff2') format('woff2'); unicode-range: U+0100-024F; }
 @font-face { font-family: 'Inter'; font-weight: 600; src: url('nui://flamingo_tablet/html/fonts/inter-latin-600-normal.woff2') format('woff2'); }
@@ -8,8 +10,8 @@
 @font-face { font-family: 'Inter'; font-weight: 800; src: url('nui://flamingo_tablet/html/fonts/inter-latin-ext-800-normal.woff2') format('woff2'); unicode-range: U+0100-024F; }
 
 :root {
-    --bg: #121214; --card: #1c1c1e; --card-2: #232326; --line: rgba(255, 255, 255, 0.08);
-    --muted: #98989f; --pink: #ff4d94; --pink-2: #d81b72; --green: #30d158; --red: #ff6961;
+    --bg: #111114; --card: rgba(255, 255, 255, 0.035); --card-2: #1d1d22; --line: rgba(255, 255, 255, 0.075);
+    --muted: #a8a196; --pink: #c9a86a; --pink-2: #c9a86a; --green: #8fc7a2; --red: #e07c74;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; }
@@ -17,14 +19,14 @@ body { font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif; color: #fff;
 .hidden { display: none !important; }
 
 #app { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
-.panel { width: 420px; border-radius: 20px; background: var(--bg); border: 1px solid rgba(255, 255, 255, 0.1); animation: panelIn .22s ease; }
+.panel { width: 420px; border-radius: 18px; color: #efe9df; background: radial-gradient(420px 200px at 0% 0%, rgba(201, 168, 106, .12), transparent 70%), var(--bg); border: 1px solid rgba(255, 255, 255, 0.13); box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 30px 60px -30px rgba(0,0,0,.9); animation: panelIn .22s ease; }
 @keyframes panelIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 .head { display: flex; align-items: center; gap: 13px; padding: 20px 20px 4px; }
-.head-ico { flex: 0 0 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 19px; background: var(--pink-2); color: #fff; }
+.head-ico { flex: 0 0 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 19px; background: rgba(201, 168, 106, .14); border: 1px solid rgba(201, 168, 106, .36); color: #c9a86a; }
 .head-t { flex: 1; min-width: 0; }
 .eyebrow { font-size: 10.5px; font-weight: 800; letter-spacing: .14em; color: var(--pink); text-transform: uppercase; }
-.head-t h1 { font-size: 19px; font-weight: 800; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.head-t h1 { font-family: 'Poppins', 'Inter', sans-serif; font-weight: 600 !important; font-size: 19px; font-weight: 800; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .x { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--muted); cursor: pointer; font-size: 13px; }
 .x:hover { color: #fff; }
 
@@ -39,7 +41,7 @@ body { font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif; color: #fff;
 .players { display: flex; flex-wrap: wrap; gap: 7px; }
 .pl { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: #fff; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 .pl small { color: var(--muted); font-weight: 600; }
-.pl.active { border-color: var(--pink); background: rgba(255, 77, 148, .12); }
+.pl.active { border-color: #c9a86a; background: rgba(201, 168, 106, .14); }
 .empty { padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--line); color: var(--muted); font-size: 12px; line-height: 1.5; }
 
 .amount { position: relative; }
@@ -53,13 +55,13 @@ body { font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif; color: #fff;
 
 .btns { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; }
 .btn { height: 46px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: #fff; font-family: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.btn.primary { background: var(--pink-2); border-color: transparent; }
-.btn.green { background: #1e9e43; border-color: transparent; }
+.btn.primary { background: #c9a86a; border-color: transparent; color: #16130d; }
+.btn.green { background: #8fc7a2; border-color: transparent; color: #0d1a12; }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
 
 .big-price { text-align: center; padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
 .big-price span { font-size: 11.5px; color: var(--muted); font-weight: 600; }
-.big-price b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -.8px; margin-top: 2px; }
+.big-price b { display: block; font-family: 'Poppins', 'Inter', sans-serif; font-weight: 600 !important; font-size: 30px; font-weight: 800; letter-spacing: -.8px; margin-top: 2px; }
 .big-price small { font-size: 11.5px; color: var(--muted); }
 .timer { height: 4px; border-radius: 3px; background: rgba(255,255,255,.07); overflow: hidden; }
 .timer div { height: 100%; background: var(--pink-2); transition: width 1s linear; }

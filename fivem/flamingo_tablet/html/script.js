@@ -2741,14 +2741,15 @@ window.addEventListener('message', (event) => {
   window.addEventListener('resize', fit); fit();
 
   /* ---------- pozadina ---------- */
-  const WALLS = ['img/ipad1.svg', 'img/ipad2.svg', 'img/ipad3.svg', 'img/wallpaper.jpg'];
+  // Prva pozadina je Flamingo (isti stil kao M meni) - podrazumevana za sve
+  const WALLS = ['img/flamingo_bg.jpg', 'img/ipad1.svg', 'img/ipad2.svg', 'img/ipad3.svg', 'img/wallpaper.jpg'];
   let wall = 0;
-  try { wall = Math.max(0, WALLS.indexOf(localStorage.getItem('fl_tab_wall'))); } catch (e) {}
+  try { wall = Math.max(0, WALLS.indexOf(localStorage.getItem('fl_tab_wall2'))); } catch (e) {}
   function applyWall() { $('tablet').style.backgroundImage = `url('${WALLS[wall]}'), url('img/wallpaper.jpg')`; }
   applyWall();
   $('ios-dock-wall').addEventListener('click', () => {
     wall = (wall + 1) % WALLS.length;
-    try { localStorage.setItem('fl_tab_wall', WALLS[wall]); } catch (e) {}
+    try { localStorage.setItem('fl_tab_wall2', WALLS[wall]); } catch (e) {}
     applyWall();
   });
 

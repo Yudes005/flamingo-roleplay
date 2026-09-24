@@ -1,0 +1,273 @@
+/* =====================================================================
+   FLAMINGO TEMA - isti izgled kao M meni (flamingo_mmenu)
+   ---------------------------------------------------------------------
+   Grafit + šampanj zlato, Poppins (naslovi) + Inter (tekst), kartice sa
+   tankom ivicom bez blur-a. Učitava se POSLEDNJI, pa prepisuje iPadOS
+   izgled svih aplikacija. Akcenat se menja na jednom mestu: --fl-accent.
+
+   Napomena za FiveM: backdrop-filter na malim elementima CEF ume da
+   iscrta kao crni kvadrat, zato se ovde nigde ne koristi.
+   ===================================================================== */
+
+@font-face { font-family: 'Poppins'; font-weight: 500; src: url('fonts/poppins-latin-500-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+2000-206F,U+20AC; }
+@font-face { font-family: 'Poppins'; font-weight: 500; src: url('fonts/poppins-latin-ext-500-normal.woff2') format('woff2'); unicode-range: U+0100-024F; }
+@font-face { font-family: 'Poppins'; font-weight: 600; src: url('fonts/poppins-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+2000-206F,U+20AC; }
+@font-face { font-family: 'Poppins'; font-weight: 600; src: url('fonts/poppins-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-024F; }
+@font-face { font-family: 'Poppins'; font-weight: 700; src: url('fonts/poppins-latin-700-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+2000-206F,U+20AC; }
+@font-face { font-family: 'Poppins'; font-weight: 700; src: url('fonts/poppins-latin-ext-700-normal.woff2') format('woff2'); unicode-range: U+0100-024F; }
+
+:root {
+  --fl-accent: #c9a86a;
+  --fl-accent-2: #a8884f;
+  --fl-gold: #e3cb98;
+  --fl-accent-soft: rgba(201, 168, 106, 0.14);
+  --fl-accent-line: rgba(201, 168, 106, 0.36);
+  --fl-on-accent: #16130d;
+
+  --fl-text: #efe9df;
+  --fl-dim: #a8a196;
+  --fl-faint: #767068;
+
+  --fl-bg: #0b0b0d;
+  --fl-panel: #16161a;
+  --fl-panel-2: #1d1d22;
+  --fl-well: rgba(255, 255, 255, 0.035);
+  --fl-line: rgba(255, 255, 255, 0.075);
+  --fl-line-2: rgba(255, 255, 255, 0.13);
+  --fl-hl: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+  --fl-ok: #8fc7a2;
+  --fl-bad: #e07c74;
+  --fl-warn: #e3b36a;
+
+  --fl-display: 'Poppins', 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ---------------- Okvir tableta ---------------- */
+#tablet-frame { background: #08080a; box-shadow: 0 0 0 1.5px #3a3833, 0 0 0 3px #1b1a17, 0 40px 80px -30px rgba(0, 0, 0, .9); }
+#tablet { background-color: var(--fl-bg); color: var(--fl-text); }
+.side-button { background: #3a3833; }
+
+/* ---------------- Statusna traka / zaključani ekran ---------------- */
+#tablet-statusbar { color: var(--fl-text); }
+.lock-clock { font-family: var(--fl-display); font-weight: 600; letter-spacing: -3px; }
+.lock-date { font-family: var(--fl-display); font-weight: 500; color: var(--fl-gold); }
+.lock-ic { color: var(--fl-accent); }
+#lock-screen { background: linear-gradient(180deg, rgba(9, 9, 11, .25), transparent 40%, rgba(9, 9, 11, .55)); }
+
+/* ---------------- Obaveštenja ---------------- */
+.toast { background: var(--fl-panel-2); backdrop-filter: none; border: 1px solid var(--fl-line-2); box-shadow: 0 18px 36px -18px rgba(0, 0, 0, .9); color: var(--fl-text); }
+.toast-icon { background: var(--fl-accent-soft); color: var(--fl-accent) !important; border: 1px solid var(--fl-accent-line); }
+.toast-success .toast-icon { background: rgba(143, 199, 162, .12); color: var(--fl-ok) !important; border-color: rgba(143, 199, 162, .36); }
+.toast-error .toast-icon { background: rgba(224, 124, 116, .12); color: var(--fl-bad) !important; border-color: rgba(224, 124, 116, .36); }
+
+/* ---------------- Početni ekran: widgeti ---------------- */
+.widget {
+  background: rgba(20, 20, 24, .82);
+  backdrop-filter: none;
+  border: 1px solid var(--fl-line);
+  box-shadow: var(--fl-hl), 0 22px 44px -24px rgba(0, 0, 0, .85);
+  border-radius: 18px;
+  color: var(--fl-text);
+}
+.wcl-face { background: #111114; box-shadow: inset 0 0 0 2px var(--fl-accent-line); }
+.wcl-face text { fill: var(--fl-dim) !important; font-family: var(--fl-display); }
+#ios-h, #ios-m { stroke: var(--fl-text) !important; }
+#ios-s { stroke: var(--fl-accent) !important; }
+.wcl-face circle { fill: var(--fl-accent) !important; }
+.wcl-info b { font-family: var(--fl-display); color: var(--fl-gold); }
+.wcl-info span { font-family: var(--fl-display); font-weight: 500; }
+.w-cal { background: rgba(20, 20, 24, .82); color: var(--fl-text); }
+.wca-left span { color: var(--fl-accent); }
+.wca-left b { font-family: var(--fl-display); font-weight: 600; }
+.wca-left em { color: var(--fl-dim); }
+.wca-grid i.h { color: var(--fl-faint); }
+.wca-grid i.t { background: var(--fl-accent); color: var(--fl-on-accent); }
+.wo-ic { background: var(--fl-accent-soft) !important; color: var(--fl-accent); border: 1px solid var(--fl-accent-line); }
+.quickstat-card { background: var(--fl-well); border: 1px solid var(--fl-line); }
+.quickstat-icon.calls, .quickstat-icon.medkit { background: var(--fl-accent-soft); color: var(--fl-accent); }
+.quickstat-value { font-family: var(--fl-display); }
+.quickstat-label { color: var(--fl-dim); }
+
+/* ---------------- Ikonice aplikacija (kao pločice u M meniju) ---------------- */
+#tablet .app-icon-glyph,
+#tablet .dock-icon {
+  background: linear-gradient(180deg, #1f1f24, #141418) !important;
+  color: var(--fl-accent) !important;
+  border: 1px solid var(--fl-accent-line);
+  box-shadow: var(--fl-hl), 0 12px 24px -14px rgba(0, 0, 0, .95);
+}
+#tablet .app-icon-glyph::after, #tablet .dock-icon::after { box-shadow: none; }
+#tablet .app-icon:hover .app-icon-glyph { border-color: var(--fl-accent); background: linear-gradient(180deg, #25241f, #16150f) !important; }
+.app-icon-label { font-weight: 600; color: var(--fl-text); text-shadow: 0 1px 8px rgba(0, 0, 0, .7); }
+.app-badge { background: var(--fl-bad); color: #fff; box-shadow: 0 0 0 2px #0b0b0d; }
+
+.home-dock, #home-dock.home-dock.hidden {
+  background: rgba(16, 16, 19, .86);
+  backdrop-filter: none;
+  border: 1px solid var(--fl-line-2);
+  box-shadow: var(--fl-hl), 0 20px 40px -20px rgba(0, 0, 0, .9);
+  border-radius: 24px;
+}
+.dock-sep { background: var(--fl-line-2); }
+.home-indicator { background: rgba(239, 233, 223, .75); }
+
+/* ---------------- Okvir aplikacija ---------------- */
+#tablet .app-screen {
+  background:
+    radial-gradient(900px 520px at 0% -12%, rgba(201, 168, 106, .10), transparent 60%),
+    radial-gradient(700px 500px at 110% 110%, rgba(255, 255, 255, .03), transparent 60%),
+    linear-gradient(180deg, #0e0e11 0%, #09090b 100%) !important;
+  color: var(--fl-text);
+}
+#tablet .app-topbar {
+  min-height: 60px;
+  background: rgba(12, 12, 15, .92);
+  border-bottom: 1px solid var(--fl-line);
+}
+#tablet .app-title { font-family: var(--fl-display); font-size: 19px; font-weight: 600; letter-spacing: -.2px; color: var(--fl-text); }
+#tablet .app-back { color: var(--fl-accent); }
+#tablet .app-back:hover { background: var(--fl-accent-soft); }
+#tablet .app-icon-mini {
+  width: 36px; height: 36px; border-radius: 10px; font-size: 14px;
+  background: var(--fl-accent-soft) !important; color: var(--fl-accent) !important;
+  border: 1px solid var(--fl-accent-line);
+}
+#tablet .app-screen input, #tablet .app-screen textarea, #tablet .app-screen select { caret-color: var(--fl-accent); }
+#tablet .app-screen ::placeholder { color: var(--fl-faint); }
+
+/* Zajednički naslovi u aplikacijama */
+#tablet h1, #tablet h2, #tablet h3,
+#tablet .fl-org-section-title, #tablet .fm-head-t b,
+#tablet .kc-hero h3, #tablet .bz-hero h3, #tablet .bz-kasa-num, #tablet .bz-sum-num,
+#tablet .kc-cap-num, #tablet .bz-tier-p, #tablet .bz-atm-ring-in b, #tablet .quickstat-value {
+  font-family: var(--fl-display);
+}
+
+/* ---------------- Aktivne stavke u bočnim menijima (kao leva traka M menija) ---------------- */
+#tablet .fl-settings-sidenav, #tablet .mk-side, #tablet .kc-side, #tablet .fm-side, #tablet .bz-side {
+  background: rgba(14, 14, 17, .78);
+  border-right: 1px solid var(--fl-line);
+}
+#tablet .fl-settings-sidenav { border: 1px solid var(--fl-line); }
+
+#tablet .fl-settings-nav-item.active,
+#tablet .mk-nav.active,
+#tablet .kc-item.active,
+#tablet .fm-nav-btn.active,
+#tablet .fm.gov .fm-nav-btn.active,
+#tablet .bz-item.active {
+  position: relative;
+  background: var(--fl-accent-soft) !important;
+  border: 1px solid var(--fl-accent-line) !important;
+  color: var(--fl-text) !important;
+  box-shadow: var(--fl-hl) !important;
+}
+#tablet .fl-settings-nav-item.active::before,
+#tablet .mk-nav.active::before,
+#tablet .kc-item.active::before,
+#tablet .fm-nav-btn.active::before,
+#tablet .bz-item.active::before {
+  content: ''; position: absolute; left: -1px; top: 22%; bottom: 22%; width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--fl-accent);
+}
+#tablet .kc-item.active * { color: inherit !important; }
+#tablet .kc-item.active .kc-item-sub { color: var(--fl-dim) !important; }
+#tablet .mk-nav.active i:first-child, #tablet .mk-nav.active em,
+#tablet .fm-nav-btn.active i { color: var(--fl-accent) !important; }
+#tablet .fl-settings-nav-item.active .fl-settings-nav-sub { color: var(--fl-dim); }
+#tablet .fl-settings-nav-item.active .fl-settings-nav-chevron { color: var(--fl-accent); }
+#tablet .fl-settings-nav-item .fl-settings-nav-icon {
+  background: var(--fl-well) !important; color: var(--fl-accent) !important;
+  border: 1px solid var(--fl-line-2);
+}
+#tablet .fl-settings-nav-item.active .fl-settings-nav-icon { background: var(--fl-accent-soft) !important; border-color: var(--fl-accent-line); box-shadow: none; }
+#tablet .fm-nav-btn i, #tablet .fm.gov .fm-nav-btn i, #tablet .mk-nav i:first-child { color: var(--fl-accent); }
+#tablet .fm-nav-sec { color: var(--fl-faint); text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; font-weight: 700; }
+
+/* ---------------- Kartice / paneli ---------------- */
+#tablet .fl-settings-main, #tablet .fm-me, #tablet .kc-cap,
+#tablet .kc-section, #tablet .kc-stat, #tablet .kc-item, #tablet .kc-hero,
+#tablet .bz-section, #tablet .bz-stat, #tablet .bz-sum, #tablet .bz-hero, #tablet .bz-item,
+#tablet .duty-status-bar, #tablet .call-item {
+  background: rgba(21, 21, 25, .82);
+  border: 1px solid var(--fl-line);
+  box-shadow: var(--fl-hl);
+}
+#tablet .kc-item, #tablet .bz-item { background: rgba(21, 21, 25, .6); }
+#tablet .kc-item:hover, #tablet .bz-item:hover { border-color: var(--fl-line-2); background: rgba(30, 30, 36, .8); }
+#tablet .fm-head { background: rgba(12, 12, 15, .92); border-bottom: 1px solid var(--fl-line); }
+#tablet .org-category-body::before { background: transparent; }
+
+/* Hero kartice: diskretan zlatni sjaj u uglu, kao "Tvoj napredak" u M meniju */
+#tablet .bz-hero, #tablet .kc-hero {
+  background:
+    radial-gradient(420px 220px at 0% 0%, rgba(201, 168, 106, .16), transparent 70%),
+    rgba(21, 21, 25, .9);
+}
+#tablet .bz-hero-art { color: rgba(201, 168, 106, .07); }
+#tablet .bz-eyebrow { color: var(--fl-accent); }
+
+/* ---------------- Dugmad ---------------- */
+#tablet .fl-btn-primary, #tablet .kc-btn.primary, #tablet .bz-btn.primary,
+#tablet .kc-pay-btn:last-child, #tablet .mk-btn.primary, #tablet .mk-primary {
+  background: var(--fl-accent) !important;
+  color: var(--fl-on-accent) !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 22px -12px rgba(201, 168, 106, .55);
+  font-weight: 700;
+}
+#tablet .kc-pay-btn:last-child b { color: var(--fl-on-accent) !important; }
+#tablet .fl-btn-primary:hover, #tablet .kc-btn.primary:hover, #tablet .bz-btn.primary:hover { filter: brightness(1.06); }
+#tablet .fl-btn-secondary, #tablet .kc-btn, #tablet .bz-btn {
+  background: var(--fl-well);
+  border: 1px solid var(--fl-line-2);
+  color: var(--fl-text);
+}
+#tablet .fl-btn-secondary:hover, #tablet .kc-btn:hover, #tablet .bz-btn:hover { border-color: var(--fl-accent-line); background: rgba(255, 255, 255, .06); }
+#tablet .bz-btn.success { background: rgba(143, 199, 162, .1); border-color: rgba(143, 199, 162, .36); color: var(--fl-ok); }
+#tablet .bz-btn.danger, #tablet .kc-btn.danger { background: rgba(224, 124, 116, .1); border-color: rgba(224, 124, 116, .36); color: var(--fl-bad); }
+#tablet .bz-btn.armed, #tablet .kc-btn.armed, #tablet .bz-btn.danger.armed, #tablet .kc-btn.danger.armed { background: var(--fl-bad); color: #1a0d0b; border-color: transparent; }
+#tablet .bz-btn.success.armed { background: var(--fl-ok); color: #0d1a12; }
+#tablet .bz-tag { background: rgba(22, 19, 13, .25); }
+
+/* Segmentirani prekidači */
+#tablet .bz-seg, #tablet .li-tabbar, #tablet .org-mode-switch { background: var(--fl-well); border: 1px solid var(--fl-line); }
+#tablet .bz-seg button.active, #tablet .li-tab.active, #tablet .org-mode-btn.active {
+  background: var(--fl-accent-soft); color: var(--fl-text); box-shadow: inset 0 0 0 1px var(--fl-accent-line);
+}
+
+/* Polja */
+#tablet .fl-input, #tablet .fl-select-trigger, #tablet .kc-input, #tablet .bz-input {
+  background: rgba(10, 10, 12, .55); border: 1px solid var(--fl-line-2); color: var(--fl-text);
+}
+#tablet .fl-input:focus, #tablet .kc-input:focus, #tablet .bz-input:focus, #tablet .fl-select.open .fl-select-trigger { border-color: var(--fl-accent); }
+#tablet .fl-select-menu { background: var(--fl-panel-2); border: 1px solid var(--fl-line-2); }
+#tablet .app-screen input[type="checkbox"]:checked::after { border-color: var(--fl-on-accent); }
+
+/* ---------------- Moj biznis: sitnice ---------------- */
+#tablet .bz-sum-ico, #tablet .bz-item-ico, #tablet .kc-cap-ico {
+  background: var(--fl-accent-soft); color: var(--fl-accent); border: 1px solid var(--fl-accent-line);
+}
+#tablet .bz-item-amt b, #tablet .bz-stat-value.pos, #tablet .bz-log-r b.pos { color: var(--fl-ok); }
+#tablet .bz-bar.today .bz-bar-track div { background: var(--fl-accent); }
+#tablet .bz-bar-track div { background: rgba(201, 168, 106, .45); }
+#tablet .bz-bar.today .bz-bar-l { color: var(--fl-accent); }
+#tablet .bz-tier { border-color: rgba(255, 255, 255, .08); box-shadow: var(--fl-hl); }
+#tablet .bz-tier.green { background: linear-gradient(150deg, #1d3a2b, #142219); }
+#tablet .bz-tier.dark  { background: linear-gradient(150deg, #26262c, #18181c); }
+#tablet .bz-tier.gold  { background: linear-gradient(150deg, #4a3c22, #2a2214); }
+#tablet .bz-tier-p { color: var(--fl-gold); }
+#tablet .bz-prod { background: var(--fl-well); border-color: var(--fl-line); }
+#tablet .bz-prod-img { background: rgba(10, 10, 12, .6); border: 1px solid var(--fl-line); }
+#tablet .bz-kbd { background: var(--fl-accent-soft); color: var(--fl-accent); }
+#tablet .bz-refresh { color: var(--fl-accent); }
+#tablet .bz-refresh:hover { background: var(--fl-accent-soft); }
+
+/* ---------------- MDT (Policija / Vlada / FIB / Šerif) ---------------- */
+#tablet .fm-side { background: rgba(14, 14, 17, .78) !important; }
+#tablet .fm-main { background: transparent; }
+#tablet .fm-brand b { font-family: var(--fl-display); font-weight: 600; }
+#tablet .fm.gov .fm-nav-btn.active { background: rgba(227, 179, 106, .14) !important; border-color: rgba(227, 179, 106, .4) !important; }
+#tablet .fm.gov .fm-nav-btn.active::before { background: #e3b36a; }
+#tablet .fm-exit { color: var(--fl-bad); }

@@ -2,18 +2,18 @@
    FLAMINGO MDT - zajednički dizajn za MDT Policije i MDT Vlade
    Tema se bira klasom na .fm:  .fm.pd (plava)  |  .fm.gov (zlatna)
    ============================================================ */
-.app-icon-glyph.pdmdt { background: linear-gradient(155deg, #1f4fd1, #4f86ff); }
+.app-icon-glyph.pdmdt { background: linear-gradient(155deg, #1f4fd1, #c9a86a); }
 .app-icon-glyph.mdt { background: linear-gradient(155deg, #b8860b, #f2c14e); }
 
 .fm-app.app-screen { background: #000; backdrop-filter: none; padding-top: 30px; }
 .fm {
-  --acc: #0a84ff; --acc2: #64aaff; --accbg: rgba(10, 132, 255, .16); --accln: rgba(10, 132, 255, .45); --accgrad: linear-gradient(180deg, #3d9bff, #0a6fe0);
-  --bg: #000000; --side: #1c1c1e; --card: #1c1c1e; --card2: #2c2c2e; --line: rgba(84,84,88,.45); --line2: rgba(84,84,88,.7);
-  --text: #ffffff; --dim: #98989f; --faint: #6e6e73; --red: #ff453a; --redbg: rgba(255,69,58,.16); --warn: #ff9f0a; --warnbg: rgba(255,159,10,.16);
-  --ok: #30d158; --okbg: rgba(48,209,88,.16); --gold: #ffd60a;
+  --acc: #c9a86a; --acc2: #e3cb98; --accbg: rgba(201, 168, 106, .14); --accln: rgba(201, 168, 106, .4); --accgrad: linear-gradient(180deg, #d4b57a, #a8884f);
+  --bg: transparent; --side: rgba(14, 14, 17, .78); --card: rgba(21, 21, 25, .82); --card2: #1d1d22; --line: rgba(255,255,255,.075); --line2: rgba(255,255,255,.13);
+  --text: #efe9df; --dim: #a8a196; --faint: #767068; --red: #e07c74; --redbg: rgba(224, 124, 116,.16); --warn: #e3b36a; --warnbg: rgba(227, 179, 106,.16);
+  --ok: #8fc7a2; --okbg: rgba(143, 199, 162,.16); --gold: #ffd60a;
   position: relative; flex: 1; min-height: 0; display: flex; color: var(--text); font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif; overflow: hidden;
 }
-.fm.gov { --acc: #ff9f0a; --acc2: #ffc266; --accbg: rgba(255, 159, 10, .16); --accln: rgba(255, 159, 10, .45); --accgrad: linear-gradient(180deg, #ffb340, #e08600); }
+.fm.gov { --acc: #e3b36a; --acc2: #f0d29a; --accbg: rgba(227, 179, 106, .14); --accln: rgba(227, 179, 106, .4); --accgrad: linear-gradient(180deg, #e8c07d, #b98a3e); }
 .fm *::-webkit-scrollbar { width: 0; height: 0; }
 .fm button { font-family: inherit; cursor: pointer; border: none; color: inherit; background: none; }
 .fm input, .fm textarea, .fm select { font-family: inherit; color: var(--text); outline: none; }
@@ -22,7 +22,7 @@
 /* ---------- SIDEBAR ---------- */
 .fm-side { flex: 0 0 188px; width: 188px; display: flex; flex-direction: column; background: var(--side); border-right: 1px solid var(--line); padding: 14px 10px 12px; }
 .fm-brand { display: flex; align-items: center; gap: 10px; padding: 2px 6px 14px; border-bottom: 1px solid var(--line); margin-bottom: 10px; }
-.fm-brand-ico { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--accgrad); color: #fff; font-size: 15px; box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+.fm-brand-ico { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--accbg); border: 1px solid var(--accln); color: var(--acc); font-size: 15px; }
 .fm.gov .fm-brand-ico { color: #231600; }
 .fm-brand b { display: block; font-size: 13.5px; font-weight: 800; letter-spacing: .3px; }
 .fm-brand span { font-size: 10.5px; color: var(--dim); font-weight: 700; text-transform: uppercase; letter-spacing: .8px; }
@@ -67,7 +67,7 @@ select.fm-inp option { background: #15171f; }
 
 .fm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px; border-radius: 10px; font-size: 12.5px; font-weight: 700; background: var(--card2); border: 1px solid var(--line2); white-space: nowrap; transition: .12s; }
 .fm-btn:hover { border-color: rgba(255,255,255,.22); }
-.fm-btn.acc { background: var(--accgrad); border-color: transparent; color: #fff; }
+.fm-btn.acc { background: var(--acc); border-color: transparent; color: #16130d; }
 .fm.gov .fm-btn.acc { color: #231600; }
 .fm-btn.acc:hover { filter: brightness(1.08); }
 .fm-btn.red { background: var(--redbg); border-color: rgba(255,90,115,.35); color: #ff93a5; }
@@ -162,7 +162,7 @@ select.fm-inp option { background: #15171f; }
 /* ---------- DISPATCH ---------- */
 .fm-call { position: relative; padding: 12px 14px 12px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); overflow: hidden; }
 .fm-call::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--pc, var(--acc)); }
-.fm-call.p-LOW { --pc: #6b7189; } .fm-call.p-NORMAL { --pc: #4f86ff; } .fm-call.p-HIGH { --pc: var(--warn); } .fm-call.p-CRITICAL { --pc: var(--red); }
+.fm-call.p-LOW { --pc: #6b7189; } .fm-call.p-NORMAL { --pc: #c9a86a; } .fm-call.p-HIGH { --pc: var(--warn); } .fm-call.p-CRITICAL { --pc: var(--red); }
 .fm-call + .fm-call { margin-top: 8px; }
 .fm-call-top { display: flex; align-items: center; gap: 10px; }
 .fm-call-top b { flex: 1; font-size: 13.5px; }
@@ -183,8 +183,8 @@ select.fm-inp option { background: #15171f; }
 
 /* Organizacija - policijska tema ikonice/dock-a */
 .app-icon-glyph.organizacija.organizacija--policija,
-.app-icon-mini.organizacija.organizacija--policija { background: linear-gradient(135deg, #1f4fd1, #4f86ff); }
-.dock-icon.dock-organizacija.dock-organizacija--policija { background: linear-gradient(135deg, #1f4fd1, #4f86ff); color: #fff; }
+.app-icon-mini.organizacija.organizacija--policija { background: linear-gradient(135deg, #1f4fd1, #c9a86a); }
+.dock-icon.dock-organizacija.dock-organizacija--policija { background: linear-gradient(135deg, #1f4fd1, #c9a86a); color: #fff; }
 
 /* ---------- FIB tema (crno + hladno srebrno-plava) ---------- */
 .fm.fib { --acc: #7fb4d9; --acc2: #b7dcf5; --accbg: rgba(127, 180, 217, .13); --accln: rgba(127, 180, 217, .4);
