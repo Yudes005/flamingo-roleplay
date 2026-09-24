@@ -596,19 +596,11 @@ local function doAction(src, s, xPlayer, acc, payload, cb)
             return fail('Nemaš toliko gotovine kod sebe.')
         end
 
-        local fee      = isAtm and math.floor(amount * tier.atmFee / 100) or 0
-        local credited = amount - fee
-        if credited < 1 then return fail('Iznos je premali.') end
-
+        -- uplata je uvek bez provizije (i na bankomatu)
         xPlayer.removeAccountMoney('money', amount, 'Bank deposit')
-        xPlayer.addAccountMoney('bank', credited, 'Bank deposit')
+        xPlayer.addAccountMoney('bank', amount, 'Bank deposit')
         logTx(xPlayer.identifier, 'deposit', 'Uplata na račun', memo or 'Gotovina na račun', s.place, amount)
-        if fee > 0 then
-            logTx(xPlayer.identifier, 'fee', 'Provizija bankomata', ('Uplata, %d%%'):format(tier.atmFee), s.place, fee)
-            msg = ('Uplaćeno %s na račun (provizija %s).'):format(fmt(credited), fmt(fee))
-        else
-            msg = ('Uplaćeno %s na račun.'):format(fmt(amount))
-        end
+        msg = ('Uplaćeno %s na račun.'):format(fmt(amount))
 
     elseif action == 'withdraw' then
         if isAtm and amount > tier.atmLimit then

@@ -62,9 +62,9 @@ const MODES = {
 };
 
 const DEFAULT_CARDS = [
-    { id: 'standard', label: 'Standard', theme: 'green', price: 0,     maintenance: 0,    atmFee: 5, atmLimit: 50000,   transferFee: 0, maxTransfer: 500000,   cashback: 0 },
-    { id: 'premium',  label: 'Premium',  theme: 'dark',  price: 15000, maintenance: 1500, atmFee: 2, atmLimit: 250000,  transferFee: 0, maxTransfer: 2000000,  cashback: 1 },
-    { id: 'gold',     label: 'Gold',     theme: 'gold',  price: 75000, maintenance: 5000, atmFee: 0, atmLimit: 1000000, transferFee: 0, maxTransfer: 15000000, cashback: 3 }
+    { id: 'standard', label: 'Standard', theme: 'green', price: 0,     maintenance: 0,    atmFee: 15, atmLimit: 50000,   transferFee: 0, maxTransfer: 500000,   cashback: 0 },
+    { id: 'premium',  label: 'Premium',  theme: 'dark',  price: 15000, maintenance: 1500, atmFee: 10, atmLimit: 250000,  transferFee: 0, maxTransfer: 2000000,  cashback: 1 },
+    { id: 'gold',     label: 'Gold',     theme: 'gold',  price: 75000, maintenance: 5000, atmFee: 5, atmLimit: 1000000, transferFee: 0, maxTransfer: 15000000, cashback: 3 }
 ];
 
 const state = {
@@ -171,7 +171,7 @@ function cardVisual(tier, opt = {}) {
             <span class="bcard-tier">${esc(tier.label)}</span>
         </div>
         <div class="bcard-mid">
-            <div class="chip"><i></i><i></i><i></i></div>
+            <div class="bcard-chip"><i></i><i></i><i></i></div>
             <svg class="nfc" viewBox="0 0 24 24"><path d="M8 7c2 3 2 7 0 10M12 5c3 4 3 10 0 14M16 3c4 5 4 13 0 18"/></svg>
         </div>
         <div class="bcard-num">${esc(opt.number || '•••• •••• •••• ••••')}</div>
@@ -186,7 +186,7 @@ function cardVisual(tier, opt = {}) {
 function perkRows(t) {
     const maint = !maintOn() || !t.maintenance ? 'Besplatno' : `${money(t.maintenance)} / ${esc(maintLabel())}`;
     return [
-        ['Provizija bankomata', t.atmFee ? `${t.atmFee}%` : 'Bez provizije'],
+        ['Provizija na podizanje', t.atmFee ? `${t.atmFee}%` : 'Bez provizije'],
         ['Cashback', t.cashback ? `${t.cashback}%` : 'Ne'],
         ['Limit bankomata', `Do ${money(t.atmLimit)}`],
         ['Održavanje', maint],
@@ -589,8 +589,6 @@ function renderOverview() {
     const inSum = txs.filter((t) => dirOf(t) === 'in').reduce((s, t) => s + t.amount, 0);
     const outSum = txs.filter((t) => dirOf(t) === 'out').reduce((s, t) => s + t.amount, 0);
     const outCount = txs.filter((t) => dirOf(t) === 'out').length;
-    const net = inSum - outSum;
-    const avg = txs.length ? Math.round((inSum + outSum) / txs.length) : 0;
     const days = state.cfg.statsDays || 30;
     const total = d.bank + d.cash;
     const pct = (v) => (total > 0 ? Math.round((v / total) * 100) : 0);
@@ -608,16 +606,6 @@ function renderOverview() {
             <div class="stat-h"><span class="label">Potrošeno</span><div class="badge out">${icon('withdraw')}</div></div>
             <div class="val">${money(outSum)}</div>
             <div class="sub">kroz ${outCount} ${outCount === 1 ? 'isplatu' : 'isplata'}</div>
-        </div>
-        <div class="card stat">
-            <div class="stat-h"><span class="label">Bilans</span><div class="badge">${icon(net >= 0 ? 'trend' : 'trendDown')}</div></div>
-            <div class="val" style="color:${net < 0 ? 'var(--out)' : 'var(--text)'}">${net < 0 ? '-' : ''}${money(net)}</div>
-            <div class="sub">primljeno minus potrošeno</div>
-        </div>
-        <div class="card stat">
-            <div class="stat-h"><span class="label">Prosečna transakcija</span><div class="badge">${icon('wallet')}</div></div>
-            <div class="val">${money(avg)}</div>
-            <div class="sub">od ukupno ${txs.length} ${txs.length === 1 ? 'transakcije' : 'transakcija'}</div>
         </div>
     </div>
 
@@ -885,7 +873,7 @@ function demoPayFine(id) {
 const isAtm = () => state.data && state.data.kind === 'atm';
 const atmLimit = () => myTier().atmLimit;
 const feePct = () => {
-    if (isAtm()) return myTier().atmFee || 0;
+    if (isAtm()) return state.mode === 'withdraw' ? (myTier().atmFee || 0) : 0;
     return state.mode === 'transfer' ? (myTier().transferFee || 0) : 0;
 };
 
@@ -944,7 +932,7 @@ function renderActions() {
         ${modeIds.map((id) => { const x = MODES[id]; return `
             <button class="mode ${state.mode === id ? 'active' : ''}" data-mode="${id}">
                 <div class="mode-ic">${icon(x.icon)}</div>
-                <div class="mode-t"><strong>${x.title}</strong><span>${isAtm() ? `${x.sub}, provizija ${t.atmFee}%` : x.sub}</span></div>
+                <div class="mode-t"><strong>${x.title}</strong><span>${isAtm() ? (id === 'withdraw' && t.atmFee ? `${x.sub}, provizija ${t.atmFee}%` : `${x.sub}, bez provizije`) : x.sub}</span></div>
             </button>`; }).join('')}
     </div>
 

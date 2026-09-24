@@ -209,7 +209,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .link:hover { text-decoration: underline; }
 .label { font-size: 11px; font-weight: 700; color: var(--dim); }
 
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .stat { position: relative; }
 .stat-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .stat .badge {
@@ -530,13 +530,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .bcard-top, .bcard-mid, .bcard-bot { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .brandmark { font-size: 15px; font-weight: 800; font-style: italic; letter-spacing: 1.5px; }
 .bcard-tier { font-size: 12px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--fg-dim); }
-.chip {
+.bcard-chip {
     width: 42px; height: 31px; border-radius: 7px;
     background: linear-gradient(135deg, #f3dc9c, #b8923f);
     display: grid; grid-template-rows: repeat(3, 1fr); gap: 3px; padding: 5px 6px;
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15);
 }
-.chip i { border-radius: 2px; border: 1px solid rgba(0, 0, 0, .18); }
+.bcard-chip i { border-radius: 2px; border: 1px solid rgba(0, 0, 0, .18); }
 .nfc { width: 24px; height: 24px; fill: none; stroke: var(--fg-dim); stroke-width: 1.8; stroke-linecap: round; }
 .bcard-num { position: relative; font-family: var(--mono); font-size: 19px; font-weight: 600; letter-spacing: 2px; white-space: nowrap; }
 .bcard-bot > div:first-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -557,7 +557,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .bcard.sm { padding: 12px 14px; border-radius: 13px; box-shadow: 0 12px 26px rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(255, 255, 255, .1); }
 .bcard.sm .brandmark { font-size: 11px; }
 .bcard.sm .bcard-tier { font-size: 9.5px; }
-.bcard.sm .chip { width: 28px; height: 21px; padding: 3px 4px; gap: 2px; border-radius: 5px; }
+.bcard.sm .bcard-chip { width: 28px; height: 21px; padding: 3px 4px; gap: 2px; border-radius: 5px; }
 .bcard.sm .nfc { width: 16px; height: 16px; }
 .bcard.sm .bcard-num { font-size: 12px; letter-spacing: 1px; }
 .bcard.sm .bcard-bot span { display: none; }

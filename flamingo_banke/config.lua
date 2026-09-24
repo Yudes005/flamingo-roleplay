@@ -85,7 +85,7 @@ Config.DefaultCard = 'standard' -- paket za stare racune (pre ovog sistema) i ka
 -- Paketi kartica (redosled = redosled u UI-ju)
 --   price       -> jednokratna cena pri otvaranju racuna / prelasku na paket
 --   maintenance -> cena odrzavanja (vidi Config.Maintenance)
---   atmFee      -> % provizije na bankomatu (podizanje i uplata)
+--   atmFee      -> % provizije SAMO na podizanje sa bankomata (uplata i salter banke su bez provizije)
 --   atmLimit    -> max iznos po jednoj transakciji na bankomatu
 --   transferFee -> % provizije na transfer (banka + telefon)
 --   maxTransfer -> max iznos po jednom transferu
@@ -95,21 +95,21 @@ Config.Cards = {
     {
         id = 'standard', label = 'Standard', theme = 'green',
         price = 0, maintenance = 0,
-        atmFee = 5, atmLimit = 50000,
+        atmFee = 15, atmLimit = 50000,
         transferFee = 0, maxTransfer = 500000,
         cashback = 0
     },
     {
         id = 'premium', label = 'Premium', theme = 'dark',
         price = 15000, maintenance = 1500,
-        atmFee = 2, atmLimit = 250000,
+        atmFee = 10, atmLimit = 250000,
         transferFee = 0, maxTransfer = 2000000,
         cashback = 1
     },
     {
         id = 'gold', label = 'Gold', theme = 'gold',
         price = 75000, maintenance = 5000,
-        atmFee = 0, atmLimit = 1000000,
+        atmFee = 5, atmLimit = 1000000,
         transferFee = 0, maxTransfer = 15000000,
         cashback = 3
     },
