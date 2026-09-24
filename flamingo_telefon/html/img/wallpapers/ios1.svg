@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a3fd1"/><stop offset=".55" stop-color="#1467e8"/><stop offset="1" stop-color="#0b3cb8"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".42" cy=".35" r=".75">
+      <stop offset="0" stop-color="#ffd08a"/><stop offset=".45" stop-color="#ffab6b"/><stop offset=".8" stop-color="#f08a5c"/><stop offset="1" stop-color="#b56cc4"/>
+    </radialGradient>
+    <linearGradient id="y" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe45c"/><stop offset=".5" stop-color="#f6c422"/><stop offset="1" stop-color="#9fcf3a"/>
+    </linearGradient>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#46d7a0"/><stop offset="1" stop-color="#0f8f7a"/>
+    </linearGradient>
+    <linearGradient id="t" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#27b4e6"/><stop offset="1" stop-color="#1c6fe0"/>
+    </linearGradient>
+    <filter id="b1"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="b2"><feGaussianBlur stdDeviation="2"/></filter>
+    <filter id="sh"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#021a66" flood-opacity=".55"/></filter>
+  </defs>
+  <rect width="390" height="844" fill="url(#bg)"/>
+  <path d="M-40 250 C 80 180, 220 120, 440 60 L 440 -20 L -40 -20 Z" fill="#1b7ef2" opacity=".55" filter="url(#b1)"/>
+  <circle cx="250" cy="330" r="235" fill="url(#sun)" filter="url(#sh)"/>
+  <path d="M-60 520 C 60 470, 170 520, 250 610 C 320 690, 390 740, 460 730 L 460 900 L -60 900 Z" fill="url(#t)" filter="url(#sh)"/>
+  <path d="M-60 560 C 40 520, 150 560, 225 660 C 290 745, 350 800, 460 790 L 460 900 L -60 900 Z" fill="url(#y)" filter="url(#sh)"/>
+  <path d="M-60 650 C 30 610, 120 650, 180 740 C 225 805, 300 850, 460 850 L 460 900 L -60 900 Z" fill="url(#g)" filter="url(#sh)"/>
+  <path d="M-60 430 C 60 400, 130 470, 150 560 C 170 650, 120 760, 40 900 L -60 900 Z" fill="#0f58d8" opacity=".9" filter="url(#sh)"/>
+  <path d="M-60 470 C 40 450, 95 510, 105 580 C 115 660, 70 760, 0 900 L -60 900 Z" fill="#2aa3ea" opacity=".85" filter="url(#b2)"/>
+</svg>

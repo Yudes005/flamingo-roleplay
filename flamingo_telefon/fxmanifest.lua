@@ -3,8 +3,8 @@ game 'gta5'
 lua54 'yes'
 
 author 'ESX Phone Design'
-description 'Flamingo Telefon 2.0 - iPhone stil'
-version '2.0.0'
+description 'Flamingo Telefon 3.0 - iOS stil'
+version '3.0.0'
 
 -- NAPOMENA: pozivi preko telefona koriste pma-voice (exports['pma-voice']:setPlayerCall)
 -- da spoje sagovornike glasom. Nije tvrda zavisnost (nema "dependency" liniju) jer se
@@ -22,6 +22,7 @@ files {
     'html/script.js',
     'html/img/*.jpg',
     'html/img/wallpapers/*.jpg',
+    'html/img/wallpapers/*.svg',
     'html/fonts/*.woff2',
     'html/vendor/fontawesome/css/*.css',
     'html/vendor/fontawesome/webfonts/*.woff2',

@@ -721,7 +721,10 @@ local function phoneInfo(xPlayer, acc, cb)
                 recent      = rows or {},
                 now         = os.time(),
                 fee         = tier.transferFee or 0,
-                maxTransfer = tier.maxTransfer
+                maxTransfer = tier.maxTransfer,
+                tier        = tier.id,
+                tierLabel   = tier.label,
+                theme       = tier.theme
             })
         end
     )

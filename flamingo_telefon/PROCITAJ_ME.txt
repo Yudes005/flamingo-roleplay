@@ -1,49 +1,55 @@
-FLAMINGO TELEFON 2.0 (iPhone redizajn)
-======================================
-Ceo UI je napisan iz početka, ali PROTOKOL prema igri je isti kao pre -
-server i stari eventi rade bez ikakve izmene (SIM, kontakti, poruke,
-pozivi, LifeInvader, Banka, Taxi, Bolnica).
+FLAMINGO TELEFON 3.0 (iOS redizajn)
+===================================
+Ceo UI (html/index.html, style.css, script.js) je napisan iz početka.
+PROTOKOL prema igri je ISTI - client.lua i server.lua nisu menjani,
+svi stari eventi i NUI pozivi rade isto (SIM, kontakti, poruke, pozivi,
+LifeInvader, Banka, Taxi, Hitna, Policija, Kamera, Beleške).
 
-NOVO
-----
-- iPhone izgled: ram telefona, Dynamic Island, status bar, lock screen sa
-  satom i obaveštenjima, home ekran sa ikonicama i dock-om, animacije.
-- 8 pozadina (Podešavanja -> Pozadina), zvono/ne uznemiravaj/jačina zvuka.
-- Aplikacija Telefon: Omiljeni / Nedavni / Kontakti / Tastatura (iOS stil).
-  Desni klik na kontakt = brisanje, desni klik na poziv = brisanje iz istorije.
-- Poruke: lista razgovora + iOS mehurići, nova poruka preko broja ili kontakta.
-- Banka: kartica sa stanjem, brzi iznosi, transakcije, ekran uspeha.
-- LifeInvader: pisanje oglasa + tvoji poslednji oglasi.
-- Taxi: mapa, radar dok se traži vozač, izbor destinacije, GPS opcija.
-- Hitna: status dežurnih doktora + poziv sa opisom.
-- NOVO: Kamera, GALERIJA, Beleške, Muzika (radio), Kalkulator, Podešavanja.
-- USLUGE: Taxi i Hitna pomoć su sada u aplikaciji "Usluge" (spremno za
-  mehaničara, policiju itd. - dodaju se kao nove kartice).
-- Izgled: titanijumski ram (iPhone 17 stil), tanje ivice, staklene ikonice,
-  "Traži" dugme umesto tačkica, jači blur na dock-u.
+IZGLED
+------
+- Titanijumski ram, Dynamic Island (obaveštenja se "razvuku" iz ostrva),
+  pravi iOS status bar (signal, wifi, baterija).
+- Zaključani ekran: katanac, datum iznad velikog sata, obaveštenja,
+  lampa + kamera dole, "Pritisni ekran da otključaš".
+- Početni ekran: widgeti Kalendar i Banka (stanje na računu), ikonice u
+  iOS stilu, "Traži" dugme i dock (Telefon, Poruke, Kontakti, Podešavanja)
+  sa crvenim bedževima (propušteni pozivi / nepročitane poruke).
+- 4 nove iOS pozadine (SVG) + 8 starih, ili slika iz Galerije.
+- Telefon se sam smanji na manjim rezolucijama (npr. 1366x768).
+- Fontovi sada stvarno rade (u 2.0 su putanje do fontova bile pogrešne).
+
+APLIKACIJE
+----------
+- Telefon: Omiljeni (velike ikonice), Nedavni (Svi / Propušteni),
+  Kontakti (po slovima + "Moja kartica"), Tastatura (iOS).
+  Klik na kontakt otvara karticu kontakta (poruka, poziv, omiljeni, brisanje).
+  "i" pored poziva: otvori kontakt ili ga dodaj.
+- Poruke: pretraga, nepročitane (plava tačka), iOS mehurići grupisani po
+  vremenu, klik na obaveštenje otvara razgovor.
+- Banka: kartica u boji tvog paketa (Standard/Premium/Gold iz flamingo_banke),
+  limit i provizija transfera, brzi iznosi, poslednji transferi.
+- LifeInvader: novi izgled oglasnika + tvoji oglasi.
+- Usluge: Taxi, Hitna, Policija (Hitna i Policija su i na početnom ekranu).
+- Taxi: mapa + donji panel sa stanjem vožnje i destinacijama.
+- Hitna / Policija: status dežurnih, brza prijava, potvrda slanja.
+- Fotografije (Galerija), Beleške (pretraga), Muzika (radio), Kalkulator
+  (pravi iOS), Kalendar (NOVO), Podešavanja (+ opcija da se isključi
+  zaključani ekran).
 
 KAMERA + GALERIJA
 -----------------
-Otvara pravu kameru telefona u igri.
 KLIK / ENTER = slikaj, STRELICA GORE = selfi, ESC / desni klik = izlaz.
-Slika se ČUVA U GALERIJU ako je pokrenut resurs `screenshot-basic`
-(besplatan, standardni FiveM resurs - samo ga ubaci i dodaj u server.cfg).
-Bez njega kamera radi, ali slike se ne čuvaju.
-U Galeriji: klik na sliku -> može da se obriše ili postavi kao POZADINA telefona.
-Slike se čuvaju lokalno na računaru igrača (do 24 slike).
+Slike se čuvaju u Fotografije ako je pokrenut `screenshot-basic`.
 
-BELEŠKE
--------
-Čuvaju se u bazi. Tabela `phone_notes` se pravi AUTOMATSKI pri pokretanju.
-
-MUZIKA
-------
-Internet radio (čuje samo igrač, svira i kad je telefon zatvoren).
-Stanice se menjaju u html/script.js -> STATIONS. Može i svoj mp3/stream link.
+TEST U BROWSERU
+---------------
+Otvori html/index.html u Chrome-u - telefon se pokrene sa demo podacima
+(u igri se demo NIKAD ne koristi). Npr. index.html?app=banka, ?app=phone,
+?call (dolazni poziv), ?notif (obaveštenje na zaključanom ekranu).
 
 NAPOMENE
 --------
-- Ako menjaš taxi destinacije, promeni ih na OBA mesta kao i ranije
+- Ako menjaš taxi destinacije, promeni ih na OBA mesta
   (flamingo_taxi/config.lua i html/script.js -> TAXI_DESTINATIONS).
-- Font Awesome i fontovi su lokalno (bez CDN-a).
-- Telefon se otvara tasterom K (isto kao pre).
+- Radio stanice: html/script.js -> STATIONS.
+- Telefon se otvara tasterom K.
