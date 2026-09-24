@@ -2,6 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<!-- Font Awesome: lokalno (html/vendor), a CDN ostaje kao rezerva ako lokalni fajl nije dostupan -->
+<link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -17,13 +19,22 @@
             <div class="chat-tab chat-tab-staff" data-channel="staff" id="chat-tab-staff" style="display:none;">STAFF</div>
         </div>
 
-        <input id="chat-input" type="text" placeholder="Message..." maxlength="150" autocomplete="off">
+        <div id="chat-bar">
+            <span id="chat-cmd-tag" class="hidden"></span>
+            <input id="chat-input" type="text" placeholder="Poruka..." maxlength="150" autocomplete="off" spellcheck="false">
+            <span id="chat-count">0/150</span>
+            <button id="chat-send" title="Pošalji (Enter)"><i class="fa-solid fa-play"></i></button>
+        </div>
 
-        <div id="chat-quick-cmds">
-            <button class="chat-cmd-btn" data-cmd="/me "><i class="fa-solid fa-person-walking"></i> ME</button>
-            <button class="chat-cmd-btn" data-cmd="/do "><i class="fa-solid fa-quote-right"></i> DO</button>
-            <button class="chat-cmd-btn" data-cmd="/try "><i class="fa-solid fa-dice"></i> TRY</button>
-            <button class="chat-cmd-btn" data-cmd="/todo "><i class="fa-solid fa-list-check"></i> TODO</button>
+        <div id="chat-bottom">
+            <button id="chat-actions-btn">ACTIONS</button>
+            <div id="chat-quick-cmds" class="hidden">
+                <button class="chat-cmd-btn" data-cmd="/me "><b class="k-me">ME</b><span>Radnja</span></button>
+                <button class="chat-cmd-btn" data-cmd="/do "><b class="k-do">DO</b><span>Opis</span></button>
+                <button class="chat-cmd-btn" data-cmd="/try "><b class="k-try">TRY</b><span>Pokušaj 50/50</span></button>
+                <button class="chat-cmd-btn" data-cmd="/todo "><b class="k-todo">TODO</b><span>Opis + pokušaj</span></button>
+            </div>
+            <span id="chat-hint"><kbd>ENTER</kbd> pošalji <kbd>ESC</kbd> zatvori</span>
         </div>
     </div>
 </div>

@@ -29,29 +29,38 @@ function pruneMessages() {
     }
 }
 
+// Kad je chat zatvoren, poruke posle FADE_AFTER ms polako izblede (kad se
+// chat otvori, opet se vide sve poslednje poruke).
+const FADE_AFTER = 15000;
+
 function addMessageEl(el) {
     messagesEl.appendChild(el);
     pruneMessages();
+    setTimeout(function () { el.classList.add('faded'); }, FADE_AFTER);
+}
+
+function badge(cls, label) {
+    return '<span class="chat-badge ' + cls + '">' + label + '</span>';
 }
 
 function channelTag(data) {
-    if (data.channel === 'nonrp') return '<span class="chat-nonrp-tag">[NON-RP]</span>';
-    if (data.channel === 'rp') return '<span class="chat-rp-tag">[RP]</span>';
+    if (data.channel === 'nonrp') return badge('b-nonrp', 'NON-RP');
+    if (data.channel === 'rp') return badge('b-rp', 'RP');
     return '';
 }
 
 function kindTag(kind) {
-    if (kind === 'me') return '<span class="chat-tag chat-tag-me">[ME]</span>';
-    if (kind === 'do') return '<span class="chat-tag chat-tag-do">[DO]</span>';
-    if (kind === 'todo') return '<span class="chat-tag chat-tag-todo">[TODO]</span>';
-    if (kind === 'try') return '<span class="chat-tag chat-tag-try">[TRY]</span>';
+    if (kind === 'me') return badge('b-me', 'ME');
+    if (kind === 'do') return badge('b-do', 'DO');
+    if (kind === 'todo') return badge('b-todo', 'TODO');
+    if (kind === 'try') return badge('b-try', 'TRY');
     return '';
 }
 
 function renderMessage(data) {
     const row = document.createElement('div');
-    row.className = 'chat-msg';
-    const tag = kindTag(data.kind) + channelTag(data);
+    row.className = 'chat-msg k-' + (data.kind || 'chat') + ' c-' + (data.channel || 'rp');
+    const tag = '<span class="chat-badges">' + kindTag(data.kind) + channelTag(data) + '</span>';
 
     if (data.kind === 'me') {
         row.innerHTML = tag + '<span class="chat-me">* ' + escapeHtml(data.author) + ' ' + escapeHtml(data.text) + ' *</span>';
@@ -68,7 +77,7 @@ function renderMessage(data) {
         row.innerHTML =
             tag +
             '<span class="chat-author" style="color:' + (data.authorColor || '#e21e6b') + '">' +
-            escapeHtml(data.author) + ' [' + escapeHtml(data.authorId) + ']</span>: ' +
+            escapeHtml(data.author) + ' <em>' + escapeHtml(data.authorId) + '</em></span>' +
             '<span class="chat-text">' + escapeHtml(data.text) + '</span>';
     }
 
@@ -77,11 +86,11 @@ function renderMessage(data) {
 
 function renderStaffMessage(data) {
     const row = document.createElement('div');
-    row.className = 'chat-msg';
+    row.className = 'chat-msg k-staff';
     row.innerHTML =
-        '<span class="chat-staff-tag">[STAFF]</span>' +
+        '<span class="chat-badges">' + badge('b-staff', 'STAFF') + '</span>' +
         '<span class="chat-author" style="color:' + (data.color || '#ffd400') + '">' +
-        '[' + escapeHtml(data.rank) + '] ' + escapeHtml(data.name) + '</span>: ' +
+        '<em class="rank">' + escapeHtml(data.rank) + '</em> ' + escapeHtml(data.name) + '</span>' +
         '<span class="chat-text">' + escapeHtml(data.message) + '</span>';
     addMessageEl(row);
 }
@@ -130,10 +139,15 @@ function setOpen(isOpen, canSeeStaffTab) {
         }
 
         controlsEl.classList.remove('hidden');
+        document.body.classList.add('chat-open');
         inputEl.value = '';
+        updateInputDecor();
         inputEl.focus();
     } else {
         controlsEl.classList.add('hidden');
+        document.body.classList.remove('chat-open');
+        document.getElementById('chat-quick-cmds').classList.add('hidden');
+        document.getElementById('chat-actions-btn').classList.remove('active');
         inputEl.blur();
     }
 }
@@ -192,15 +206,15 @@ window.addEventListener('message', function (event) {
 
 function applyChannelIndicator(channel) {
     if (channel === 'nonrp') {
-        inputEl.placeholder = 'Poruka... (NON-RP)';
+        inputEl.placeholder = 'OOC poruka (NON-RP)...';
         inputEl.classList.remove('channel-staff');
         inputEl.classList.add('channel-nonrp');
     } else if (channel === 'staff') {
-        inputEl.placeholder = 'Poruka... (STAFF)';
+        inputEl.placeholder = 'Poruka staff timu...';
         inputEl.classList.remove('channel-nonrp');
         inputEl.classList.add('channel-staff');
     } else {
-        inputEl.placeholder = 'Message...';
+        inputEl.placeholder = 'Poruka...';
         inputEl.classList.remove('channel-nonrp', 'channel-staff');
     }
 }
@@ -218,8 +232,47 @@ document.querySelectorAll('.chat-tab').forEach(function (tab) {
 document.querySelectorAll('.chat-cmd-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
         inputEl.value = btn.dataset.cmd;
+        document.getElementById('chat-quick-cmds').classList.add('hidden');
+        document.getElementById('chat-actions-btn').classList.remove('active');
+        updateInputDecor();
         inputEl.focus();
     });
+});
+
+// ACTIONS dugme otvara/zatvara brze komande (ME / DO / TRY / TODO)
+document.getElementById('chat-actions-btn').addEventListener('click', function () {
+    const box = document.getElementById('chat-quick-cmds');
+    box.classList.toggle('hidden');
+    this.classList.toggle('active', !box.classList.contains('hidden'));
+    inputEl.focus();
+});
+
+// Dok se kuca: brojač znakova + oznaka komande (/me, /do, /try, /todo)
+const CMD_TAGS = { me: 'ME', do: 'DO', try: 'TRY', todo: 'TODO' };
+function updateInputDecor() {
+    const v = inputEl.value;
+    const count = document.getElementById('chat-count');
+    count.textContent = v.length + '/150';
+    count.classList.toggle('warn', v.length >= 130);
+    document.getElementById('chat-bar').classList.toggle('has-text', v.trim().length > 0);
+
+    const m = v.match(/^\/(me|do|try|todo)\b/i);
+    const tag = document.getElementById('chat-cmd-tag');
+    if (m) {
+        const k = m[1].toLowerCase();
+        tag.textContent = CMD_TAGS[k];
+        tag.className = 'k-' + k;
+    } else {
+        tag.className = 'hidden';
+    }
+}
+inputEl.addEventListener('input', updateInputDecor);
+
+// Strelica = isto kao Enter
+document.getElementById('chat-send').addEventListener('click', function () {
+    const text = inputEl.value.trim();
+    if (text.length > 0) sendMessageToGame(text, currentChannel);
+    closeChatToGame();
 });
 
 inputEl.addEventListener('keydown', function (e) {

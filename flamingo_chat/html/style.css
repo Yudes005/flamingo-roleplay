@@ -1,359 +1,288 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
+/* =====================================================================
+   FLAMINGO CHAT - redizajn (tabovi + široka traka za unos + ACTIONS)
+   Boje su upisane direktno (bez var()), kao u ostalim Flamingo UI-jima.
+   ===================================================================== */
+@font-face { font-family: 'Barlow Condensed'; font-weight: 500; font-display: swap; src: url('fonts/barlow-condensed-latin-ext-500.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 500; font-display: swap; src: url('fonts/barlow-condensed-latin-500.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 600; font-display: swap; src: url('fonts/barlow-condensed-latin-ext-600.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 600; font-display: swap; src: url('fonts/barlow-condensed-latin-600.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 700; font-display: swap; src: url('fonts/barlow-condensed-latin-ext-700.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 700; font-display: swap; src: url('fonts/barlow-condensed-latin-700.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }@font-face { font-family: 'Inter'; font-weight: 500; font-display: swap; src: url('fonts/inter-latin-500-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap; src: url('fonts/inter-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-weight: 700; font-display: swap; src: url('fonts/inter-latin-700-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Inter'; font-weight: 500; font-display: swap; src: url('fonts/inter-latin-ext-500-normal.woff2') format('woff2'); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap; src: url('fonts/inter-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-weight: 700; font-display: swap; src: url('fonts/inter-latin-ext-700-normal.woff2') format('woff2'); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
     background: transparent;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+    user-select: none;
 }
+button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
 
 /* Sakrij ceo chat kad je otvoren ESC meni, market, telefon ili bilo koji drugi NUI */
-body.hud-hidden > div {
-    display: none !important;
-}
+body.hud-hidden > div { display: none !important; }
 
-/* Rucno gasenje chat-a iz Podesavanja */
-body.chat-manual-hidden #chat-wrapper {
-    display: none !important;
-}
+/* Ručno gašenje chat-a iz Podešavanja */
+body.chat-manual-hidden #chat-wrapper { display: none !important; }
 
-:root {
-    --card-bg: rgba(17, 17, 19, 0.88);
-    --card-border: rgba(255, 255, 255, 0.06);
-    --primary: rgba(255, 255, 255, 0.85);
-    --primary-bg: rgba(255, 255, 255, 0.1);
-    --yellow: #e8c94a;
-    --yellow-bg: #453d22;
-    --green: #3ddc97;
-    --red: #f2545b;
-    --purple: #d9b8ff;
-    --cyan: #4db8ff;
-}
+.hidden { display: none !important; }
 
 /* ================= CHAT ================= */
-
 #chat-wrapper {
     position: absolute;
-    top: 100px;
-    left: 16px;
-    width: 420px;
+    top: 64px;
+    left: 18px;
+    width: 600px;
 }
 
+/* ---------------- Poruke ---------------- */
 #chat-messages {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    align-items: flex-start;
     gap: 4px;
-    height: 190px;
+    height: 250px;
     overflow: hidden;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 36px);
+            mask-image: linear-gradient(180deg, transparent 0, #000 36px);
 }
 
 .chat-msg {
-    font-size: 13px;
+    max-width: 100%;
+    padding: 5px 10px 5px 6px;
+    border-radius: 7px;
+    background: rgba(14, 14, 16, 0.62);
+    font-size: 14px;
     font-weight: 500;
     line-height: 1.4;
-    color: #ffffff;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
-    background: transparent;
-    border-left: 3px solid transparent;
-    padding: 1px 2px;
-    opacity: 1;
-    transform: translateX(0);
-    transition: opacity 0.6s ease;
-    animation: chat-msg-in 0.2s ease;
+    color: #ececf0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    word-wrap: break-word;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    animation: chat-msg-in 0.25s cubic-bezier(.2, .9, .3, 1);
 }
-
 @keyframes chat-msg-in {
-    from { opacity: 0; transform: translateX(-8px); }
+    from { opacity: 0; transform: translateX(-12px); }
     to { opacity: 1; transform: translateX(0); }
 }
+/* kad je chat zatvoren, stare poruke izblede; otvoren chat = sve se vide */
+.chat-msg.faded { opacity: 0; }
+body.chat-open .chat-msg.faded { opacity: 1; transition: opacity 0.15s ease; }
 
-.chat-author {
+.chat-badges { display: inline-flex; gap: 4px; vertical-align: 1px; margin-right: 7px; }
+.chat-badge {
+    display: inline-block;
+    padding: 1px 7px 0;
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', 'Inter', sans-serif;
+    font-size: 13px;
     font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 17px;
+    text-shadow: none;
 }
+.b-rp { background: rgba(255, 255, 255, 0.9); color: #111; }
+.b-nonrp { background: #f7d54a; color: #1a1600; }
+.b-me { background: #b98cff; color: #1b0f33; }
+.b-do { background: #8e8e96; color: #111; }
+.b-todo { background: #8e8e96; color: #111; }
+.b-try { background: #4db8ff; color: #04203a; }
+.b-staff { background: #ff4d5e; color: #fff; }
 
-.chat-nonrp-tag {
-    color: var(--yellow);
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    margin-right: 4px;
-}
+.chat-author { font-weight: 700; margin-right: 6px; }
+.chat-author em { font-style: normal; font-weight: 600; font-size: 12px; opacity: 0.55; color: #fff; margin-left: 2px; }
+.chat-author em.rank { opacity: 1; font-size: 12.5px; margin: 0 3px 0 0; }
+.chat-text { color: #ececf0; }
 
-.chat-rp-tag {
-    color: var(--primary);
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    margin-right: 4px;
-}
+.chat-me { color: #d4b8ff; font-style: italic; }
+.chat-ooc { color: #b0b0b8; font-style: italic; }
+.chat-try { color: #fff; }
+.chat-try-success { color: #30d158; font-weight: 700; }
+.chat-try-fail { color: #ff453a; font-weight: 700; }
 
-.chat-tag {
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    margin-right: 4px;
-}
-
-.chat-tag-me {
-    color: var(--purple);
-}
-
-.chat-tag-do,
-.chat-tag-todo {
-    color: #9aa0a8;
-}
-
-.chat-tag-try {
-    color: var(--cyan);
-}
-
-.chat-staff-tag {
-    color: var(--yellow);
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    margin-right: 4px;
-}
-
-.chat-text {
-    color: #e6e6e8;
-}
-
-.chat-me {
-    color: var(--purple);
-    font-style: italic;
-}
-
-.chat-ooc {
-    color: #9aa0a8;
-    font-style: italic;
-}
-
-.chat-try {
-    color: #ffffff;
-}
-
-.chat-try-success {
-    color: var(--green);
-    font-weight: 700;
-}
-
-.chat-try-fail {
-    color: var(--red);
-    font-weight: 700;
-}
+.chat-msg.k-me { background: rgba(40, 22, 70, 0.62); }
+.chat-msg.k-staff { background: rgba(70, 14, 22, 0.62); }
 
 .chat-system {
-    background: transparent;
-    padding: 2px 4px;
+    padding: 5px 10px;
     font-weight: 600;
+    background: rgba(14, 14, 16, 0.62);
 }
 
-/* ---------- Reklama - ista kartica kao notify sistem ---------- */
+/* ---------- Reklama ---------- */
 .chat-ad {
     display: flex;
     flex-direction: column;
-    align-self: flex-start;
     width: fit-content;
-    max-width: 86%;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 9px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    padding: 9px 12px;
-    margin: 4px 0;
+    max-width: 90%;
+    background: rgba(14, 14, 16, 0.82);
+    border-left: 3px solid rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    padding: 9px 13px;
+    margin: 3px 0;
     text-shadow: none;
 }
-
-.chat-ad-head {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
+.chat-ad-head { display: flex; align-items: center; gap: 9px; }
 .chat-ad-head i {
-    flex: none;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    font-size: 11px;
+    flex: none; width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 7px; font-size: 12px;
 }
+.chat-ad-subtitle { color: #f4f4f6; font-size: 14px; font-weight: 600; line-height: 1.35; }
+.chat-ad-meta { margin-top: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 11.5px; color: rgba(255, 255, 255, 0.5); }
+.chat-ad-meta-item { display: flex; align-items: center; gap: 5px; }
+.chat-ad-meta-item i { font-size: 10px; }
+.chat-ad-meta-item:first-child { color: rgba(255, 255, 255, 0.75); font-weight: 600; }
+.chat-ad-meta-sep { opacity: 0.35; }
 
-.chat-ad-subtitle {
-    color: #f0f0f2;
-    font-size: 13.5px;
-    font-weight: 600;
-    line-height: 1.35;
-}
-
-.chat-ad-meta {
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.45);
-}
-
-.chat-ad-meta-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.chat-ad-meta-item i {
-    width: 9px;
-    font-size: 9px;
-    text-align: center;
-}
-
-.chat-ad-meta-item:first-child {
-    color: rgba(255, 255, 255, 0.65);
-    font-weight: 600;
-}
-
-.chat-ad-meta-sep {
-    opacity: 0.35;
-}
-
-/* ================= KONTROLE (tabovi + input + komande) ================= */
-/* Pune tamne kartice, bez glass/blur - isti jezik kao notify sistem */
-
+/* ================= KONTROLE ================= */
 #chat-controls {
     margin-top: 10px;
-    padding-top: 10px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    transition: opacity 0.15s ease;
+    gap: 7px;
+    animation: controls-in 0.18s ease;
 }
+@keyframes controls-in { from { opacity: 0; transform: translateY(6px); } }
 
-#chat-controls.hidden {
-    display: none;
-}
-
-#chat-tabs {
-    display: flex;
-    gap: 6px;
-}
-
+/* Tabovi (kao na slici: tamne pločice, aktivna žuta) */
+#chat-tabs { display: flex; gap: 6px; }
 .chat-tab {
-    padding: 6px 16px;
-    border-radius: 8px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 11px;
-    font-weight: 700;
+    padding: 5px 15px 4px;
+    border-radius: 5px;
+    background: rgba(24, 24, 27, 0.78);
+    color: #fff;
+    font-family: 'Barlow Condensed', 'Inter', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
     letter-spacing: 0.4px;
+    line-height: 24px;
     text-transform: uppercase;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
+.chat-tab:hover { background: rgba(44, 44, 48, 0.88); }
+.chat-tab:active { transform: scale(0.96); }
+.chat-tab.active { background: #f7d54a; color: #141414; }
+.chat-tab-staff.active { background: #ff4d5e; color: #fff; }
 
-.chat-tab:hover {
-    color: #ffffff;
-}
-
-.chat-tab.active {
-    background: var(--card-bg);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.35);
-}
-
-.chat-tab-staff {
-    color: rgba(255, 255, 255, 0.55);
-}
-
-.chat-tab-staff.active {
-    background: var(--card-bg);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.35);
-}
-
-#chat-input {
-    width: 100%;
-    box-sizing: border-box;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 10px;
-    padding: 10px 13px;
-    color: #ffffff;
-    font-family: 'Manrope', sans-serif;
-    font-weight: 500;
-    font-size: 13px;
-    outline: none;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
-    transition: border-color 0.15s ease;
-}
-
-#chat-input:focus {
-    border-color: rgba(255, 255, 255, 0.4);
-}
-
-#chat-input.channel-nonrp {
-    border-color: var(--card-border);
-}
-
-#chat-input.channel-nonrp:focus {
-    border-color: rgba(255, 255, 255, 0.4);
-}
-
-#chat-input.channel-staff {
-    border-color: var(--card-border);
-}
-
-#chat-input.channel-staff:focus {
-    border-color: rgba(255, 255, 255, 0.4);
-}
-
-#chat-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-}
-
-#chat-quick-cmds {
-    display: flex;
-    gap: 6px;
-}
-
-.chat-cmd-btn {
-    flex: 1 1 0;
+/* Traka za unos */
+#chat-bar {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 5px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    padding: 7px 0;
-    color: rgba(255, 255, 255, 0.55);
-    font-family: 'Manrope', sans-serif;
-    font-size: 10.5px;
+    gap: 10px;
+    height: 54px;
+    padding: 0 8px 0 18px;
+    border-radius: 6px;
+    background: rgba(24, 24, 27, 0.78);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    transition: box-shadow 0.15s ease, background 0.15s ease;
+}
+#chat-bar:focus-within { background: rgba(28, 28, 32, 0.86); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+#chat-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    caret-color: #f7d54a;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    user-select: text;
+}
+#chat-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+#chat-input.channel-nonrp { caret-color: #f7d54a; }
+#chat-input.channel-staff { caret-color: #ff4d5e; }
+
+#chat-cmd-tag {
+    flex: none;
+    padding: 2px 8px 1px;
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', 'Inter', sans-serif;
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: 0.3px;
-    cursor: pointer;
+    letter-spacing: 0.5px;
+    animation: tag-in 0.15s ease;
+}
+@keyframes tag-in { from { opacity: 0; transform: scale(0.8); } }
+#chat-cmd-tag.k-me { background: #b98cff; color: #1b0f33; }
+#chat-cmd-tag.k-do, #chat-cmd-tag.k-todo { background: #8e8e96; color: #111; }
+#chat-cmd-tag.k-try { background: #4db8ff; color: #04203a; }
+
+#chat-count { flex: none; font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, 0.3); font-variant-numeric: tabular-nums; }
+#chat-count.warn { color: #ff9f0a; }
+
+#chat-send {
+    flex: none;
+    width: 40px; height: 40px;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 17px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+#chat-bar.has-text #chat-send { color: #fff; }
+#chat-send:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+
+/* ACTIONS + brze komande */
+#chat-bottom { display: flex; align-items: center; gap: 6px; }
+#chat-actions-btn {
+    padding: 5px 13px 4px;
+    border-radius: 5px;
+    background: rgba(24, 24, 27, 0.78);
+    color: #fff;
+    font-family: 'Barlow Condensed', 'Inter', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    line-height: 22px;
     transition: background 0.15s ease, color 0.15s ease;
 }
+#chat-actions-btn:hover { background: rgba(44, 44, 48, 0.88); }
+#chat-actions-btn.active { background: #fff; color: #141414; }
 
-.chat-cmd-btn i {
-    font-size: 10px;
+#chat-quick-cmds { display: flex; gap: 6px; animation: controls-in 0.15s ease; }
+.chat-cmd-btn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 11px 4px 5px;
+    border-radius: 5px;
+    background: rgba(24, 24, 27, 0.78);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
 }
+.chat-cmd-btn:hover { background: rgba(44, 44, 48, 0.9); color: #fff; }
+.chat-cmd-btn b {
+    padding: 1px 7px 0;
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
+.chat-cmd-btn .k-me { background: #b98cff; color: #1b0f33; }
+.chat-cmd-btn .k-do, .chat-cmd-btn .k-todo { background: #8e8e96; color: #111; }
+.chat-cmd-btn .k-try { background: #4db8ff; color: #04203a; }
 
-.chat-cmd-btn:hover {
-    background: var(--card-bg);
-    border-color: rgba(255, 255, 255, 0.35);
-    color: #ffffff;
+#chat-quick-cmds:not(.hidden) ~ #chat-hint { display: none; }
+#chat-hint { margin-left: auto; font-size: 11.5px; font-weight: 600; color: rgba(255, 255, 255, 0.4); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); white-space: nowrap; }
+#chat-hint kbd {
+    font-family: 'Barlow Condensed', 'Inter', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.4px;
+    padding: 0 5px; border-radius: 3px;
+    background: rgba(24, 24, 27, 0.78); color: rgba(255, 255, 255, 0.75);
+    margin: 0 3px 0 6px;
 }
