@@ -6,7 +6,7 @@
     <title>Animacije</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,75 +37,47 @@
     </svg>
 
     <div id="app" class="app" aria-hidden="true">
-        <div class="app__shade"></div>
-
         <main class="panel" id="panel">
-            <!-- Zaglavlje -->
-            <header class="panel__head">
-                <div class="brand">
-                    <div class="brand__mark"><span>F</span></div>
-                    <div class="brand__text">
-                        <span class="brand__eyebrow">Flamingo Roleplay</span>
-                        <h1 class="brand__title" id="menuTitle">Animacije</h1>
-                    </div>
+            <header class="head">
+                <h1 class="head__title" id="menuTitle">Animacije</h1>
+                <div class="search">
+                    <svg class="search__icon"><use href="#i-search"/></svg>
+                    <input id="searchInput" type="text" placeholder="Pretraga (naziv ili komanda)" autocomplete="off" spellcheck="false">
+                    <button class="search__clear" id="searchClear" title="Obriši"><svg><use href="#i-close"/></svg></button>
                 </div>
-                <div class="head__actions">
-                    <div class="seg" role="group" aria-label="Izgled">
-                        <button class="seg__btn is-active" data-layout="grid" title="Mreža"><svg><use href="#i-grid"/></svg></button>
-                        <button class="seg__btn" data-layout="list" title="Lista"><svg><use href="#i-list"/></svg></button>
-                    </div>
-                    <button class="icon-btn" id="closeBtn" title="Zatvori (ESC)"><svg><use href="#i-close"/></svg></button>
-                </div>
+                <button class="icon-btn" id="closeBtn" title="Zatvori (ESC)"><svg><use href="#i-close"/></svg></button>
             </header>
 
-            <!-- Pretraga -->
-            <div class="search">
-                <svg class="search__icon"><use href="#i-search"/></svg>
-                <input id="searchInput" type="text" placeholder="Pretraži po nazivu ili komandi..." autocomplete="off" spellcheck="false">
-                <button class="search__clear" id="searchClear" title="Obriši"><svg><use href="#i-close"/></svg></button>
-                <kbd class="search__kbd">ENTER pokreće prvu</kbd>
+            <nav class="tabs" id="categoryRail"></nav>
+
+            <div class="toolbar">
+                <div class="toolbar__info">
+                    <span id="categoryTitle">Sve</span>
+                    <span class="toolbar__count" id="resultCount">0 animacija</span>
+                </div>
+                <div class="seg" role="group" aria-label="Izgled">
+                    <button class="seg__btn is-active" data-layout="grid" title="Mreža"><svg><use href="#i-grid"/></svg></button>
+                    <button class="seg__btn" data-layout="list" title="Lista"><svg><use href="#i-list"/></svg></button>
+                </div>
             </div>
 
-            <div class="panel__body">
-                <!-- Kategorije -->
-                <nav class="rail" id="categoryRail"></nav>
-
-                <!-- Sadrzaj -->
-                <section class="content">
-                    <div class="content__head">
-                        <div>
-                            <h2 class="content__title" id="categoryTitle">Sve</h2>
-                            <span class="content__count" id="resultCount">0 animacija</span>
-                        </div>
-                    </div>
-                    <div class="scroller" id="scroller">
-                        <div class="grid" id="grid"></div>
-                        <div class="sentinel" id="sentinel"></div>
-                        <div class="empty" id="emptyState" hidden>
-                            <div class="empty__icon"><svg><use href="#i-search"/></svg></div>
-                            <p class="empty__title" id="emptyTitle">Nema rezultata</p>
-                            <p class="empty__text" id="emptyText">Probaj drugi naziv ili komandu.</p>
-                            <button class="btn" id="emptyAction" hidden>Pretraži sve kategorije</button>
-                        </div>
-                    </div>
-                </section>
+            <div class="scroller" id="scroller">
+                <div class="grid" id="grid"></div>
+                <div class="sentinel" id="sentinel"></div>
+                <div class="empty" id="emptyState" hidden>
+                    <p class="empty__title" id="emptyTitle">Nema rezultata</p>
+                    <p class="empty__text" id="emptyText">Probaj drugi naziv ili komandu.</p>
+                    <button class="btn" id="emptyAction" hidden>Pretraži sve kategorije</button>
+                </div>
             </div>
 
-            <!-- Brzi slotovi -->
             <footer class="quick">
                 <div class="quick__info">
-                    <span class="quick__title"><svg><use href="#i-bolt"/></svg>Brzi slotovi</span>
-                    <span class="quick__hint"><kbd id="quickKey">LSHIFT</kbd> + <kbd>1-7</kbd></span>
+                    <span class="quick__title">Brzi slotovi</span>
+                    <span class="quick__hint"><span id="quickKey">LSHIFT</span> + 1–7 · desni klik na animaciju za dodelu</span>
                 </div>
                 <div class="quick__slots" id="quickSlots"></div>
             </footer>
-
-            <div class="hints">
-                <span><kbd>LEVI KLIK</kbd> pokreni</span>
-                <span><kbd>DESNI KLIK</kbd> opcije</span>
-                <span><kbd>PREVUCI</kbd> na slot</span>
-                <span><kbd>ESC</kbd> zatvori</span>
-            </div>
 
             <div class="toast" id="toast"></div>
         </main>

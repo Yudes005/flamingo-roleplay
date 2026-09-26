@@ -167,21 +167,18 @@ function renderRail() {
     counts.all = state.animations.length;
     counts.favorites = state.favorites.length;
 
-    let html = '<span class="rail__label">Kategorije</span>';
+    let html = '';
     state.categories.forEach((cat) => {
         html += `
-            <button class="rail__item${cat.name === state.category ? ' is-active' : ''}" data-cat="${esc(cat.name)}">
-                ${svg(iconFor(cat.name))}
-                <span class="rail__name">${esc(cat.label)}</span>
-                <span class="rail__count">${counts[cat.name] || 0}</span>
+            <button class="tab${cat.name === state.category ? ' is-active' : ''}" data-cat="${esc(cat.name)}">
+                ${esc(cat.label)}<span class="tab__count">${counts[cat.name] || 0}</span>
             </button>`;
-        if (cat.name === 'favorites') html += '<div class="rail__divider"></div>';
     });
     el.rail.innerHTML = html;
 }
 
 el.rail.addEventListener('click', (e) => {
-    const btn = e.target.closest('.rail__item');
+    const btn = e.target.closest('.tab');
     if (!btn) return;
     selectCategory(btn.dataset.cat);
     playSound('NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET');
@@ -191,7 +188,7 @@ function selectCategory(name) {
     if (!state.categories.some((c) => c.name === name)) name = 'all';
     state.category = name;
     store('category', name);
-    el.rail.querySelectorAll('.rail__item').forEach((b) => b.classList.toggle('is-active', b.dataset.cat === name));
+    el.rail.querySelectorAll('.tab').forEach((b) => b.classList.toggle('is-active', b.dataset.cat === name));
     el.catTitle.textContent = categoryLabel(name);
     renderView();
 }
@@ -232,12 +229,15 @@ function appendBatch() {
     next.forEach((anim) => frag.appendChild(createCard(anim)));
     state.rendered += next.length;
     el.grid.appendChild(frag);
+    requestAnimationFrame(fillIfNeeded);
 }
 
-const observer = new IntersectionObserver((entries) => {
-    if (entries.some((e) => e.isIntersecting)) appendBatch();
-}, { root: el.scroller, rootMargin: '600px 0px' });
-observer.observe(el.sentinel);
+// Dodaje sledecu grupu kartica kada se priblizimo dnu liste
+function fillIfNeeded() {
+    const s = el.scroller;
+    if (s.scrollTop + s.clientHeight >= s.scrollHeight - 600) appendBatch();
+}
+el.scroller.addEventListener('scroll', fillIfNeeded, { passive: true });
 
 function createCard(anim) {
     const card = document.createElement('div');
@@ -354,7 +354,7 @@ function toggleFavorite(anim) {
     playSound();
     post({ action: 'saveFavAnims', favoriteAnimations: state.favorites });
 
-    const countEl = el.rail.querySelector('.rail__item[data-cat="favorites"] .rail__count');
+    const countEl = el.rail.querySelector('.tab[data-cat="favorites"] .tab__count');
     if (countEl) countEl.textContent = state.favorites.length;
 
     if (state.category === 'favorites') renderView();
