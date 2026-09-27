@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <title>Flamingo Input</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="fi-overlay" class="hidden">
+        <form id="fi-card" autocomplete="off" novalidate>
+            <div class="fi-head">
+                <div class="fi-icon hidden" id="fi-icon"><i></i></div>
+                <div class="fi-headtext">
+                    <div class="fi-title" id="fi-title">Unos</div>
+                    <div class="fi-desc hidden" id="fi-desc"></div>
+                </div>
+                <button type="button" class="fi-close" id="fi-close" title="Zatvori (ESC)">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="fi-rows" id="fi-rows"></div>
+
+            <div class="fi-buttons">
+                <button type="submit" class="fi-btn fi-confirm" id="fi-confirm">Ok</button>
+                <button type="button" class="fi-btn fi-cancel" id="fi-cancel">Otkaži</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

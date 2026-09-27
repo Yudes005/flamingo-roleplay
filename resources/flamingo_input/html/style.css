@@ -1,0 +1,362 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    user-select: none;
+}
+
+.hidden { display: none !important; }
+
+:root {
+    --bg: rgba(22, 22, 25, 0.97);
+    --bg-soft: rgba(255, 255, 255, 0.05);
+    --bg-softer: rgba(255, 255, 255, 0.08);
+    --field: rgba(0, 0, 0, 0.32);
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.6);
+    --text-faint: rgba(255, 255, 255, 0.36);
+    --accent: #e8607f;
+    --accent-soft: rgba(232, 96, 127, 0.16);
+    --danger: #ff6b6b;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(3px); }
+}
+
+/* ---------- Overlay ---------- */
+#fi-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.42));
+    animation: fadeIn 0.18s ease;
+}
+
+/* ---------- Card ---------- */
+#fi-card {
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+    animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#fi-card.shake { animation: shake 0.3s ease; }
+
+.fi-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.fi-icon {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 16px;
+}
+
+.fi-headtext {
+    flex: 1;
+    min-width: 0;
+    padding-top: 1px;
+}
+
+.fi-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.fi-desc {
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text-dim);
+}
+
+.fi-close {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-dim);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.fi-close:hover {
+    background: var(--bg-softer);
+    color: var(--text);
+}
+
+/* ---------- Rows ---------- */
+.fi-rows {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fi-label {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.fi-label .req { color: var(--accent); }
+
+.fi-rowdesc {
+    margin: -3px 0 7px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+}
+
+.fi-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 46px;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fi-field.textarea { height: auto; }
+
+.fi-field:focus-within {
+    border-color: rgba(232, 96, 127, 0.7);
+    box-shadow: 0 0 0 3px rgba(232, 96, 127, 0.14);
+}
+
+.fi-field.invalid {
+    border-color: rgba(255, 107, 107, 0.75);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.12);
+}
+
+.fi-prefix {
+    flex: none;
+    padding-left: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-faint);
+}
+
+.fi-field input,
+.fi-field textarea,
+.fi-field select {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 14px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    user-select: text;
+}
+
+.fi-prefix + input { padding-left: 6px; }
+
+.fi-field textarea {
+    min-height: 84px;
+    padding: 12px 14px;
+    resize: none;
+    line-height: 1.45;
+}
+
+.fi-field select {
+    cursor: pointer;
+    appearance: none;
+}
+
+.fi-field select option {
+    background: #1b1b1e;
+    color: var(--text);
+}
+
+.fi-field .fi-caret {
+    position: absolute;
+    right: 14px;
+    pointer-events: none;
+    font-size: 11px;
+    color: var(--text-faint);
+}
+
+.fi-field input::placeholder,
+.fi-field textarea::placeholder {
+    color: var(--text-faint);
+    font-weight: 500;
+}
+
+.fi-hint {
+    flex: none;
+    padding-right: 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+}
+
+.fi-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+    min-height: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-faint);
+}
+
+.fi-error { color: var(--danger); }
+
+/* ---------- Brzi iznosi ---------- */
+.fi-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.fi-chip {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-dim);
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.fi-chip:hover {
+    background: var(--accent-soft);
+    border-color: rgba(232, 96, 127, 0.45);
+    color: var(--text);
+}
+
+/* ---------- Checkbox ---------- */
+.fi-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+}
+
+.fi-check input { display: none; }
+
+.fi-check .box {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    border: 1px solid var(--border-strong);
+    background: var(--field);
+    color: transparent;
+    font-size: 10px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.fi-check input:checked + .box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+/* ---------- Buttons ---------- */
+.fi-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.fi-btn {
+    flex: 1;
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.fi-btn:hover {
+    background: var(--bg-softer);
+    color: var(--text);
+    border-color: var(--border-strong);
+}
+
+.fi-confirm {
+    background: var(--accent-soft);
+    border-color: rgba(232, 96, 127, 0.35);
+    color: var(--text);
+}
+
+.fi-confirm:hover {
+    background: rgba(232, 96, 127, 0.3);
+    border-color: rgba(232, 96, 127, 0.6);
+}
+
+.fi-btn:active { transform: translateY(1px); }
