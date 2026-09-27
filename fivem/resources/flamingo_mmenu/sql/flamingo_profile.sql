@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS `flamingo_profile` (
+  `identifier` VARCHAR(60) NOT NULL,
+  `registered_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`identifier`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<title>Flamingo M Menu</title>
+<!-- Font Awesome je lokalno (vendor/) - ne zavisi od CDN-a -->
+<link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/paketi.css">
+<link rel="stylesheet" href="css/zadaci.css">
+</head>
+<body>
+
+<div id="app" class="hidden">
+
+  <div class="mmenu">
+
+    <!-- LEVA TRAKA -->
+    <aside class="mmenu-rail">
+      <div class="mmenu-rail-logo">
+        <img src="img/flamingo_logo.png" alt="Flamingo" class="mmenu-rail-logo-img">
+        <div class="mmenu-rail-logo-text">
+          <span class="mmenu-rail-logo-name">Flamingo</span>
+          <span class="mmenu-rail-logo-sub">Roleplay</span>
+        </div>
+      </div>
+
+      <nav class="mmenu-rail-nav" id="mmenuNav">
+        <button class="mmenu-rail-btn active" data-category="home" title="Početna">
+          <i class="fa-solid fa-house"></i><span class="mmenu-rail-btn-label">Početna</span>
+        </button>
+        <div class="mmenu-rail-group" id="mmenuRailShopGroup">
+          <button class="mmenu-rail-btn" data-category="prodavnica" title="Prodavnica">
+            <i class="fa-solid fa-cart-shopping"></i><span class="mmenu-rail-btn-label">Prodavnica</span>
+            <i class="fa-solid fa-chevron-down mmenu-rail-chevron"></i>
+          </button>
+          <div class="mmenu-rail-submenu" id="mmenuRailShopSubmenu">
+            <!-- Popunjava se dinamicki iz SHOP_TABS u script.js (renderShopSubmenu) -->
+          </div>
+        </div>
+        <div class="mmenu-rail-group" id="mmenuRailStatGroup">
+          <button class="mmenu-rail-btn" data-category="statistika" title="Statistika">
+            <i class="fa-solid fa-chart-simple"></i><span class="mmenu-rail-btn-label">Statistika</span>
+            <i class="fa-solid fa-chevron-down mmenu-rail-chevron"></i>
+          </button>
+          <div class="mmenu-rail-submenu" id="mmenuRailStatSubmenu">
+            <!-- Popunjava se dinamicki iz STAT_TABS u script.js (renderStatSubmenu) -->
+          </div>
+        </div>
+        <button class="mmenu-rail-btn" data-category="paketi" title="Moji paketi">
+          <i class="fa-solid fa-boxes-stacked"></i><span class="mmenu-rail-btn-label">Moji paketi</span>
+        </button>
+        <button class="mmenu-rail-btn" data-category="nagrade" title="Nagrade">
+          <i class="fa-solid fa-gift"></i><span class="mmenu-rail-btn-label">Nagrade</span>
+        </button>
+        <div class="mmenu-rail-group" id="mmenuRailTaskGroup">
+          <button class="mmenu-rail-btn" data-category="zadaci" title="Zadaci">
+            <i class="fa-solid fa-list-check"></i><span class="mmenu-rail-btn-label">Zadaci</span>
+            <i class="fa-solid fa-chevron-down mmenu-rail-chevron"></i>
+          </button>
+          <div class="mmenu-rail-submenu" id="mmenuRailTaskSubmenu">
+            <!-- Popunjava se dinamicki iz TASK_TABS u zadaci.js (renderTaskSubmenu) -->
+          </div>
+        </div>
+
+        <div class="mmenu-rail-divider"></div>
+
+        <button class="mmenu-rail-btn" data-category="pomoc" title="Pomoć">
+          <i class="fa-solid fa-headset"></i><span class="mmenu-rail-btn-label">Pomoć</span>
+        </button>
+        <button class="mmenu-rail-btn" data-category="podesavanja" title="Podešavanja">
+          <i class="fa-solid fa-gear"></i><span class="mmenu-rail-btn-label">Podešavanja</span>
+        </button>
+      </nav>
+
+      <div class="mmenu-rail-foot">
+        <span class="mmenu-rail-foot-label">Zajednica</span>
+        <div class="mmenu-rail-social" id="mmenuRailSocial">
+          <!-- Popunjava se dinamicki iz Config.SocialLinks -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- GLAVNA KOLONA -->
+    <div class="mmenu-main">
+
+      <!-- TOP BAR: naslov trenutne stranice levo, igrac/level/coini desno -->
+      <header class="mmenu-topbar">
+        <div class="mmenu-content-header">
+          <div class="mmenu-header-icon" id="categoryIcon"><i class="fa-solid fa-house"></i></div>
+          <div class="mmenu-header-text">
+            <h1 id="categoryTitle">Početna</h1>
+            <p id="categorySubtitle">Pregled servera i tvog napretka</p>
+          </div>
+        </div>
+
+        <div class="mmenu-topbar-right">
+          <div class="mmenu-identity">
+            <div class="mmenu-avatar"><i class="fa-solid fa-user"></i></div>
+            <div class="mmenu-identity-info">
+              <span class="mmenu-player-name-row">
+                <span class="mmenu-player-name" id="playerName">Ime Igrača</span>
+                <span class="mmenu-player-id" id="playerId">#0</span>
+              </span>
+              <span class="mmenu-player-job" id="playerJob">Nezaposlen</span>
+            </div>
+          </div>
+
+          <span class="mmenu-topbar-sep"></span>
+
+          <div class="mmenu-pill mmenu-pill--level" title="Tvoj nivo">
+            <i class="fa-solid fa-star"></i> Nivo <span id="topLevel">1</span>
+          </div>
+
+          <div class="mmenu-pill mmenu-pill--coin" title="Flamingo Coini">
+            <img src="img/flamingo_coin.png" alt="Flamingo Coin" class="mmenu-coin-icon"> <span id="coinAmount">0</span>
+          </div>
+
+          <span class="mmenu-topbar-sep"></span>
+
+          <button class="mmenu-icon-btn" id="settingsShortcutBtn" title="Podešavanja">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+
+          <button class="mmenu-close-x" id="closeBtn" title="Zatvori (M / ESC)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- POČETNA - dashboard -->
+      <main class="mmenu-home" id="mmenuHome">
+        <!-- Sadrzaj generise renderHome() u script.js -->
+      </main>
+
+      <!-- DETALJ - Prodavnica / Statistika / Podesavanja / Nagrade / Battle Pass -->
+      <main class="mmenu-detail hidden" id="mmenuDetail">
+        <div class="mmenu-content-body" id="categoryBody">
+          <!-- Sadrzaj se ubacuje dinamicki iz script.js za svaku kategoriju -->
+        </div>
+      </main>
+
+      <footer class="mmenu-footer">
+        <span>© 2026 Flamingo Roleplay</span>
+        <span class="mmenu-footer-keys"><kbd>M</kbd><kbd>ESC</kbd> zatvori meni</span>
+      </footer>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="js/script.js"></script>
+<script src="js/zvuk.js"></script>
+<script src="js/paketi.js"></script>
+<script src="js/zadaci.js"></script>
+</body>
+</html>
