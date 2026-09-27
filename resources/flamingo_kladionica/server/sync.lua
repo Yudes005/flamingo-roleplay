@@ -63,10 +63,11 @@ function Sync.refreshSports()
     Sync.sportsFetched = os.time()
     if not data then return handleApiError(err, status) end
 
-    local listed, order = {}, {}
+    local listed, order, meta = {}, {}, {}
     for i, lg in ipairs(SvConfig.Leagues) do
         listed[lg.key] = lg.name
         order[lg.key] = i
+        meta[lg.key] = lg
     end
 
     local leagues, found = {}, {}
@@ -86,6 +87,8 @@ function Sync.refreshSports()
                     sport = sport,
                     name = listed[s.key] or s.title or s.key,
                     order = order[s.key] or (1000 + #leagues),
+                    flag = meta[s.key] and meta[s.key].flag or nil,
+                    top = meta[s.key] and meta[s.key].top or false,
                 }
             end
         end
@@ -130,6 +133,10 @@ function Sync.loadCache()
             status = r.status,
         }
     end
+    for _, e in pairs(Events) do
+        Logos.request(e.home, e.sport)
+        Logos.request(e.away, e.sport)
+    end
     Util.log('Učitano %d utakmica iz baze.', #rows)
 end
 
@@ -157,6 +164,8 @@ function Sync.fetchOdds(league)
         if type(ev.id) == 'string' and commence and commence > now and commence <= horizon then
             local odds = Odds.parse(ev, league.sport)
             if odds then
+                Logos.request(ev.home_team, league.sport)
+                Logos.request(ev.away_team, league.sport)
                 seen[ev.id] = true
                 offered = offered + 1
                 Events[ev.id] = {
@@ -310,7 +319,7 @@ end
 function Sync.buildOffer()
     local now = os.time()
     local close = (SvConfig.CloseMinutesBefore or 1) * 60
-    local events, counts = {}, {}
+    local events, counts, logos = {}, {}, {}
     for _, e in pairs(Events) do
         if e.status == 'open' and e.odds and e.commence - close > now and Sync.leagueByKey[e.sport_key] then
             events[#events + 1] = {
@@ -323,13 +332,15 @@ function Sync.buildOffer()
                 odds = e.odds,
             }
             counts[e.sport_key] = (counts[e.sport_key] or 0) + 1
+            logos[e.home] = Logos.get(e.home)
+            logos[e.away] = Logos.get(e.away)
         end
     end
 
     local leagues = {}
     for _, lg in ipairs(Sync.leagues) do
         if counts[lg.key] then
-            leagues[#leagues + 1] = { key = lg.key, sport = lg.sport, name = lg.name, order = lg.order }
+            leagues[#leagues + 1] = { key = lg.key, sport = lg.sport, name = lg.name, order = lg.order, flag = lg.flag, top = lg.top }
         end
     end
 
@@ -339,5 +350,5 @@ function Sync.buildOffer()
     end
     table.sort(sports, function(a, b) return a.key > b.key end) -- soccer pa basketball
 
-    return { sports = sports, leagues = leagues, events = events, serverTime = now }
+    return { sports = sports, leagues = leagues, events = events, logos = logos, serverTime = now }
 end

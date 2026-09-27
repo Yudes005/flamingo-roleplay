@@ -54,6 +54,13 @@ local SCHEMA = {
         KEY `idx_event` (`event_id`, `result`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]],
 
+    [[CREATE TABLE IF NOT EXISTS `kladionica_teams` (
+        `name` VARCHAR(120) NOT NULL,
+        `logo` VARCHAR(255) NULL,
+        `checked` INT UNSIGNED NOT NULL DEFAULT 0,
+        PRIMARY KEY (`name`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]],
+
     [[CREATE TABLE IF NOT EXISTS `kladionica_state` (
         `k` VARCHAR(100) NOT NULL,
         `v` BIGINT NOT NULL DEFAULT 0,

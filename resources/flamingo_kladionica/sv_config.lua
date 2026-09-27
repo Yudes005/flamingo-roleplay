@@ -59,47 +59,65 @@ SvConfig.Sports = {
 SvConfig.LeagueMode = 'list'
 
 -- Lige (redoslijed = redoslijed u meniju). Lige van sezone se automatski sakrivaju.
+-- flag = zastava (kod države: gb-eng, es, de...; 'uefa' / 'world' = pehar), top = ide u "Top utakmice"
 SvConfig.Leagues = {
     -- Fudbal - Evropska takmičenja
-    { key = 'soccer_uefa_champs_league',             name = 'UEFA Liga prvaka' },
-    { key = 'soccer_uefa_europa_league',             name = 'UEFA Liga Evrope' },
-    { key = 'soccer_uefa_europa_conference_league',  name = 'UEFA Liga konferencija' },
-    { key = 'soccer_uefa_nations_league',            name = 'UEFA Liga nacija' },
-    { key = 'soccer_uefa_european_championship',     name = 'Evropsko prvenstvo' },
-    { key = 'soccer_fifa_world_cup',                 name = 'Svjetsko prvenstvo' },
-    { key = 'soccer_fifa_world_cup_qualifiers_europe', name = 'SP kvalifikacije - Evropa' },
+    { key = 'soccer_uefa_champs_league',             name = 'UEFA Liga prvaka', flag = 'uefa', top = true },
+    { key = 'soccer_uefa_europa_league',             name = 'UEFA Liga Evrope', flag = 'uefa', top = true },
+    { key = 'soccer_uefa_europa_conference_league',  name = 'UEFA Liga konferencija', flag = 'uefa' },
+    { key = 'soccer_uefa_nations_league',            name = 'UEFA Liga nacija', flag = 'uefa', top = true },
+    { key = 'soccer_uefa_european_championship',     name = 'Evropsko prvenstvo', flag = 'uefa', top = true },
+    { key = 'soccer_fifa_world_cup',                 name = 'Svjetsko prvenstvo', flag = 'world', top = true },
+    { key = 'soccer_fifa_world_cup_qualifiers_europe', name = 'SP kvalifikacije - Evropa', flag = 'world' },
     -- Fudbal - Top lige
-    { key = 'soccer_epl',                            name = 'Engleska - Premier liga' },
-    { key = 'soccer_spain_la_liga',                  name = 'Španija - La Liga' },
-    { key = 'soccer_italy_serie_a',                  name = 'Italija - Serie A' },
-    { key = 'soccer_germany_bundesliga',             name = 'Njemačka - Bundesliga' },
-    { key = 'soccer_france_ligue_one',               name = 'Francuska - Ligue 1' },
+    { key = 'soccer_epl',                            name = 'Engleska - Premier liga', flag = 'gb-eng', top = true },
+    { key = 'soccer_spain_la_liga',                  name = 'Španija - La Liga', flag = 'es', top = true },
+    { key = 'soccer_italy_serie_a',                  name = 'Italija - Serie A', flag = 'it', top = true },
+    { key = 'soccer_germany_bundesliga',             name = 'Njemačka - Bundesliga', flag = 'de', top = true },
+    { key = 'soccer_france_ligue_one',               name = 'Francuska - Ligue 1', flag = 'fr', top = true },
     -- Fudbal - Ostale lige
-    { key = 'soccer_efl_champ',                      name = 'Engleska - Championship' },
-    { key = 'soccer_fa_cup',                         name = 'Engleska - FA kup' },
-    { key = 'soccer_spain_segunda_division',         name = 'Španija - Segunda' },
-    { key = 'soccer_italy_serie_b',                  name = 'Italija - Serie B' },
-    { key = 'soccer_germany_bundesliga2',            name = 'Njemačka - 2. Bundesliga' },
-    { key = 'soccer_france_ligue_two',               name = 'Francuska - Ligue 2' },
-    { key = 'soccer_netherlands_eredivisie',         name = 'Holandija - Eredivisie' },
-    { key = 'soccer_portugal_primeira_liga',         name = 'Portugal - Primeira Liga' },
-    { key = 'soccer_turkey_super_league',            name = 'Turska - Super Lig' },
-    { key = 'soccer_belgium_first_div',              name = 'Belgija - Pro League' },
-    { key = 'soccer_austria_bundesliga',             name = 'Austrija - Bundesliga' },
-    { key = 'soccer_switzerland_superleague',        name = 'Švicarska - Super League' },
-    { key = 'soccer_greece_super_league',            name = 'Grčka - Super League' },
-    { key = 'soccer_spl',                            name = 'Škotska - Premiership' },
-    { key = 'soccer_denmark_superliga',              name = 'Danska - Superliga' },
-    { key = 'soccer_poland_ekstraklasa',             name = 'Poljska - Ekstraklasa' },
-    { key = 'soccer_brazil_campeonato',              name = 'Brazil - Serie A' },
-    { key = 'soccer_argentina_primera_division',     name = 'Argentina - Primera' },
-    { key = 'soccer_usa_mls',                        name = 'SAD - MLS' },
-    { key = 'soccer_saudi_arabia_pro_league',        name = 'Saudijska Arabija - Pro liga' },
+    { key = 'soccer_efl_champ',                      name = 'Engleska - Championship', flag = 'gb-eng' },
+    { key = 'soccer_fa_cup',                         name = 'Engleska - FA kup', flag = 'gb-eng' },
+    { key = 'soccer_spain_segunda_division',         name = 'Španija - Segunda', flag = 'es' },
+    { key = 'soccer_italy_serie_b',                  name = 'Italija - Serie B', flag = 'it' },
+    { key = 'soccer_germany_bundesliga2',            name = 'Njemačka - 2. Bundesliga', flag = 'de' },
+    { key = 'soccer_france_ligue_two',               name = 'Francuska - Ligue 2', flag = 'fr' },
+    { key = 'soccer_netherlands_eredivisie',         name = 'Holandija - Eredivisie', flag = 'nl' },
+    { key = 'soccer_portugal_primeira_liga',         name = 'Portugal - Primeira Liga', flag = 'pt' },
+    { key = 'soccer_turkey_super_league',            name = 'Turska - Super Lig', flag = 'tr' },
+    { key = 'soccer_belgium_first_div',              name = 'Belgija - Pro League', flag = 'be' },
+    { key = 'soccer_austria_bundesliga',             name = 'Austrija - Bundesliga', flag = 'at' },
+    { key = 'soccer_switzerland_superleague',        name = 'Švicarska - Super League', flag = 'ch' },
+    { key = 'soccer_greece_super_league',            name = 'Grčka - Super League', flag = 'gr' },
+    { key = 'soccer_spl',                            name = 'Škotska - Premiership', flag = 'gb-sct' },
+    { key = 'soccer_denmark_superliga',              name = 'Danska - Superliga', flag = 'dk' },
+    { key = 'soccer_poland_ekstraklasa',             name = 'Poljska - Ekstraklasa', flag = 'pl' },
+    { key = 'soccer_brazil_campeonato',              name = 'Brazil - Serie A', flag = 'br' },
+    { key = 'soccer_argentina_primera_division',     name = 'Argentina - Primera', flag = 'ar' },
+    { key = 'soccer_usa_mls',                        name = 'SAD - MLS', flag = 'us' },
+    { key = 'soccer_saudi_arabia_pro_league',        name = 'Saudijska Arabija - Pro liga', flag = 'sa' },
     -- Košarka
-    { key = 'basketball_euroleague',                 name = 'Evroliga' },
-    { key = 'basketball_nba',                        name = 'NBA' },
-    { key = 'basketball_wnba',                       name = 'WNBA' },
-    { key = 'basketball_ncaab',                      name = 'NCAA' },
+    { key = 'basketball_euroleague',                 name = 'Evroliga', flag = 'eu', top = true },
+    { key = 'basketball_nba',                        name = 'NBA', flag = 'us', top = true },
+    { key = 'basketball_wnba',                       name = 'WNBA', flag = 'us' },
+    { key = 'basketball_ncaab',                      name = 'NCAA', flag = 'us' },
+}
+
+--------------------------------------------------------------------------------
+-- SLIKE (grbovi klubova i zastave)
+--------------------------------------------------------------------------------
+-- Grbovi klubova se automatski traže na TheSportsDB (besplatno) i pamte u bazi.
+SvConfig.TeamLogos = true
+SvConfig.TeamLogoApiKey = '3'          -- besplatni javni ključ TheSportsDB
+-- Ako se neki klub ne pronađe (drugačije ime), dodaj alias ili direktan link slike:
+SvConfig.TeamSearchAliases = {
+    ['Paris Saint Germain'] = 'Paris SG',
+    ['Inter Milan'] = 'Inter',
+    ['Atlético Madrid'] = 'Atletico Madrid',
+    ['Crvena Zvezda'] = 'Red Star Belgrade',
+}
+SvConfig.TeamLogoOverrides = {
+    -- ['Partizan'] = 'https://link-do-slike.png',
 }
 
 -- Lige koje se preskaču kad je LeagueMode = 'all'

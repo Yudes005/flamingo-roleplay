@@ -66,7 +66,13 @@ local function ticketDetails(codes)
         }
     end
 
-    for _, t in ipairs(tickets) do t.id = nil end
+    for _, t in ipairs(tickets) do
+        t.id = nil
+        for _, s in ipairs(t.selections) do
+            s.homeLogo = Logos.get(s.home)
+            s.awayLogo = Logos.get(s.away)
+        end
+    end
     return tickets
 end
 
@@ -108,6 +114,9 @@ lib.callback.register('kladionica:getOffer', function(src)
     local offer = Sync.buildOffer()
     offer.limits = limits()
     offer.currency = Config.Currency
+    local xPlayer = ESX.GetPlayerFromId(src)
+    local account = xPlayer and xPlayer.getAccount(SvConfig.Account)
+    offer.balance = account and account.money or 0
     return offer
 end)
 
@@ -312,6 +321,7 @@ end)
 
 MySQL.ready(function()
     DB.init()
+    Logos.load()
     Sync.loadCache()
 
     if Api.getKey() == '' then

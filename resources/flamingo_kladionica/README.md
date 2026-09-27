@@ -101,6 +101,17 @@ Kombinovani tiketi (više parova na jednom tiketu), jedan par po utakmici.
 
 ---
 
+## Slike (grbovi klubova i zastave)
+
+- **Grbovi klubova** se automatski traže na [TheSportsDB](https://www.thesportsdb.com) (besplatno, ne troši The Odds API kredite)
+  i pamte se u bazi (`kladionica_teams`). Traže se polako u pozadini, pa se pri prvom pokretanju pojavljuju postepeno.
+- Ako se grb nekog kluba ne pronađe, prikazuje se lijep generisani grb sa inicijalima (npr. **ARS**, **CZ**).
+- Klub se ne pronalazi jer ima drugačije ime? U `sv_config.lua` dodaj alias u `SvConfig.TeamSearchAliases`
+  ili direktan link slike u `SvConfig.TeamLogoOverrides`.
+- **Zastave liga** se učitavaju sa flagcdn.com. Kod države se podešava u `SvConfig.Leagues` (`flag = 'gb-eng'`),
+  a lige sa `top = true` idu u traku **Top utakmice**.
+- Grbove možeš isključiti sa `SvConfig.TeamLogos = false`.
+
 ## Podešavanja
 
 - **`config.lua`** (vide ga i igrači): lokacije i NPC, blip, ox_target ili [E], ime itema, valuta.

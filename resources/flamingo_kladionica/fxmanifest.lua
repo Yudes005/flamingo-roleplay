@@ -24,6 +24,7 @@ server_scripts {
     'server/api.lua',
     'server/db.lua',
     'server/odds.lua',
+    'server/logos.lua',
     'server/settle.lua',
     'server/sync.lua',
     'server/main.lua',
