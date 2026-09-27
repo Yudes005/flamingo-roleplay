@@ -20,15 +20,16 @@ const arr = (x) => (Array.isArray(x) ? x : []);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 const DAYS = ['Ned', 'Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub'];
-const SPORT_ICON = { soccer: '⚽', basketball: '🏀' };
 
-const ICONS = {
+const ICON = {
+    soccer: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.6l4 2.9-1.5 4.7h-5L8 10.5zM12 3v4.6M16 10.5l4.4-1.4M14.5 15.2l2.7 3.7M9.5 15.2l-2.7 3.7M8 10.5L3.6 9.1"/></svg>',
+    basketball: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6a9 9 0 0 1 0 12.8M18.4 5.6a9 9 0 0 0 0 12.8"/></svg>',
+    all: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+    cup: '<svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/></svg>',
     x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-    check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
-    undo: '<svg viewBox="0 0 24 24"><path d="M4 10h11a5 5 0 0 1 0 10H9M4 10l4-4M4 10l4 4"/></svg>',
-    clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
-    trophy: '<svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M9.5 17h5"/></svg>',
     ticket: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2.5a2.5 2.5 0 0 0 0 5V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2.5a2.5 2.5 0 0 0 0-5zM9 5v14"/></svg>',
+    search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
 };
 
 const state = {
@@ -71,6 +72,7 @@ function dayLabel(key) {
 
 const timeStr = (ts) => { const d = new Date(ts * 1000); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const dateTimeStr = (ts) => { const d = new Date(ts * 1000); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. ${timeStr(ts)}`; };
+const fullDateStr = (ts) => { const d = new Date(ts * 1000); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${timeStr(ts)}`; };
 
 function marketName(sport, market) {
     switch (market) {
@@ -92,6 +94,12 @@ function pickLabel(market, pick, point) {
     }
 }
 
+// "Engleska - Premier liga" -> { country: 'Engleska', name: 'Premier liga' }
+function splitLeague(name) {
+    const parts = String(name || '').split(' - ');
+    return parts.length > 1 ? { country: parts[0], name: parts.slice(1).join(' - ') } : { country: '', name: parts[0] };
+}
+
 function toast(text, type = '') {
     const el = $('toast');
     el.textContent = text;
@@ -102,13 +110,13 @@ function toast(text, type = '') {
 
 /* ================= Grbovi i zastave ================= */
 
-const PREFIXES = new Set(['FC', 'CF', 'AC', 'SC', 'AFC', 'CD', 'UD', 'RC', 'SS', 'AS', 'FK', 'NK', 'KK', 'SK', 'BC', 'SL', 'CA', 'SV', 'VFB', 'VFL', 'TSG', 'RB', '1.', 'OGC', 'US']);
+const PREFIXES = new Set(['FC', 'CF', 'AC', 'SC', 'AFC', 'CD', 'UD', 'RC', 'SS', 'AS', 'FK', 'NK', 'KK', 'SK', 'BC', 'CA', 'SV', 'VFB', 'VFL', 'TSG', 'RB', 'OGC', 'US']);
 
 function initials(name) {
-    const words = String(name).replace(/[^\p{L}\p{N}\s.]/gu, ' ').split(/\s+/).filter(Boolean);
+    const words = String(name).replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean);
     const main = words.filter((w) => !PREFIXES.has(w.toUpperCase()));
     const use = main.length ? main : words;
-    if (use.length === 1) return use[0].slice(0, 3).toUpperCase();
+    if (use.length === 1) return use[0].slice(0, 2).toUpperCase();
     return (use[0][0] + use[1][0]).toUpperCase();
 }
 
@@ -118,71 +126,18 @@ function hue(name) {
     return h % 360;
 }
 
-function crest(name, size = '', logo) {
-    const h = hue(name);
-    const url = logo !== undefined ? logo : state.logos[name];
-    const style = `--c1:hsl(${h},70%,52%);--c2:hsl(${(h + 40) % 360},72%,30%)`;
+function crest(name, size = '') {
+    const url = state.logos[name];
     const img = url ? `<img src="${esc(url)}" alt="" onerror="this.parentNode.classList.remove('has-logo');this.remove()">` : '';
-    return `<div class="crest ${size} ${url ? 'has-logo' : ''}" style="${style}">${esc(initials(name))}${img}</div>`;
+    return `<span class="crest ${size} ${url ? 'has-logo' : ''}" style="--c1:hsl(${hue(name)},14%,30%)">${esc(initials(name))}${img}</span>`;
 }
 
 function flag(code) {
-    if (!code) return `<span class="flag cup">${ICONS.trophy}</span>`;
-    if (code === 'uefa' || code === 'world') return `<span class="flag cup">${ICONS.trophy}</span>`;
+    if (!code || code === 'uefa' || code === 'world') return `<span class="flag">${ICON.cup}</span>`;
     return `<span class="flag"><img src="https://flagcdn.com/w40/${esc(code)}.png" alt="" onerror="this.remove()"></span>`;
 }
 
-function leagueOf(key) {
-    return arr(state.offer?.leagues).find((l) => l.key === key) || { key, name: key };
-}
-
-/* ================= Hero ilustracije ================= */
-
-const HERO_ART = {
-    soccer: `<svg viewBox="0 0 620 150" preserveAspectRatio="xMaxYMid slice">
-        <defs>
-            <radialGradient id="hgs" cx="78%" cy="50%" r="55%"><stop offset="0" stop-color="#ff4fa3" stop-opacity=".55"/><stop offset="1" stop-color="#ff4fa3" stop-opacity="0"/></radialGradient>
-            <linearGradient id="fds" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".18"/></linearGradient>
-            <radialGradient id="ball" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#c9c3d6"/></radialGradient>
-        </defs>
-        <rect width="620" height="150" fill="url(#hgs)"/>
-        <g fill="none" stroke="url(#fds)" stroke-width="2">
-            <rect x="30" y="12" width="570" height="126" rx="6"/><line x1="315" y1="12" x2="315" y2="138"/>
-            <circle cx="315" cy="75" r="32"/><circle cx="315" cy="75" r="3" fill="#fff" fill-opacity=".2"/>
-            <rect x="30" y="40" width="62" height="70"/><rect x="538" y="40" width="62" height="70"/>
-            <rect x="30" y="60" width="22" height="30"/><rect x="578" y="60" width="22" height="30"/>
-        </g>
-        <g transform="translate(482 75)">
-            <circle r="46" fill="#ff4fa3" opacity=".25" style="filter:blur(8px)"/>
-            <circle r="40" fill="url(#ball)"/>
-            <path d="M0-13l12.4 9-4.7 14.6H-7.7L-12.4-4z" fill="#1b1424"/>
-            <path d="M0-13V-39M12.4-4l24-8M7.7 10.6l15 20M-7.7 10.6l-15 20M-12.4-4l-24-8" stroke="#1b1424" stroke-width="2.4" fill="none"/>
-            <path d="M-14-38l14 -1 14 1M34-20l4 13-2 13M22 33l-11 6-13 0M-22 33l-11-8-3-12M-38-6l2-14 9-11" stroke="#1b1424" stroke-width="2" fill="none" opacity=".6"/>
-        </g>
-    </svg>`,
-    basketball: `<svg viewBox="0 0 620 150" preserveAspectRatio="xMaxYMid slice">
-        <defs>
-            <radialGradient id="hgb" cx="78%" cy="50%" r="55%"><stop offset="0" stop-color="#ff8a3d" stop-opacity=".5"/><stop offset="1" stop-color="#ff8a3d" stop-opacity="0"/></radialGradient>
-            <linearGradient id="fdb" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".18"/></linearGradient>
-            <radialGradient id="bball" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#ffa45c"/><stop offset="1" stop-color="#c2410c"/></radialGradient>
-        </defs>
-        <rect width="620" height="150" fill="url(#hgb)"/>
-        <g fill="none" stroke="url(#fdb)" stroke-width="2">
-            <rect x="30" y="12" width="570" height="126" rx="6"/><line x1="315" y1="12" x2="315" y2="138"/>
-            <circle cx="315" cy="75" r="26"/>
-            <rect x="30" y="50" width="80" height="50"/><rect x="520" y="50" width="80" height="50"/>
-            <path d="M30 22h40a53 53 0 0 1 0 106H30M600 22h-40a53 53 0 0 0 0 106h40"/>
-        </g>
-        <g transform="translate(482 75)">
-            <circle r="46" fill="#ff8a3d" opacity=".3" style="filter:blur(8px)"/>
-            <circle r="40" fill="url(#bball)"/>
-            <g stroke="#3b1406" stroke-width="2.4" fill="none">
-                <line x1="-40" y1="0" x2="40" y2="0"/><line x1="0" y1="-40" x2="0" y2="40"/>
-                <path d="M-28-28a40 40 0 0 1 0 56M28-28a40 40 0 0 0 0 56"/>
-            </g>
-        </g>
-    </svg>`,
-};
+const leagueOf = (key) => arr(state.offer?.leagues).find((l) => l.key === key) || { key, name: key };
 
 /* ================= Kvote ================= */
 
@@ -202,26 +157,23 @@ function groupsFor(ev) {
         return [
             { title: 'Konačan ishod', heads: ['1', 'X', '2'], cells: [cell(ev, 'h2h', 'home'), cell(ev, 'h2h', 'draw'), cell(ev, 'h2h', 'away')] },
             { title: 'Dupla šansa', heads: ['1X', '12', 'X2'], cells: [cell(ev, 'dc', '1X'), cell(ev, 'dc', '12'), cell(ev, 'dc', 'X2')] },
-            { title: 'Golovi', heads: ['Manje', 'Više'], cells: [cell(ev, 'totals', 'under', `M ${tp}`), cell(ev, 'totals', 'over', `V ${tp}`)] },
+            { title: 'Golovi', heads: ['Manje', 'Više'], cells: [cell(ev, 'totals', 'under', `${tp}`), cell(ev, 'totals', 'over', `${tp}`)] },
         ];
     }
     const sp = o.spreads ? o.spreads.point : 0;
     return [
         { title: 'Pobjednik', heads: ['1', '2'], cells: [cell(ev, 'h2h', 'home'), cell(ev, 'h2h', 'away')] },
-        { title: 'Hendikep', heads: ['H1', 'H2'], cells: [cell(ev, 'spreads', 'home', `H1 ${signed(sp)}`), cell(ev, 'spreads', 'away', `H2 ${signed(-sp)}`)] },
-        { title: 'Poeni', heads: ['Manje', 'Više'], cells: [cell(ev, 'totals', 'under', `M ${tp}`), cell(ev, 'totals', 'over', `V ${tp}`)] },
+        { title: 'Hendikep', heads: ['1', '2'], cells: [cell(ev, 'spreads', 'home', signed(sp)), cell(ev, 'spreads', 'away', signed(-sp))] },
+        { title: 'Poeni', heads: ['Manje', 'Više'], cells: [cell(ev, 'totals', 'under', `${tp}`), cell(ev, 'totals', 'over', `${tp}`)] },
     ];
 }
 
-function selectedMap() {
-    return new Map(state.slip.map((s) => [s.id, s]));
-}
+const selectedMap = () => new Map(state.slip.map((s) => [s.id, s]));
 
-function oddBtn(ev, c, sel, withSmall = true) {
+function oddBtn(ev, c, sel) {
     if (c.locked) return `<div class="odd locked">–</div>`;
     const isSel = sel && sel.market === c.market && sel.pick === c.pick;
-    return `<button class="odd ${isSel ? 'sel' : ''}" data-id="${esc(ev.id)}" data-market="${c.market}" data-pick="${c.pick}">
-        ${withSmall && c.small ? `<small>${esc(c.small)}</small>` : ''}${fmtOdd(c.odds)}</button>`;
+    return `<button class="odd ${isSel ? 'sel' : ''}" data-id="${esc(ev.id)}" data-market="${c.market}" data-pick="${c.pick}">${c.small ? `<small>${esc(c.small)}</small>` : ''}${fmtOdd(c.odds)}</button>`;
 }
 
 /* ================= Render: ponuda ================= */
@@ -232,57 +184,8 @@ const leagueEvents = () => sportEvents().filter((e) => state.league === 'all' ||
 function renderSports() {
     $('sports').innerHTML = arr(state.offer?.sports).map((s) => {
         const n = arr(state.offer.events).filter((e) => e.sport === s.key).length;
-        return `<button class="sport-btn ${s.key === state.sport ? 'active' : ''}" data-sport="${esc(s.key)}">
-            <span class="ball">${SPORT_ICON[s.key] || '•'}</span>${esc(s.label)}<span class="n">${n}</span></button>`;
-    }).join('');
-}
-
-function renderHero() {
-    const events = sportEvents();
-    const sport = arr(state.offer?.sports).find((s) => s.key === state.sport);
-    const today = events.filter((e) => dayKey(e.time) === dayKey(Date.now() / 1000)).length;
-    const leagues = new Set(events.map((e) => e.key)).size;
-    const hero = $('hero');
-    hero.className = `hero ${state.sport}`;
-    hero.innerHTML = `
-        <div class="hero-art">${HERO_ART[state.sport] || HERO_ART.soccer}</div>
-        <div class="hero-kicker">Flamingo Bet · prave kvote</div>
-        <h1>${esc(sport ? sport.label : '')}</h1>
-        <div class="hero-stats">
-            <span><b>${events.length}</b> utakmica</span>
-            <span><b>${today}</b> danas</span>
-            <span><b>${leagues}</b> liga</span>
-        </div>`;
-}
-
-function renderFeatured() {
-    const now = Date.now() / 1000;
-    const events = sportEvents().sort((a, b) => a.time - b.time);
-    const topKeys = new Set(arr(state.offer?.leagues).filter((l) => l.top).map((l) => l.key));
-    let list = events.filter((e) => topKeys.has(e.key) && e.time < now + 3 * 86400);
-    if (list.length < 4) list = list.concat(events.filter((e) => !list.includes(e))).slice(0, 8);
-    list = list.slice(0, 10);
-
-    $('featuredWrap').classList.toggle('hidden', list.length === 0);
-    const sel = selectedMap();
-    $('featured').innerHTML = list.map((ev) => {
-        const lg = leagueOf(ev.key);
-        const soon = ev.time - now < 3 * 3600;
-        const cells = ev.sport === 'soccer'
-            ? [cell(ev, 'h2h', 'home', '1'), cell(ev, 'h2h', 'draw', 'X'), cell(ev, 'h2h', 'away', '2')]
-            : [cell(ev, 'h2h', 'home', '1'), cell(ev, 'h2h', 'away', '2')];
-        return `<div class="fcard">
-            <div class="fcard-top">
-                <div class="fcard-league">${flag(lg.flag)}<span>${esc(lg.name)}</span></div>
-                <span class="time-pill ${soon ? 'soon' : ''}">${dayLabel(dayKey(ev.time))} ${timeStr(ev.time)}</span>
-            </div>
-            <div class="fcard-teams">
-                <div class="fteam">${crest(ev.home, 'lg')}<div class="nm">${esc(ev.home)}</div></div>
-                <div class="vs">VS</div>
-                <div class="fteam">${crest(ev.away, 'lg')}<div class="nm">${esc(ev.away)}</div></div>
-            </div>
-            <div class="fodds n${cells.length}">${cells.map((c) => oddBtn(ev, c, sel.get(ev.id))).join('')}</div>
-        </div>`;
+        return `<button class="side-item ${s.key === state.sport ? 'active' : ''}" data-sport="${esc(s.key)}">
+            ${ICON[s.key] || ICON.all}<span class="txt">${esc(s.label)}</span><span class="n">${n}</span></button>`;
     }).join('');
 }
 
@@ -291,22 +194,62 @@ function renderLeagues() {
     const counts = {};
     events.forEach((e) => { counts[e.key] = (counts[e.key] || 0) + 1; });
     const leagues = arr(state.offer?.leagues).filter((l) => l.sport === state.sport && counts[l.key]);
-    $('leagues').innerHTML = `<button class="chip ${state.league === 'all' ? 'active' : ''}" data-league="all">Sve lige <span class="n">${events.length}</span></button>`
-        + leagues.map((l) => `<button class="chip ${state.league === l.key ? 'active' : ''}" data-league="${esc(l.key)}">
-            ${flag(l.flag)}${esc(l.name)} <span class="n">${counts[l.key]}</span></button>`).join('');
+    $('leagues').innerHTML = `<button class="side-item ${state.league === 'all' ? 'active' : ''}" data-league="all">
+            ${ICON.all}<span class="txt">Sve lige</span><span class="n">${events.length}</span></button>`
+        + leagues.map((l) => {
+            const { country, name } = splitLeague(l.name);
+            return `<button class="side-item ${state.league === l.key ? 'active' : ''}" data-league="${esc(l.key)}">
+                ${flag(l.flag)}<span class="txt">${esc(name)}${country ? `<small>${esc(country)}</small>` : ''}</span><span class="n">${counts[l.key]}</span></button>`;
+        }).join('');
+}
+
+function renderHead() {
+    const sport = arr(state.offer?.sports).find((s) => s.key === state.sport);
+    const events = leagueEvents();
+    let title = sport ? sport.label : '';
+    if (state.league !== 'all') title = splitLeague(leagueOf(state.league).name).name;
+    $('pageTitle').textContent = title;
+    const upd = state.offer?.serverTime ? ` · osvježeno u ${timeStr(state.offer.serverTime)}` : '';
+    $('pageSub').textContent = `${events.length} utakmica u ponudi${upd}`;
+}
+
+function renderFeatured() {
+    const show = state.league === 'all' && state.day === 'all' && !state.search.trim();
+    const now = Date.now() / 1000;
+    const events = sportEvents().sort((a, b) => a.time - b.time);
+    const topKeys = new Set(arr(state.offer?.leagues).filter((l) => l.top).map((l) => l.key));
+    let list = events.filter((e) => topKeys.has(e.key) && e.time < now + 3 * 86400);
+    if (list.length < 3) list = list.concat(events.filter((e) => !list.includes(e)));
+    list = list.slice(0, 8);
+
+    $('featuredWrap').classList.toggle('hidden', !show || list.length === 0);
+    if (!show) return;
+    const sel = selectedMap();
+    $('featured').innerHTML = list.map((ev) => {
+        const lg = leagueOf(ev.key);
+        const cells = ev.sport === 'soccer'
+            ? [cell(ev, 'h2h', 'home', '1'), cell(ev, 'h2h', 'draw', 'X'), cell(ev, 'h2h', 'away', '2')]
+            : [cell(ev, 'h2h', 'home', '1'), cell(ev, 'h2h', 'away', '2')];
+        return `<div class="fcard">
+            <div class="fcard-top">${flag(lg.flag)}<span class="lg">${esc(splitLeague(lg.name).name)}</span><span class="tm">${dayLabel(dayKey(ev.time))}, ${timeStr(ev.time)}</span></div>
+            <div class="fcard-team">${crest(ev.home, 'md')}<span>${esc(ev.home)}</span></div>
+            <div class="fcard-team">${crest(ev.away, 'md')}<span>${esc(ev.away)}</span></div>
+            <div class="fodds n${cells.length}">${cells.map((c) => oddBtn(ev, c, sel.get(ev.id))).join('')}</div>
+        </div>`;
+    }).join('');
 }
 
 function renderDays() {
     const keys = [...new Set(leagueEvents().map((e) => dayKey(e.time)))].sort();
     if (state.day !== 'all' && !keys.includes(state.day)) state.day = 'all';
-    $('days').innerHTML = [`<button class="chip ${state.day === 'all' ? 'active' : ''}" data-day="all">Svi dani</button>`]
-        .concat(keys.map((k) => `<button class="chip ${state.day === k ? 'active' : ''}" data-day="${k}">${dayLabel(k)}</button>`))
+    $('days').innerHTML = [`<button class="day ${state.day === 'all' ? 'active' : ''}" data-day="all">Sve</button>`]
+        .concat(keys.map((k) => `<button class="day ${state.day === k ? 'active' : ''}" data-day="${k}">${dayLabel(k)}</button>`))
         .join('');
 }
 
 function renderEvents() {
     if (!state.offer || arr(state.offer.events).length === 0) {
-        $('events').innerHTML = `<div class="empty"><div class="ico">🏟️</div><b>Trenutno nema utakmica u ponudi</b>Ponuda se osvježava automatski, navrati malo kasnije.</div>`;
+        $('events').innerHTML = `<div class="empty">${ICON.calendar}<b>Trenutno nema utakmica u ponudi</b>Ponuda se osvježava automatski, navrati malo kasnije.</div>`;
         return;
     }
     const q = state.search.trim().toLowerCase();
@@ -316,7 +259,7 @@ function renderEvents() {
         .sort((a, b) => a.time - b.time);
 
     if (events.length === 0) {
-        $('events').innerHTML = `<div class="empty"><div class="ico">🔍</div><b>Nema utakmica</b>Promijeni ligu, dan ili pretragu.</div>`;
+        $('events').innerHTML = `<div class="empty">${ICON.search}<b>Nema rezultata</b>Promijeni ligu, dan ili pretragu.</div>`;
         return;
     }
 
@@ -328,11 +271,17 @@ function renderEvents() {
     const cols = state.sport === 'soccer' ? 'cols-soccer' : 'cols-basketball';
     const showDate = state.day === 'all';
 
-    $('events').innerHTML = keys.map((key, i) => {
+    $('events').innerHTML = keys.map((key) => {
         const list = groups.get(key);
         const lg = leagueOf(key);
+        const { country, name } = splitLeague(lg.name);
         const heads = groupsFor(list[0]);
-        const rows = list.map((ev) => `
+        return `<div class="lg-block">
+            <div class="lg-head ${cols}">
+                <div class="lg-name">${flag(lg.flag)}${country ? `<span class="country">${esc(country)}</span><span class="sep">/</span>` : ''}<span>${esc(name)}</span></div>
+                ${heads.map((g) => `<div class="lg-grp og n${g.heads.length}"><span class="gt">${g.title}</span>${g.heads.map((h) => `<span>${h}</span>`).join('')}</div>`).join('')}
+            </div>
+            ${list.map((ev) => `
             <div class="ev ${cols}">
                 <div class="ev-info">
                     <div class="ev-time"><b>${timeStr(ev.time)}</b>${showDate ? `<small>${dayLabel(dayKey(ev.time))}</small>` : ''}</div>
@@ -342,13 +291,7 @@ function renderEvents() {
                     </div>
                 </div>
                 ${groupsFor(ev).map((g) => `<div class="og n${g.cells.length}">${g.cells.map((c) => oddBtn(ev, c, sel.get(ev.id))).join('')}</div>`).join('')}
-            </div>`).join('');
-        return `<div class="lg-block" style="animation-delay:${Math.min(i, 6) * 40}ms">
-            <div class="lg-head ${cols}">
-                <div class="lg-name">${flag(lg.flag)}${esc(lg.name)}<span class="cnt">${list.length}</span></div>
-                ${heads.map((g) => `<div class="lg-grp og n${g.heads.length}"><span class="gt">${g.title}</span>${g.heads.map((h) => `<span>${h}</span>`).join('')}</div>`).join('')}
-            </div>
-            ${rows}
+            </div>`).join('')}
         </div>`;
     }).join('');
 }
@@ -360,9 +303,9 @@ function renderOddsOnly() {
 
 function renderOffer() {
     renderSports();
-    renderHero();
-    renderFeatured();
     renderLeagues();
+    renderHead();
+    renderFeatured();
     renderDays();
     renderEvents();
 }
@@ -381,7 +324,7 @@ function toggleSelection(id, market, pick) {
     if (idx >= 0 && state.slip[idx].market === market && state.slip[idx].pick === pick) {
         state.slip.splice(idx, 1);
     } else {
-        const item = { id, market, pick, odds: c.odds, point: c.point, home: ev.home, away: ev.away, sport: ev.sport, time: ev.time, changed: false };
+        const item = { id, market, pick, odds: c.odds, point: c.point, home: ev.home, away: ev.away, sport: ev.sport, key: ev.key, time: ev.time, changed: false };
         if (idx >= 0) {
             state.slip[idx] = item;
         } else {
@@ -413,19 +356,20 @@ function validateSlip() {
     return null;
 }
 
-const EMPTY_SLIP = `<div class="slip-empty">${ICONS.ticket}<b>Tiket je prazan</b>Klikni na kvotu u ponudi<br>da dodaš par na tiket.</div>`;
-
 function renderSlip(message, msgType) {
     const n = state.slip.length;
     $('slipCount').textContent = n;
-    $('slipCountLbl').textContent = n === 1 ? 'par' : (n >= 2 && n <= 4 ? 'para' : 'parova');
+    $('slipCount').classList.toggle('on', n > 0);
 
-    $('slipList').innerHTML = n === 0 ? EMPTY_SLIP : state.slip.map((s, i) => `
+    $('slipList').innerHTML = n === 0
+        ? `<div class="slip-empty">${ICON.ticket}<b>Tiket je prazan</b>Izaberi kvotu u ponudi da dodaš par.</div>`
+        : state.slip.map((s, i) => `
         <div class="sitem ${s.changed ? 'changed' : ''}">
-            <button class="rm" data-rm="${i}">${ICONS.x}</button>
-            <div class="sitem-teams">${crest(s.home, 'sm')}<span class="t">${esc(s.home)}</span><span class="x">vs</span>${crest(s.away, 'sm')}<span class="t">${esc(s.away)}</span></div>
-            <div class="sitem-meta">${dateTimeStr(s.time)} · ${marketName(s.sport, s.market)}</div>
-            <div class="sitem-pick"><span>${esc(pickLabel(s.market, s.pick, s.point))}</span><b>${fmtOdd(s.odds)}</b></div>
+            <button class="rm" data-rm="${i}" title="Ukloni">${ICON.x}</button>
+            <div class="sitem-teams">${esc(s.home)} – ${esc(s.away)}</div>
+            <div class="sitem-meta">${dayLabel(dayKey(s.time))} ${timeStr(s.time)} · ${esc(splitLeague(leagueOf(s.key).name).name)}</div>
+            <div class="sitem-pick"><span><em>${marketName(s.sport, s.market)}</em>${esc(pickLabel(s.market, s.pick, s.point))}</span><b>${fmtOdd(s.odds)}</b></div>
+            ${s.changed ? '<div class="sitem-note">Kvota je promijenjena</div>' : ''}
         </div>`).join('');
 
     const { total, win } = slipTotals();
@@ -476,7 +420,13 @@ async function refreshOffer(silent) {
     if (changed) text += 'Neke kvote na tiketu su promijenjene. ';
     if (removed) text += `${removed} par(ova) više nije u ponudi.`;
     renderSlip(text || undefined);
-    if (!silent || text) renderOffer(); else { renderSports(); renderHero(); renderOddsOnly(); }
+    if (!silent || text) {
+        renderOffer();
+    } else {
+        renderSports();
+        renderHead();
+        renderOddsOnly();
+    }
 }
 
 async function placeBet() {
@@ -494,9 +444,9 @@ async function placeBet() {
     if (res && res.ok) {
         state.slip = [];
         setBalance(state.balance - stake);
-        renderSlip(`Tiket ${res.code} uplaćen · mogući dobitak ${money(res.potential)}`, 'ok');
+        renderSlip(`Tiket ${res.code} je uplaćen. Mogući dobitak ${money(res.potential)}.`, 'ok');
         renderOddsOnly();
-        toast(`Tiket ${res.code} je uplaćen i nalazi se u inventaru`, 'ok');
+        toast(`Tiket ${res.code} je uplaćen i nalazi se u inventaru.`, 'ok');
         return;
     }
     if (res && res.reason === 'odds_changed') {
@@ -507,97 +457,99 @@ async function placeBet() {
     renderSlip(res ? res.message : 'Greška u komunikaciji.', 'err');
 }
 
-/* ================= Moji tiketi ================= */
+/* ================= Papirni tiket ================= */
 
 const isPayable = (t) => (t.status === 'won' || t.status === 'void') && !t.paid;
 
-function ticketStatus(t) {
-    if (t.status === 'pending') return ['U igri', 'pending'];
-    if (t.status === 'lost') return ['Gubitan', 'lost'];
-    if (t.paid) return ['Isplaćen', 'paid'];
-    if (t.status === 'won') return ['Dobitan', 'won'];
-    if (t.status === 'void') return ['Storniran', 'void'];
-    return [t.status, 'paid'];
+function stampOf(t) {
+    if (t.status === 'pending') return ['U IGRI', 'pending'];
+    if (t.status === 'lost') return ['GUBITAN', 'lost'];
+    if (t.paid) return ['ISPLAĆEN', 'paid'];
+    if (t.status === 'won') return ['DOBITAN', 'won'];
+    if (t.status === 'void') return ['STORNO', 'void'];
+    return [String(t.status).toUpperCase(), 'paid'];
 }
 
-const RESULT_ICON = { won: ICONS.check, lost: ICONS.x, void: ICONS.undo, pending: ICONS.clock };
+const RESULT_LABEL = { won: 'POGODAK', lost: 'PROMAŠAJ', void: 'STORNO', pending: 'U TOKU' };
 
 function barcode(code) {
     let html = '';
-    for (const ch of String(code)) {
+    for (const ch of `*${code}*`) {
         const c = ch.charCodeAt(0);
-        html += `<i style="width:${1 + (c % 3)}px"></i><i style="width:${1 + ((c >> 2) % 3)}px;opacity:${(c % 2) ? 1 : .6}"></i><i style="width:${2 + ((c >> 1) % 2)}px"></i>`;
+        html += `<i style="width:${1 + (c % 3)}px"></i><i style="width:1px;background:transparent"></i><i style="width:${1 + ((c >> 2) % 2)}px"></i><i style="width:${1 + ((c >> 1) % 2)}px;background:transparent"></i>`;
     }
-    return `<div class="barcode">${html}</div>`;
+    return `<div class="p-barcode">${html}</div>`;
 }
 
-function ticketCard(t, withActions) {
-    const [label, cls] = ticketStatus(t);
+function paperTicket(t) {
+    const [stamp, stampCls] = stampOf(t);
     const pending = t.status === 'pending';
     const sels = arr(t.selections).map((s) => {
-        const score = s.homeScore != null && s.awayScore != null ? `<span class="score">${s.homeScore}:${s.awayScore}</span>` : '';
-        return `<div class="tsel">
-            <div class="res ${s.result}">${RESULT_ICON[s.result] || ICONS.clock}</div>
-            <div style="min-width:0">
-                <div class="tsel-teams">${crest(s.home, 'sm', s.homeLogo || null)}<span class="t">${esc(s.home)}</span>
-                    <span style="color:var(--dim)">–</span>${crest(s.away, 'sm', s.awayLogo || null)}<span class="t">${esc(s.away)}</span>${score}</div>
-                <div class="tsel-meta">${s.time ? dateTimeStr(s.time) : ''} · ${esc(s.league)} · ${marketName(s.sport, s.market)}</div>
-            </div>
-            <div class="tsel-pk"><span>${esc(pickLabel(s.market, s.pick, s.point))}</span><b>${fmtOdd(s.odds)}</b></div>
+        const score = s.homeScore != null && s.awayScore != null ? `Rezultat ${s.homeScore}:${s.awayScore}` : '';
+        return `<div class="p-sel">
+            <div class="meta">${s.time ? dateTimeStr(s.time) : ''} · ${esc(splitLeague(s.league).name)}</div>
+            <div class="teams">${esc(s.home)} - ${esc(s.away)}</div>
+            <div class="pick"><span>${marketName(s.sport, s.market)}: ${esc(pickLabel(s.market, s.pick, s.point))}</span><span>${fmtOdd(s.odds)}</span></div>
+            <div class="pick"><span class="meta">${score}</span><span class="res ${s.result}">${RESULT_LABEL[s.result] || ''}</span></div>
         </div>`;
     }).join('');
 
-    let actions = '';
-    if (withActions) {
-        if (isPayable(t)) actions = `<button class="btn-primary" data-payout="${esc(t.code)}">Isplati ${money(t.win_amount)}</button>`;
-        else if (t.status === 'lost') actions = `<button class="btn-ghost" data-discard="${esc(t.code)}">Baci tiket</button>`;
-    }
+    const winLabel = pending || t.status === 'lost' ? 'Mogući dobitak' : 'Isplata';
+    const winValue = pending || t.status === 'lost' ? t.potential_win : t.win_amount;
 
-    return `<div class="tk ${cls}">
-        <div class="tk-head">
-            <div class="tk-brand"><div class="mini">F</div><div><div class="tk-code">${esc(t.code)}</div><div class="tk-date">Uplaćen ${dateTimeStr(t.created_at)}</div></div></div>
-            <span class="status">${label}</span>
-        </div>
+    return `<div class="paper-shadow"><div class="paper">
+        <div class="paper-head"><b>FLAMINGO BET</b><small>Sportska kladionica · Los Santos</small></div>
+        <hr>
+        <div class="p-row"><span class="k">Tiket br.</span><span>${esc(t.code)}</span></div>
+        <div class="p-row"><span class="k">Uplaćen</span><span>${fullDateStr(t.created_at)}</span></div>
+        <hr>
         ${sels}
-        <div class="perf"></div>
-        <div class="tk-sum">
-            <div>Uplata<b>${money(t.stake)}</b></div>
-            <div>Kvota<b>${fmtOdd(t.total_odds)}</b></div>
-            <div class="w">${pending ? 'Mogući dobitak' : 'Dobitak'}<b>${money(pending || t.status === 'lost' ? t.potential_win : t.win_amount)}</b></div>
-        </div>
-        <div class="tk-bottom">${barcode(t.code)}<div class="tk-actions">${actions}</div></div>
-    </div>`;
+        <hr>
+        <div class="p-row"><span class="k">Broj parova</span><span>${arr(t.selections).length}</span></div>
+        <div class="p-row"><span class="k">Ukupna kvota</span><span>${fmtOdd(t.total_odds)}</span></div>
+        <div class="p-row"><span class="k">Uplata</span><span>${money(t.stake)}</span></div>
+        <div class="p-row p-total"><span>${winLabel}</span><span>${money(winValue)}</span></div>
+        <div class="stamp-row"><span class="stamp ${stampCls}">${stamp}</span></div>
+        ${barcode(t.code)}
+        <div class="p-code">${esc(t.code)}</div>
+    </div></div>`;
 }
 
-function updateRailBadge() {
+function ticketBlock(t) {
+    let actions = '';
+    if (isPayable(t)) actions = `<button class="btn btn-accent" data-payout="${esc(t.code)}">Isplati ${money(t.win_amount)}</button>`;
+    else if (t.status === 'lost') actions = `<button class="btn btn-plain" data-discard="${esc(t.code)}">Baci tiket</button>`;
+    return `<div class="tk-wrap">${paperTicket(t)}${actions ? `<div class="tk-actions">${actions}</div>` : ''}</div>`;
+}
+
+function updateNavBadge() {
     const n = state.tickets.filter(isPayable).length;
-    $('railBadge').textContent = n;
-    $('railBadge').classList.toggle('hidden', n === 0);
+    $('navBadge').textContent = n;
+    $('navBadge').classList.toggle('hidden', n === 0);
 }
 
 function renderTickets() {
-    const payable = state.tickets.filter(isPayable);
-    $('payAllBtn').classList.toggle('hidden', payable.length < 2);
-    updateRailBadge();
+    $('payAllBtn').classList.toggle('hidden', state.tickets.filter(isPayable).length < 2);
+    updateNavBadge();
     if (state.tickets.length === 0) {
-        $('tickets').innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="ico">🎟️</div><b>Nemaš tiketa kod sebe</b>Uplaćeni tiketi se nalaze u tvom inventaru.</div>`;
+        $('tickets').innerHTML = `<div class="empty" style="grid-column:1/-1">${ICON.ticket}<b>Nemaš tiketa kod sebe</b>Uplaćeni tiketi se nalaze u tvom inventaru.</div>`;
         return;
     }
-    $('tickets').innerHTML = state.tickets.map((t) => ticketCard(t, true)).join('');
+    $('tickets').innerHTML = state.tickets.map(ticketBlock).join('');
 }
 
 async function loadTickets(show = true) {
     if (show) $('tickets').innerHTML = `<div class="empty" style="grid-column:1/-1">Učitavanje...</div>`;
     state.tickets = arr(await post('getTickets'));
     state.tickets.forEach((t) => { t.selections = arr(t.selections); });
-    if (show) renderTickets(); else updateRailBadge();
+    if (show) renderTickets(); else updateNavBadge();
 }
 
 async function payout(code) {
     const res = await post('payout', { code });
     if (res && res.ok) {
         setBalance(state.balance + Number(res.amount || 0));
-        toast(`Isplaćeno ${money(res.amount)} · čestitamo!`, 'ok');
+        toast(`Isplaćeno ${money(res.amount)}.`, 'ok');
     } else {
         toast(res ? res.message : 'Greška.', 'err');
     }
@@ -608,11 +560,9 @@ async function payout(code) {
 
 function setTab(tab) {
     state.tab = tab;
-    document.querySelectorAll('.rail-btn[data-tab]').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.nav button[data-tab]').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
     $('offerView').classList.toggle('hidden', tab !== 'offer');
     $('ticketsView').classList.toggle('hidden', tab !== 'tickets');
-    document.querySelector('.topbar .sport-switch').style.visibility = tab === 'offer' ? 'visible' : 'hidden';
-    document.querySelector('.topbar .search').style.visibility = tab === 'offer' ? 'visible' : 'hidden';
     if (tab === 'tickets') loadTickets();
 }
 
@@ -656,7 +606,7 @@ function close() {
 function showTicketModal(ticket, currency) {
     if (currency) state.currency = currency;
     ticket.selections = arr(ticket.selections);
-    $('ticketModalBody').innerHTML = ticketCard(ticket, false);
+    $('ticketModalBody').innerHTML = paperTicket(ticket);
     $('ticketModal').classList.remove('hidden');
 }
 
@@ -674,7 +624,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); }
 $('closeBtn').addEventListener('click', close);
 $('ticketModalClose').addEventListener('click', close);
 
-document.querySelectorAll('.rail-btn[data-tab]').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+document.querySelectorAll('.nav button[data-tab]').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
 
 $('sports').addEventListener('click', (e) => {
     const b = e.target.closest('[data-sport]');
@@ -682,6 +632,7 @@ $('sports').addEventListener('click', (e) => {
     state.sport = b.dataset.sport;
     state.league = 'all';
     state.day = 'all';
+    if (state.tab !== 'offer') setTab('offer');
     renderOffer();
     $('offerView').scrollTop = 0;
 });
@@ -690,9 +641,13 @@ $('leagues').addEventListener('click', (e) => {
     const b = e.target.closest('[data-league]');
     if (!b) return;
     state.league = b.dataset.league;
+    if (state.tab !== 'offer') setTab('offer');
     renderLeagues();
+    renderHead();
+    renderFeatured();
     renderDays();
     renderEvents();
+    $('offerView').scrollTop = 0;
 });
 
 $('days').addEventListener('click', (e) => {
@@ -700,17 +655,15 @@ $('days').addEventListener('click', (e) => {
     if (!b) return;
     state.day = b.dataset.day;
     renderDays();
+    renderFeatured();
     renderEvents();
 });
 
 $('search').addEventListener('input', (e) => {
     state.search = e.target.value;
+    renderFeatured();
     renderEvents();
 });
-
-document.querySelectorAll('[data-scroll]').forEach((b) => b.addEventListener('click', () => {
-    $('featured').scrollBy({ left: Number(b.dataset.scroll) * 628, behavior: 'smooth' });
-}));
 
 $('offerView').addEventListener('click', (e) => {
     const b = e.target.closest('button.odd');
