@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Flamingo Roleplay - custom timecycle modifieri.
+    Primenjuju se u "extra" timecycle slotu, tako da ne smetaju skriptama
+    koje koriste glavni slot (droge, kamere, enterijeri...).
+    Posle izmene ovog fajla igraci moraju ponovo da se konektuju.
+-->
+<timecycle_modifier_data version="1.000000">
+
+    <!-- PRIRODNO: dan - malo zivlje boje, blag bloom -->
+    <modifier name="flamingo_prirodno_dan" numMods="3" userFlags="0">
+        <postfx_desaturation>1.080000 1.080000</postfx_desaturation>
+        <postfx_intensity_bloom>0.550000 0.550000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.120000 0.120000</postfx_vignetting_intensity>
+    </modifier>
+
+    <!-- PRIRODNO: noc - svetla vise "sijaju" -->
+    <modifier name="flamingo_prirodno_noc" numMods="3" userFlags="0">
+        <postfx_desaturation>1.050000 1.050000</postfx_desaturation>
+        <postfx_intensity_bloom>0.850000 0.850000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.180000 0.180000</postfx_vignetting_intensity>
+    </modifier>
+
+    <!-- FILMSKI: dan - jace boje, izrazenija vinjeta -->
+    <modifier name="flamingo_film_dan" numMods="3" userFlags="0">
+        <postfx_desaturation>1.180000 1.180000</postfx_desaturation>
+        <postfx_intensity_bloom>0.750000 0.750000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.250000 0.250000</postfx_vignetting_intensity>
+    </modifier>
+
+    <!-- FILMSKI: noc - neon/grad atmosfera -->
+    <modifier name="flamingo_film_noc" numMods="3" userFlags="0">
+        <postfx_desaturation>1.120000 1.120000</postfx_desaturation>
+        <postfx_intensity_bloom>1.100000 1.100000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.300000 0.300000</postfx_vignetting_intensity>
+    </modifier>
+
+</timecycle_modifier_data>
