@@ -1,0 +1,318 @@
+/* =====================================================================
+   PODESAVANJA -> GRAFIKA
+   Akcent boja dolazi iz teme (--fl-pink), isto kao ostatak menija.
+   Bez backdrop-filter-a na malim elementima (CEF ih crta kao crne kvadrate).
+   ===================================================================== */
+
+/* ---------- Pregled uzivo ---------- */
+.fl-gfx-hero {
+  position: relative;
+  height: 220px;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow), var(--hl);
+  margin-bottom: 8px;
+  background: #0d0d10;
+}
+.fl-gfx-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 72% 45%;
+}
+.fl-gfx-hero-img--fx { transition: opacity .25s ease, filter .35s ease; }
+.fl-gfx-hero-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.78) 100%);
+  transition: opacity .25s ease;
+  pointer-events: none;
+}
+.fl-gfx-hero-night {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20, 30, 90, 0.5), rgba(8, 10, 35, 0.45));
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
+.fl-gfx-hero--night .fl-gfx-hero-night { opacity: 1; }
+.fl-gfx-hero-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.25) 45%, transparent 70%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 30%);
+  pointer-events: none;
+}
+
+.fl-gfx-hero-top {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.fl-gfx-daynight {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+}
+.fl-gfx-daynight-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fl-text-dim);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.fl-gfx-daynight-btn:hover { color: var(--fl-text); }
+.fl-gfx-daynight-btn.active { background: var(--fl-pink); color: var(--on-accent); }
+
+.fl-gfx-perf {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--line-2);
+}
+.fl-gfx-perf--low  { color: var(--ok);   border-color: var(--ok-line); }
+.fl-gfx-perf--mid  { color: var(--warn); border-color: rgba(227, 179, 106, 0.4); }
+.fl-gfx-perf--high { color: var(--bad);  border-color: rgba(224, 124, 116, 0.45); }
+
+.fl-gfx-hero-info {
+  position: absolute;
+  left: 18px;
+  right: 20px;
+  bottom: 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+.fl-gfx-hero-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--fl-pink);
+  color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.35), 0 10px 26px -6px var(--fl-pink-glow);
+}
+.fl-gfx-hero-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.fl-gfx-hero-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--fl-pink);
+}
+.fl-gfx-hero-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.3px;
+  color: #fff;
+  line-height: 1.15;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+.fl-gfx-hero-desc { font-size: 12px; color: rgba(255, 255, 255, 0.78); margin-top: 2px; }
+.fl-gfx-hero-strength {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 14px var(--fl-pink-glow);
+}
+
+/* ---------- Preseti ---------- */
+.fl-gfx-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.fl-gfx-preset {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--hl);
+  transition: transform .15s ease, border-color .15s ease, box-shadow .2s ease;
+}
+.fl-gfx-preset:hover { transform: translateY(-2px); border-color: var(--line-2); }
+.fl-gfx-preset.active {
+  border-color: var(--fl-pink);
+  box-shadow: 0 0 0 1px var(--fl-pink), 0 14px 30px -16px var(--fl-pink-glow);
+  background: linear-gradient(180deg, transparent 40%, var(--fl-pink-soft)), var(--panel);
+}
+.fl-gfx-preset-thumb {
+  position: relative;
+  height: 78px;
+  overflow: hidden;
+  background: #0d0d10;
+}
+.fl-gfx-preset-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 76% 45%;
+  transform: scale(1.02);
+  transition: transform .35s ease;
+}
+.fl-gfx-preset:hover .fl-gfx-preset-thumb img { transform: scale(1.09); }
+.fl-gfx-preset-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.75) 100%);
+}
+.fl-gfx-preset-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--fl-pink);
+  color: var(--on-accent);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+.fl-gfx-preset-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--fl-pink);
+  color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.35);
+}
+.fl-gfx-preset-body { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; }
+.fl-gfx-preset-name { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: var(--fl-text); }
+.fl-gfx-preset-name i { color: var(--fl-pink); font-size: 11.5px; }
+.fl-gfx-preset-desc { font-size: 11px; color: var(--fl-text-dim); line-height: 1.35; }
+
+/* ---------- Slajderi ---------- */
+.fl-gfx-sliders { margin-top: 0; }
+.fl-gfx-sliders .fl-crosshair-label { width: 150px; display: flex; align-items: center; }
+.fl-gfx-row-icon { color: var(--fl-pink); width: 16px; margin-right: 8px; text-align: center; }
+.fl-gfx-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--fl-text-dim);
+}
+.fl-gfx-hint i { color: var(--fl-pink); margin-top: 2px; }
+
+/* ---------- Brzi profili ---------- */
+.fl-gfx-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.fl-gfx-profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 16px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--hl);
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+.fl-gfx-profile:hover { border-color: var(--line-2); transform: translateY(-1px); }
+.fl-gfx-profile.active { border-color: var(--fl-pink); background: linear-gradient(90deg, var(--fl-pink-soft), transparent), var(--panel); }
+.fl-gfx-profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  background: var(--fl-pink-soft);
+  border: 1px solid var(--fl-pink-glow);
+  color: var(--fl-pink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.fl-gfx-profile-text { display: flex; flex-direction: column; min-width: 0; }
+.fl-gfx-profile-name { font-size: 13.5px; font-weight: 700; color: var(--fl-text); }
+.fl-gfx-profile-desc { font-size: 11.5px; color: var(--fl-text-dim); margin-top: 3px; }
+
+/* ---------- Saveti ---------- */
+.fl-gfx-tips {
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--hl);
+  margin-bottom: 8px;
+}
+.fl-gfx-tips-intro { margin: 0 0 12px; font-size: 12.5px; line-height: 1.55; color: var(--fl-text-dim); }
+.fl-gfx-tips-intro b { color: var(--fl-text); }
+.fl-gfx-tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.fl-gfx-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 11px 13px;
+  background: var(--well);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.fl-gfx-tip > i { color: var(--fl-pink); font-size: 13px; margin-top: 2px; width: 16px; text-align: center; }
+.fl-gfx-tip-title { display: block; font-size: 12.5px; font-weight: 700; color: var(--fl-text); }
+.fl-gfx-tip-text { display: block; font-size: 11.5px; color: var(--fl-text-dim); margin-top: 2px; line-height: 1.4; }

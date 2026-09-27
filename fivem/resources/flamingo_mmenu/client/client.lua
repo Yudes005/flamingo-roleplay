@@ -16,23 +16,34 @@ local latestTaskData = nil -- { daily, weekly, account } - leva traka -> Zadaci 
 -- ovo je licna preferenca svakog igraca na njegovom racunu.
 -- ==========================================================
 
-local Settings = {
-    minimapEnabled = true,
-    cinematicMode = false,
-    theme = 'neutral',
-    hudEnabled = true,
-    chatEnabled = true,
-    idEnabled = true,
-    crosshairEnabled = false,
-    crosshairThickness = 2,
-    crosshairSize = 10,
-    crosshairGap = 4,
-    crosshairOpacity = 1,
-    crosshairColor = '#ff4d8d',
-    menuSounds = true,  -- zvukovi u M meniju (klikovi, kutije, nagrade)
-    menuVolume = 60,    -- jačina zvukova menija 0-100
-    keybinds = {} -- [keybindId] = 'IME_TASTERA' (samo oni koje je igrac promenio)
-}
+local function DefaultSettings()
+    return {
+        minimapEnabled = true,
+        cinematicMode = false,
+        theme = 'neutral',
+        hudEnabled = true,
+        chatEnabled = true,
+        idEnabled = true,
+        crosshairEnabled = false,
+        crosshairThickness = 2,
+        crosshairSize = 10,
+        crosshairGap = 4,
+        crosshairOpacity = 1,
+        crosshairColor = '#ff4d8d',
+        menuSounds = true,  -- zvukovi u M meniju (klikovi, kutije, nagrade)
+        menuVolume = 60,    -- jačina zvukova menija 0-100
+        -- Grafika (resurs flamingo_graphics) - iste vrednosti kao Config.Defaults tamo
+        graphicsPreset = 'prirodno',
+        graphicsStrength = 80,         -- 0-100
+        graphicsDayNight = true,       -- poseban izgled nocu
+        graphicsLod = 100,             -- daljina detalja u %, 100-150
+        graphicsSoftShadows = false,
+        graphicsVehicleLights = false,
+        keybinds = {} -- [keybindId] = 'IME_TASTERA' (samo oni koje je igrac promenio)
+    }
+end
+
+local Settings = DefaultSettings()
 
 local function LoadSettings()
     local raw = GetResourceKvpString('flamingo_settings')
@@ -77,9 +88,28 @@ end
 
 -- Malo sacekamo da se flamingo_hud/flamingo_chat/flamingo_hudinfo/flamingo_id
 -- pokrenu i registruju svoje evente pre nego sto im nesto posaljemo.
+-- Salje grafička podesavanja resursu flamingo_graphics (timecycle preset,
+-- jacina, dan/noc, LOD, senke, svetla vozila). Ako resurs nije pokrenut,
+-- event jednostavno niko ne slusa.
+local function ApplyGraphicsSettings()
+    TriggerEvent('flamingo_graphics:setConfig', {
+        preset = Settings.graphicsPreset,
+        strength = Settings.graphicsStrength,
+        dayNight = Settings.graphicsDayNight ~= false,
+        lod = Settings.graphicsLod,
+        softShadows = Settings.graphicsSoftShadows == true,
+        vehicleLights = Settings.graphicsVehicleLights == true
+    })
+end
+
+-- flamingo_graphics javlja kad se (re)startuje - tada mu ponovo posaljemo
+-- sacuvana podesavanja igraca.
+AddEventHandler('flamingo_graphics:ready', ApplyGraphicsSettings)
+
 CreateThread(function()
     Wait(2000)
     ApplyInterfaceSettings()
+    ApplyGraphicsSettings()
 end)
 
 -- Primenjuje trenutna podesavanja svaki frejm (DisplayRadar/DisplayHud se
@@ -110,6 +140,10 @@ RegisterNUICallback('updateSetting', function(data, cb)
         if data.key == 'hudEnabled' or data.key == 'chatEnabled' or data.key == 'idEnabled' or crosshairKeys[data.key] then
             ApplyInterfaceSettings()
         end
+
+        if type(data.key) == 'string' and data.key:sub(1, 8) == 'graphics' then
+            ApplyGraphicsSettings()
+        end
     end
     cb('ok')
 end)
@@ -120,25 +154,10 @@ RegisterNUICallback('saveSettings', function(_, cb)
 end)
 
 RegisterNUICallback('resetSettings', function(_, cb)
-    Settings = {
-        minimapEnabled = true,
-        cinematicMode = false,
-        theme = 'neutral',
-        hudEnabled = true,
-        chatEnabled = true,
-        idEnabled = true,
-        crosshairEnabled = false,
-        crosshairThickness = 2,
-        crosshairSize = 10,
-        crosshairGap = 4,
-        crosshairOpacity = 1,
-        crosshairColor = '#ff4d8d',
-        menuSounds = true,
-        menuVolume = 60,
-        keybinds = {}
-    }
+    Settings = DefaultSettings()
     SaveSettings()
     ApplyInterfaceSettings()
+    ApplyGraphicsSettings()
     ApplyAllKeybinds()
     cb(Settings)
 end)

@@ -4,8 +4,8 @@ lua54 'yes'
 
 name 'flamingo_graphics'
 author 'Flamingo Roleplay'
-description 'Lepsa grafika za sve igrace: custom timecycle (boje, bloom, vinjeta), dan/noc prelaz i LOD boost'
-version '1.0.0'
+description 'Lepsa grafika za sve igrace: custom timecycle preseti, dan/noc izgled, LOD, senke i svetla vozila. Podesava se kroz M meni.'
+version '2.0.0'
 
 files {
     'data/timecycle_mods_flamingo.xml'

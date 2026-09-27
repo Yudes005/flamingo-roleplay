@@ -41,6 +41,7 @@ files {
     'html/js/zadaci.js',
     'html/css/zadaci.css',
     'html/css/paketi.css',
+    'html/css/grafika.css',
     'html/img/*.png',
     'html/img/kutije/*.png',
     'html/img/kutije/*.jpg',

@@ -699,7 +699,7 @@ const SETTINGS_NAV = [
   { id: 'opste',    label: 'Podešavanja', sub: 'Interfejs, tema i ostale opcije', icon: 'fa-gear' },
   { id: 'kontrole', label: 'Kontrole',    sub: 'Tasteri i prečice',               icon: 'fa-keyboard' },
   { id: 'igra',     label: 'Igra',        sub: 'Gameplay opcije',                 icon: 'fa-crosshairs' },
-  { id: 'grafika',  label: 'Grafika',     sub: 'Prikaz i performanse',            icon: 'fa-display' }
+  { id: 'grafika',  label: 'Grafika',     sub: 'Izgled sveta i performanse',      icon: 'fa-display' }
 ];
 
 // Podkategorije unutar Nagrade (levi sidenav, isti stil kao Podešavanja/Statistika).
@@ -840,6 +840,281 @@ function renderThemeGrid(settings) {
   `;
 }
 
+// ==========================================================
+// GRAFIKA - Podesavanja -> Grafika. Sve vrednosti idu kroz updateSetting
+// (graphics* kljucevi), a client.lua ih prosledjuje resursu flamingo_graphics.
+// ID preseta moraju da se poklapaju sa Config.Presets u flamingo_graphics/config.lua.
+// "preview" je samo CSS filter za pregled u meniju - pravi izgled u igri
+// dolazi iz timecycle fajla (flamingo_graphics/data/timecycle_mods_flamingo.xml).
+// ==========================================================
+const GRAPHICS_PRESETS = [
+  { id: 'off',      name: 'Isključeno', desc: 'Originalni GTA izgled',              icon: 'fa-power-off',    preview: 'none' },
+  { id: 'prirodno', name: 'Prirodno',   desc: 'Življe boje, lepša noćna svetla',     icon: 'fa-leaf',         preview: 'saturate(1.15) contrast(1.03)', badge: 'Preporučeno' },
+  { id: 'zivo',     name: 'Živopisno',  desc: 'Jake, sočne boje',                    icon: 'fa-sun',          preview: 'saturate(1.5) contrast(1.06) brightness(1.03)' },
+  { id: 'film',     name: 'Filmski',    desc: 'Kontrast, sjaj i vinjeta',            icon: 'fa-film',         preview: 'saturate(1.2) contrast(1.14) brightness(0.97)', vignette: true },
+  { id: 'toplo',    name: 'Toplo',      desc: 'Zlatni ton, kao večiti zalazak',      icon: 'fa-fire',         preview: 'sepia(0.28) saturate(1.25) contrast(1.03)' },
+  { id: 'hladno',   name: 'Hladno',     desc: 'Plavičasta, moderna slika',           icon: 'fa-snowflake',    preview: 'saturate(0.9) hue-rotate(-12deg) brightness(1.04) contrast(1.04)' },
+  { id: 'crnobelo', name: 'Crno-belo',  desc: 'Za slike i snimanje',                 icon: 'fa-camera-retro', preview: 'grayscale(1) contrast(1.15)', vignette: true }
+];
+
+// Brzi profili - jednim klikom postavljaju vise opcija odjednom
+const GRAPHICS_PROFILES = [
+  {
+    id: 'slab', name: 'Slabiji PC', icon: 'fa-battery-quarter',
+    desc: 'Lepše boje, bez gubitka FPS-a',
+    values: { graphicsPreset: 'prirodno', graphicsStrength: 60, graphicsDayNight: true, graphicsLod: 100, graphicsSoftShadows: false, graphicsVehicleLights: false }
+  },
+  {
+    id: 'balans', name: 'Balans', icon: 'fa-scale-balanced',
+    desc: 'Najbolji odnos izgleda i brzine',
+    values: { graphicsPreset: 'prirodno', graphicsStrength: 80, graphicsDayNight: true, graphicsLod: 115, graphicsSoftShadows: true, graphicsVehicleLights: true }
+  },
+  {
+    id: 'max', name: 'Maksimum', icon: 'fa-gem',
+    desc: 'Najlepša slika, za jače računare',
+    values: { graphicsPreset: 'film', graphicsStrength: 100, graphicsDayNight: true, graphicsLod: 150, graphicsSoftShadows: true, graphicsVehicleLights: true }
+  }
+];
+
+const GRAPHICS_TIPS = [
+  { icon: 'fa-wand-magic-sparkles', title: 'Post FX: Ultra', text: 'Bez ovoga se sjaj svetla i boje slabije vide.' },
+  { icon: 'fa-image',               title: 'Kvalitet tekstura: High / Very High', text: 'Oštriji automobili, odeća i zgrade.' },
+  { icon: 'fa-cloud-sun',           title: 'Senke: High + Softer', text: 'Prirodnije senke, posebno uz „Meke senke“ ovde.' },
+  { icon: 'fa-road',                title: 'Extended Distance Scaling', text: 'Povećaj koliko FPS dozvoljava.' }
+];
+
+let graphicsPreviewNight = false;
+
+function gfxSettings(settings) {
+  const num = (v, d) => (Number.isFinite(Number(v)) ? Number(v) : d);
+  return {
+    preset: GRAPHICS_PRESETS.some(p => p.id === settings.graphicsPreset) ? settings.graphicsPreset : 'prirodno',
+    strength: num(settings.graphicsStrength, 80),
+    dayNight: settings.graphicsDayNight !== false,
+    lod: num(settings.graphicsLod, 100),
+    softShadows: settings.graphicsSoftShadows === true,
+    vehicleLights: settings.graphicsVehicleLights === true
+  };
+}
+
+// Procena uticaja na FPS - samo informativno, za igraca
+function gfxPerformance(g) {
+  let score = 0;
+  if (g.lod > 100) score += (g.lod - 100) / 25; // 150% = 2
+  if (g.softShadows) score += 1;
+  if (g.vehicleLights) score += 0.25;
+  if (score < 0.75) return { id: 'low', label: 'Mali uticaj na FPS', icon: 'fa-bolt' };
+  if (score < 2) return { id: 'mid', label: 'Srednji uticaj na FPS', icon: 'fa-gauge' };
+  return { id: 'high', label: 'Veći uticaj na FPS', icon: 'fa-fire-flame-curved' };
+}
+
+function gfxActiveProfile(g) {
+  return GRAPHICS_PROFILES.find(p =>
+    p.values.graphicsPreset === g.preset &&
+    p.values.graphicsStrength === g.strength &&
+    p.values.graphicsDayNight === g.dayNight &&
+    p.values.graphicsLod === g.lod &&
+    p.values.graphicsSoftShadows === g.softShadows &&
+    p.values.graphicsVehicleLights === g.vehicleLights
+  );
+}
+
+function renderGraphicsTab(settings) {
+  const g = gfxSettings(settings);
+  const preset = GRAPHICS_PRESETS.find(p => p.id === g.preset);
+  const perf = gfxPerformance(g);
+  const activeProfile = gfxActiveProfile(g);
+  const disabled = g.preset === 'off' ? 'fl-crosshair-panel--disabled' : '';
+
+  let html = '';
+
+  // ---- Pregled uzivo ----
+  html += settingsSectionHeader('fa-eye', 'Pregled uživo');
+  html += `
+    <div class="fl-gfx-hero ${graphicsPreviewNight ? 'fl-gfx-hero--night' : ''}" id="gfxHero">
+      <img src="img/hero_banner.jpg" class="fl-gfx-hero-img" alt="">
+      <img src="img/hero_banner.jpg" class="fl-gfx-hero-img fl-gfx-hero-img--fx" id="gfxHeroFx" alt=""
+           style="filter:${preset.preview}; opacity:${g.strength / 100};">
+      <div class="fl-gfx-hero-vignette" id="gfxHeroVignette" style="opacity:${preset.vignette ? g.strength / 100 : 0};"></div>
+      <div class="fl-gfx-hero-night"></div>
+      <div class="fl-gfx-hero-shade"></div>
+
+      <div class="fl-gfx-hero-top">
+        <div class="fl-gfx-daynight">
+          <button type="button" class="fl-gfx-daynight-btn ${graphicsPreviewNight ? '' : 'active'}" data-gfx-preview="day"><i class="fa-solid fa-sun"></i> Dan</button>
+          <button type="button" class="fl-gfx-daynight-btn ${graphicsPreviewNight ? 'active' : ''}" data-gfx-preview="night"><i class="fa-solid fa-moon"></i> Noć</button>
+        </div>
+        <span class="fl-gfx-perf fl-gfx-perf--${perf.id}" id="gfxPerf"><i class="fa-solid ${perf.icon}"></i> ${escapeHtml(perf.label)}</span>
+      </div>
+
+      <div class="fl-gfx-hero-info">
+        <div class="fl-gfx-hero-icon"><i class="fa-solid ${preset.icon}"></i></div>
+        <div class="fl-gfx-hero-text">
+          <span class="fl-gfx-hero-label">Aktivni izgled</span>
+          <span class="fl-gfx-hero-name">${escapeHtml(preset.name)}</span>
+          <span class="fl-gfx-hero-desc">${escapeHtml(preset.desc)}</span>
+        </div>
+        <span class="fl-gfx-hero-strength" id="gfxHeroStrength">${g.preset === 'off' ? '' : `${g.strength}%`}</span>
+      </div>
+    </div>
+  `;
+
+  // ---- Preseti ----
+  html += settingsSectionHeader('fa-palette', 'Izgled sveta');
+  html += `<div class="fl-gfx-preset-grid">`;
+  html += GRAPHICS_PRESETS.map(p => `
+    <button type="button" class="fl-gfx-preset ${p.id === g.preset ? 'active' : ''}" data-gfx-preset="${p.id}" data-sfx="activate">
+      <div class="fl-gfx-preset-thumb">
+        <img src="img/hero_banner.jpg" alt="" style="filter:${p.preview};">
+        ${p.vignette ? '<span class="fl-gfx-preset-vignette"></span>' : ''}
+        ${p.badge ? `<span class="fl-gfx-preset-badge">${escapeHtml(p.badge)}</span>` : ''}
+        ${p.id === g.preset ? '<span class="fl-gfx-preset-check"><i class="fa-solid fa-check"></i></span>' : ''}
+      </div>
+      <div class="fl-gfx-preset-body">
+        <span class="fl-gfx-preset-name"><i class="fa-solid ${p.icon}"></i> ${escapeHtml(p.name)}</span>
+        <span class="fl-gfx-preset-desc">${escapeHtml(p.desc)}</span>
+      </div>
+    </button>
+  `).join('');
+  html += `</div>`;
+
+  // ---- Fino podesavanje ----
+  html += settingsSectionHeader('fa-sliders', 'Fino podešavanje');
+  html += `
+    <div class="fl-crosshair-panel fl-gfx-sliders">
+      <div class="fl-crosshair-row ${disabled}" id="gfxStrengthRow">
+        <span class="fl-crosshair-label"><i class="fa-solid fa-droplet fl-gfx-row-icon"></i> Jačina efekta</span>
+        <input type="range" class="fl-crosshair-slider" id="gfxStrength" min="0" max="100" step="5" value="${g.strength}">
+        <span class="fl-crosshair-value" id="gfxStrengthVal">${g.strength}%</span>
+      </div>
+      <div class="fl-crosshair-row">
+        <span class="fl-crosshair-label"><i class="fa-solid fa-mountain-sun fl-gfx-row-icon"></i> Daljina detalja</span>
+        <input type="range" class="fl-crosshair-slider" id="gfxLod" min="100" max="150" step="5" value="${g.lod}">
+        <span class="fl-crosshair-value" id="gfxLodVal">${g.lod}%</span>
+      </div>
+      <p class="fl-gfx-hint"><i class="fa-solid fa-circle-info"></i> Veća daljina detalja znači da se zgrade, drveće i auta vide oštrije i dalje, ali troši više FPS-a.</p>
+    </div>
+  `;
+
+  html += `<div class="fl-setting-card-grid">`;
+  html += settingCard('gfxDayNight', 'fa-moon', 'Noćni izgled', 'Posebno podešena noć: jači sjaj svetala grada', g.dayNight);
+  html += settingCard('gfxSoftShadows', 'fa-cloud-sun', 'Meke senke', 'Prirodnije, glađe ivice senki', g.softShadows);
+  html += settingCard('gfxVehicleLights', 'fa-car-side', 'Jača svetla vozila', 'Farovi i stop svetla jače svetle', g.vehicleLights);
+  html += `</div>`;
+
+  // ---- Brzi profili ----
+  html += settingsSectionHeader('fa-bolt', 'Brzi profili');
+  html += `<div class="fl-gfx-profile-grid">`;
+  html += GRAPHICS_PROFILES.map(p => `
+    <button type="button" class="fl-gfx-profile ${activeProfile && activeProfile.id === p.id ? 'active' : ''}" data-gfx-profile="${p.id}" data-sfx="buy">
+      <div class="fl-gfx-profile-icon"><i class="fa-solid ${p.icon}"></i></div>
+      <div class="fl-gfx-profile-text">
+        <span class="fl-gfx-profile-name">${escapeHtml(p.name)}</span>
+        <span class="fl-gfx-profile-desc">${escapeHtml(p.desc)}</span>
+      </div>
+      ${activeProfile && activeProfile.id === p.id ? '<i class="fa-solid fa-circle-check fl-theme-check"></i>' : ''}
+    </button>
+  `).join('');
+  html += `</div>`;
+
+  // ---- Saveti ----
+  html += settingsSectionHeader('fa-lightbulb', 'Saveti za najlepšu sliku');
+  html += `
+    <div class="fl-gfx-tips">
+      <p class="fl-gfx-tips-intro">Rezolucija, teksture i senke se menjaju u <b>ESC → Settings → Graphics</b>. FiveM ne dozvoljava skriptama da ih menjaju, pa ih podesi sam:</p>
+      <div class="fl-gfx-tips-grid">
+        ${GRAPHICS_TIPS.map(t => `
+          <div class="fl-gfx-tip">
+            <i class="fa-solid ${t.icon}"></i>
+            <div><span class="fl-gfx-tip-title">${escapeHtml(t.title)}</span><span class="fl-gfx-tip-text">${escapeHtml(t.text)}</span></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  return html;
+}
+
+function attachGraphicsListeners(settings) {
+  // Ponovo iscrtava tab, ali zadrzava poziciju skrola (da ne skoci na vrh posle klika)
+  const rerender = () => {
+    const main = document.getElementById('settingsMainContent');
+    const top = main ? main.scrollTop : 0;
+    renderSettingsTabContent(currentPlayer.settings || settings);
+    if (main) main.scrollTop = top;
+  };
+
+  document.querySelectorAll('[data-gfx-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      updateSetting('graphicsPreset', btn.dataset.gfxPreset);
+      rerender();
+    });
+  });
+
+  document.querySelectorAll('[data-gfx-profile]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const profile = GRAPHICS_PROFILES.find(p => p.id === btn.dataset.gfxProfile);
+      if (!profile) return;
+      Object.entries(profile.values).forEach(([key, value]) => updateSetting(key, value));
+      rerender();
+    });
+  });
+
+  document.querySelectorAll('[data-gfx-preview]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      graphicsPreviewNight = btn.dataset.gfxPreview === 'night';
+      const hero = document.getElementById('gfxHero');
+      if (hero) hero.classList.toggle('fl-gfx-hero--night', graphicsPreviewNight);
+      document.querySelectorAll('[data-gfx-preview]').forEach(b => b.classList.toggle('active', b === btn));
+    });
+  });
+
+  const strength = document.getElementById('gfxStrength');
+  if (strength) {
+    strength.addEventListener('input', () => {
+      const v = parseInt(strength.value, 10) || 0;
+      const preset = GRAPHICS_PRESETS.find(p => p.id === gfxSettings(currentPlayer.settings || settings).preset);
+      document.getElementById('gfxStrengthVal').textContent = `${v}%`;
+      const fx = document.getElementById('gfxHeroFx');
+      if (fx) fx.style.opacity = v / 100;
+      const vig = document.getElementById('gfxHeroVignette');
+      if (vig) vig.style.opacity = preset && preset.vignette ? v / 100 : 0;
+      const label = document.getElementById('gfxHeroStrength');
+      if (label && preset && preset.id !== 'off') label.textContent = `${v}%`;
+      if (window.flSound) window.flSound.play('slide');
+    });
+    strength.addEventListener('change', () => {
+      updateSetting('graphicsStrength', parseInt(strength.value, 10) || 0);
+      rerender();
+    });
+  }
+
+  const lod = document.getElementById('gfxLod');
+  if (lod) {
+    lod.addEventListener('input', () => {
+      document.getElementById('gfxLodVal').textContent = `${lod.value}%`;
+      if (window.flSound) window.flSound.play('slide');
+    });
+    lod.addEventListener('change', () => {
+      updateSetting('graphicsLod', parseInt(lod.value, 10) || 100);
+      rerender();
+    });
+  }
+
+  const bindToggle = (id, key) => {
+    const elx = document.getElementById(id);
+    if (!elx) return;
+    elx.addEventListener('change', (e) => {
+      updateSetting(key, e.target.checked);
+      rerender();
+    });
+  };
+  bindToggle('gfxDayNight', 'graphicsDayNight');
+  bindToggle('gfxSoftShadows', 'graphicsSoftShadows');
+  bindToggle('gfxVehicleLights', 'graphicsVehicleLights');
+}
+
 function renderSettingsTabContent(settings) {
   const el = document.getElementById('settingsMainContent');
   if (!el) return;
@@ -890,13 +1165,7 @@ function renderSettingsTabContent(settings) {
   }
 
   if (activeSettingsTab === 'grafika') {
-    html += settingsSectionHeader('fa-display', 'Grafika');
-    html += `
-      <div class="fl-empty" style="padding-top:12px;">
-        <i class="fa-solid fa-display"></i>
-        <span>Grafička podešavanja (rezolucija, senke, kvalitet teksture...) se menjaju kroz FiveM-ov ugrađeni meni: ESC → Settings → Video/Graphics. FiveM iz bezbednosnih razloga ne dozvoljava skriptama da menjaju ta podešavanja.</span>
-      </div>
-    `;
+    html += renderGraphicsTab(settings);
   }
 
   el.innerHTML = html;
@@ -961,6 +1230,7 @@ function attachSettingsListeners(settings) {
   }
 
   attachCrosshairPanelListeners('_igra');
+  attachGraphicsListeners(settings);
 
   document.querySelectorAll('.fl-theme-card').forEach(btn => {
     btn.addEventListener('click', () => {

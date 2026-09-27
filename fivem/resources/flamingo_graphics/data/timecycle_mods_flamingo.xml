@@ -4,35 +4,92 @@
     Primenjuju se u "extra" timecycle slotu, tako da ne smetaju skriptama
     koje koriste glavni slot (droge, kamere, enterijeri...).
     Posle izmene ovog fajla igraci moraju ponovo da se konektuju.
+
+    postfx_desaturation          iznad 1.0 = jace boje, 0.0 = crno-belo
+    postfx_intensity_bloom       koliko svetla "sijaju"
+    postfx_vignetting_intensity  tamnije ivice ekrana
+    postfx_correct_col_r/g/b     boja slike (toplo / hladno)
+    numMods mora da bude jednak broju linija u tom <modifier> bloku.
 -->
 <timecycle_modifier_data version="1.000000">
 
-    <!-- PRIRODNO: dan - malo zivlje boje, blag bloom -->
+    <!-- PRIRODNO -->
     <modifier name="flamingo_prirodno_dan" numMods="3" userFlags="0">
         <postfx_desaturation>1.080000 1.080000</postfx_desaturation>
         <postfx_intensity_bloom>0.550000 0.550000</postfx_intensity_bloom>
         <postfx_vignetting_intensity>0.120000 0.120000</postfx_vignetting_intensity>
     </modifier>
-
-    <!-- PRIRODNO: noc - svetla vise "sijaju" -->
     <modifier name="flamingo_prirodno_noc" numMods="3" userFlags="0">
         <postfx_desaturation>1.050000 1.050000</postfx_desaturation>
         <postfx_intensity_bloom>0.850000 0.850000</postfx_intensity_bloom>
         <postfx_vignetting_intensity>0.180000 0.180000</postfx_vignetting_intensity>
     </modifier>
 
-    <!-- FILMSKI: dan - jace boje, izrazenija vinjeta -->
-    <modifier name="flamingo_film_dan" numMods="3" userFlags="0">
+    <!-- ZIVOPISNO -->
+    <modifier name="flamingo_zivo_dan" numMods="3" userFlags="0">
+        <postfx_desaturation>1.250000 1.250000</postfx_desaturation>
+        <postfx_intensity_bloom>0.600000 0.600000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.100000 0.100000</postfx_vignetting_intensity>
+    </modifier>
+    <modifier name="flamingo_zivo_noc" numMods="3" userFlags="0">
         <postfx_desaturation>1.180000 1.180000</postfx_desaturation>
-        <postfx_intensity_bloom>0.750000 0.750000</postfx_intensity_bloom>
-        <postfx_vignetting_intensity>0.250000 0.250000</postfx_vignetting_intensity>
+        <postfx_intensity_bloom>0.950000 0.950000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.150000 0.150000</postfx_vignetting_intensity>
     </modifier>
 
-    <!-- FILMSKI: noc - neon/grad atmosfera -->
+    <!-- FILMSKI -->
+    <modifier name="flamingo_film_dan" numMods="3" userFlags="0">
+        <postfx_desaturation>1.150000 1.150000</postfx_desaturation>
+        <postfx_intensity_bloom>0.750000 0.750000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.280000 0.280000</postfx_vignetting_intensity>
+    </modifier>
     <modifier name="flamingo_film_noc" numMods="3" userFlags="0">
-        <postfx_desaturation>1.120000 1.120000</postfx_desaturation>
+        <postfx_desaturation>1.100000 1.100000</postfx_desaturation>
         <postfx_intensity_bloom>1.100000 1.100000</postfx_intensity_bloom>
-        <postfx_vignetting_intensity>0.300000 0.300000</postfx_vignetting_intensity>
+        <postfx_vignetting_intensity>0.320000 0.320000</postfx_vignetting_intensity>
+    </modifier>
+
+    <!-- TOPLO -->
+    <modifier name="flamingo_toplo_dan" numMods="6" userFlags="0">
+        <postfx_desaturation>1.120000 1.120000</postfx_desaturation>
+        <postfx_correct_col_r>1.060000 1.060000</postfx_correct_col_r>
+        <postfx_correct_col_g>1.000000 1.000000</postfx_correct_col_g>
+        <postfx_correct_col_b>0.900000 0.900000</postfx_correct_col_b>
+        <postfx_intensity_bloom>0.600000 0.600000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.150000 0.150000</postfx_vignetting_intensity>
+    </modifier>
+    <modifier name="flamingo_toplo_noc" numMods="6" userFlags="0">
+        <postfx_desaturation>1.080000 1.080000</postfx_desaturation>
+        <postfx_correct_col_r>1.050000 1.050000</postfx_correct_col_r>
+        <postfx_correct_col_g>0.990000 0.990000</postfx_correct_col_g>
+        <postfx_correct_col_b>0.900000 0.900000</postfx_correct_col_b>
+        <postfx_intensity_bloom>0.900000 0.900000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.200000 0.200000</postfx_vignetting_intensity>
+    </modifier>
+
+    <!-- HLADNO -->
+    <modifier name="flamingo_hladno_dan" numMods="6" userFlags="0">
+        <postfx_desaturation>1.000000 1.000000</postfx_desaturation>
+        <postfx_correct_col_r>0.930000 0.930000</postfx_correct_col_r>
+        <postfx_correct_col_g>0.990000 0.990000</postfx_correct_col_g>
+        <postfx_correct_col_b>1.060000 1.060000</postfx_correct_col_b>
+        <postfx_intensity_bloom>0.550000 0.550000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.150000 0.150000</postfx_vignetting_intensity>
+    </modifier>
+    <modifier name="flamingo_hladno_noc" numMods="6" userFlags="0">
+        <postfx_desaturation>0.980000 0.980000</postfx_desaturation>
+        <postfx_correct_col_r>0.920000 0.920000</postfx_correct_col_r>
+        <postfx_correct_col_g>0.980000 0.980000</postfx_correct_col_g>
+        <postfx_correct_col_b>1.080000 1.080000</postfx_correct_col_b>
+        <postfx_intensity_bloom>0.850000 0.850000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.200000 0.200000</postfx_vignetting_intensity>
+    </modifier>
+
+    <!-- CRNO-BELO (za slike i snimanje) -->
+    <modifier name="flamingo_crnobelo" numMods="3" userFlags="0">
+        <postfx_desaturation>0.000000 0.000000</postfx_desaturation>
+        <postfx_intensity_bloom>0.600000 0.600000</postfx_intensity_bloom>
+        <postfx_vignetting_intensity>0.350000 0.350000</postfx_vignetting_intensity>
     </modifier>
 
 </timecycle_modifier_data>

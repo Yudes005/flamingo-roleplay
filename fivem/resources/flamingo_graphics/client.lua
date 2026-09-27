@@ -1,25 +1,27 @@
-local KVP_PRESET = 'flamingo_graphics:preset'
-local KVP_STRENGTH = 'flamingo_graphics:strength'
+-- ==========================================================
+-- flamingo_graphics - klijent
+-- Sva podesavanja dolaze iz M menija (flamingo_mmenu -> Podesavanja -> Grafika)
+-- preko lokalnog eventa 'flamingo_graphics:setConfig'. Dok meni ne posalje
+-- nista, igrac ima Config.Defaults - znaci lepsa grafika radi cim se udje.
+-- ==========================================================
 
-local currentPreset = Config.DefaultPreset
-local strength = Config.DefaultStrength
+local state = {}
+for k, v in pairs(Config.Defaults) do state[k] = v end
 
-local wantedModifier = nil -- modifier koji treba da bude aktivan
+local wantedModifier = nil -- modifier koji treba da bude aktivan u extra slotu
 local fading = false
 local fadeToken = 0
+local shadowsApplied = nil
+local vehicleLightsApplied = false
 
-local ESX = nil
-if GetResourceState('es_extended') ~= 'missing' then
-    local ok, obj = pcall(function() return exports['es_extended']:getSharedObject() end)
-    if ok then ESX = obj end
+local function clamp(v, min, max)
+    v = tonumber(v)
+    if not v then return nil end
+    return math.min(max, math.max(min, v))
 end
 
-local function notify(msg)
-    if ESX and ESX.ShowNotification then
-        ESX.ShowNotification(msg)
-    else
-        TriggerEvent('chat:addMessage', { color = { 255, 105, 180 }, args = { 'Grafika', msg } })
-    end
+local function strength01()
+    return (clamp(state.strength, 0, 100) or 0) / 100
 end
 
 local function isNight()
@@ -31,19 +33,10 @@ local function isNight()
 end
 
 local function targetModifier()
-    local preset = Config.Presets[currentPreset]
+    local preset = Config.Presets[state.preset]
     if not preset or not preset.day then return nil end
-    if isNight() and preset.night then return preset.night end
+    if state.dayNight and preset.night and isNight() then return preset.night end
     return preset.day
-end
-
-local function setModifier(name, s)
-    if name then
-        SetExtraTimecycleModifier(name)
-        SetExtraTimecycleModifierStrength(s)
-    else
-        ClearExtraTimecycleModifier()
-    end
 end
 
 -- Glatko gasi trenutni modifier i pali novi (bez naglog "skoka" boja)
@@ -61,43 +54,87 @@ local function fadeTo(name)
         if hadModifier then
             for i = steps, 0, -1 do
                 if token ~= fadeToken then return end
-                SetExtraTimecycleModifierStrength(strength * i / steps)
+                SetExtraTimecycleModifierStrength(strength01() * i / steps)
                 Wait(stepWait)
             end
         end
 
         if token ~= fadeToken then return end
-        setModifier(name, 0.0)
 
         if name then
+            SetExtraTimecycleModifier(name)
+            SetExtraTimecycleModifierStrength(0.0)
             for i = 1, steps do
                 if token ~= fadeToken then return end
-                SetExtraTimecycleModifierStrength(strength * i / steps)
+                SetExtraTimecycleModifierStrength(strength01() * i / steps)
                 Wait(stepWait)
             end
+        else
+            ClearExtraTimecycleModifier()
         end
 
         if token == fadeToken then fading = false end
     end)
 end
 
-local function loadSettings()
-    local savedPreset = GetResourceKvpString(KVP_PRESET)
-    if savedPreset and Config.Presets[savedPreset] then
-        currentPreset = savedPreset
-    end
-
-    local savedStrength = tonumber(GetResourceKvpString(KVP_STRENGTH) or '')
-    if savedStrength then
-        strength = math.min(1.0, math.max(0.0, savedStrength))
+local function applyModifier()
+    local target = targetModifier()
+    if target ~= wantedModifier then
+        fadeTo(target)
+    elseif target and not fading then
+        SetExtraTimecycleModifierStrength(strength01())
     end
 end
 
+local function applyShadows()
+    if shadowsApplied == state.softShadows then return end
+    shadowsApplied = state.softShadows
+
+    if state.softShadows then
+        CascadeShadowsSetShadowSampleType(Config.SoftShadowType)
+    else
+        CascadeShadowsClearShadowSampleType()
+    end
+end
+
+local function setAllVehicleLights(multiplier)
+    for _, veh in ipairs(GetGamePool('CVehicle')) do
+        SetVehicleLightMultiplier(veh, multiplier)
+    end
+end
+
+local function applyAll()
+    applyModifier()
+    applyShadows()
+end
+
+-- Podesavanja iz M menija. Sve vrednosti se proveravaju, pa los podatak ne moze
+-- da srusi skriptu.
+AddEventHandler('flamingo_graphics:setConfig', function(cfg)
+    if type(cfg) ~= 'table' then return end
+
+    if cfg.preset ~= nil and Config.Presets[cfg.preset] then state.preset = cfg.preset end
+    if cfg.strength ~= nil then state.strength = clamp(cfg.strength, 0, 100) or state.strength end
+    if cfg.lod ~= nil then state.lod = clamp(cfg.lod, 100, Config.MaxLod) or state.lod end
+    if cfg.dayNight ~= nil then state.dayNight = cfg.dayNight == true end
+    if cfg.softShadows ~= nil then state.softShadows = cfg.softShadows == true end
+    if cfg.vehicleLights ~= nil then state.vehicleLights = cfg.vehicleLights == true end
+
+    applyAll()
+end)
+
 -- Glavna petlja: dan/noc prelaz + vracanje efekta ako ga neka skripta obrise
 CreateThread(function()
-    loadSettings()
     wantedModifier = targetModifier()
-    setModifier(wantedModifier, strength)
+    if wantedModifier then
+        SetExtraTimecycleModifier(wantedModifier)
+        SetExtraTimecycleModifierStrength(strength01())
+    end
+    applyShadows()
+
+    -- Javi M meniju da smo spremni, da posalje sacuvana podesavanja igraca
+    -- (bitno kad se flamingo_graphics restartuje posle menija).
+    TriggerEvent('flamingo_graphics:ready')
 
     while true do
         Wait(5000)
@@ -105,78 +142,42 @@ CreateThread(function()
         if target ~= wantedModifier then
             fadeTo(target)
         elseif target and not fading and GetExtraTimecycleModifierIndex() == -1 then
-            setModifier(target, strength)
+            SetExtraTimecycleModifier(target)
+            SetExtraTimecycleModifierStrength(strength01())
         end
     end
 end)
 
--- LOD boost (samo za presete koji imaju lodScale)
+-- Daljina detalja (LOD). Mora da se postavlja svaki frejm.
 CreateThread(function()
     while true do
-        local preset = Config.Presets[currentPreset]
-        if preset and preset.lodScale then
-            OverrideLodscaleThisFrame(preset.lodScale)
+        local scale = (tonumber(state.lod) or 100) / 100
+        if scale > 1.0 then
+            OverrideLodscaleThisFrame(scale)
             Wait(0)
         else
-            Wait(1000)
+            Wait(500)
         end
     end
 end)
 
-local function presetList()
-    local names = {}
-    for _, key in ipairs(Config.PresetOrder) do
-        if Config.Presets[key] then names[#names + 1] = key end
-    end
-    return table.concat(names, ', ')
-end
-
-RegisterCommand('grafika', function(_, args)
-    local key = args[1] and args[1]:lower()
-
-    if not key then
-        notify(('Trenutno: ~b~%s~s~ (%d%%). Opcije: %s'):format(currentPreset, math.floor(strength * 100 + 0.5), presetList()))
-        return
-    end
-
-    local preset = Config.Presets[key]
-    if not preset then
-        notify(('Nepoznat preset. Opcije: %s'):format(presetList()))
-        return
-    end
-
-    currentPreset = key
-    SetResourceKvp(KVP_PRESET, key)
-    fadeTo(targetModifier())
-    notify(('Grafika: ~g~%s'):format(preset.label))
-end, false)
-
-RegisterCommand('grafikajacina', function(_, args)
-    local value = tonumber(args[1])
-    if not value then
-        notify(('Jacina efekta: ~b~%d%%~s~. Upotreba: /grafikajacina 0-100'):format(math.floor(strength * 100 + 0.5)))
-        return
-    end
-
-    strength = math.min(100, math.max(0, value)) / 100
-    SetResourceKvp(KVP_STRENGTH, tostring(strength))
-    if not fading and wantedModifier then
-        SetExtraTimecycleModifierStrength(strength)
-    end
-    notify(('Jacina efekta: ~g~%d%%'):format(math.floor(strength * 100 + 0.5)))
-end, false)
-
+-- Jaca svetla vozila (samo vizuelno, kod ovog igraca)
 CreateThread(function()
-    TriggerEvent('chat:addSuggestion', '/grafika', 'Promeni izgled grafike', {
-        { name = 'preset', help = presetList() },
-    })
-    TriggerEvent('chat:addSuggestion', '/grafikajacina', 'Jacina grafickog efekta', {
-        { name = 'procenat', help = '0-100' },
-    })
+    while true do
+        if state.vehicleLights then
+            setAllVehicleLights(Config.VehicleLightMultiplier)
+            vehicleLightsApplied = true
+        elseif vehicleLightsApplied then
+            setAllVehicleLights(1.0)
+            vehicleLightsApplied = false
+        end
+        Wait(1500)
+    end
 end)
 
 AddEventHandler('onResourceStop', function(resource)
-    if resource == GetCurrentResourceName() then
-        ClearExtraTimecycleModifier()
-    end
+    if resource ~= GetCurrentResourceName() then return end
+    ClearExtraTimecycleModifier()
+    CascadeShadowsClearShadowSampleType()
+    if vehicleLightsApplied then setAllVehicleLights(1.0) end
 end)
