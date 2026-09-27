@@ -1,61 +1,73 @@
 # flamingo_pijaca
 
-Klasična pijaca za igrače: NPC kod kog se iznajmljuje tezga, tezga na kojoj
-vlasnik ubacuje robu preko `ox_inventory`-ja i postavlja cene, i kupovina za
-sve ostale igrače koji dođu do tezge.
+Pijaca za igrače (ESX + ox_inventory): NPC kod kog se iznajmljuje tezga,
+roba se stavlja na tezgu prevlačenjem u `ox_inventory`, a cena piše direktno
+na itemu.
 
 ## Instalacija
 
 1. Ubaci folder `flamingo_pijaca` u `resources`.
-2. U `server.cfg`, POSLE `ox_inventory`, `esx_notify`, `esx_keyprompt` i
-   `flamingo_npcdialog`, dodaj: `ensure flamingo_pijaca`
+2. U `server.cfg`, POSLE `es_extended`, `ox_inventory`, `esx_notify`,
+   `esx_keyprompt` i `flamingo_npcdialog`, dodaj: `ensure flamingo_pijaca`
 3. Po potrebi izmeni `config.lua` (videti ispod).
 
 ## Kako radi
 
-- Priđeš NPC-u na `Config.Npc.coords` → izađe keyprompt (`esx_keyprompt`) →
-  pritisneš `E` → otvara se dijalog (`flamingo_npcdialog`) koji ti pokazuje
-  koje su tezge trenutno slobodne i nudi opciju da ih iznajmiš.
-- Iznajmljivanje traje `Config.MaxRentSeconds` (podrazumevano 5h). Kad istekne,
-  ili kad se odjaviš sa servera, tezga se automatski oslobađa, a roba koja je
-  ostala na njoj ispadne pored tezge (`ox_inventory` drop) da ne propadne.
-- Dok iznajmljuješ tezgu, kad joj priđeš dobijaš keyprompt "Upravljaj tezgom":
-  otvara panel gde možeš otvoriti magacin tezge (obično `ox_inventory` sučelje,
-  ubacuješ/vadiš robu) i postaviti cenu za svaki item koji trenutno stoji tamo.
-  Iz istog panela možeš i da otkažeš najam ranije (roba koja stane u tvoj
-  inventar ti se vraća, ostatak ispadne pored tezge).
-- Kad neki drugi igrač priđe iznajmljenoj tezgi, dobija keyprompt "Pogledaj
-  ponudu": otvara panel sa spiskom robe koja ima cenu > 0, bira količinu i
-  kupuje. Novac ide direktno prodavcu (mora biti online, što uvek jeste dok mu
-  je tezga aktivna), roba se skida sa tezge i ubacuje u kupčev inventar.
+### Iznajmljivanje
+- Priđeš NPC-u → `E` → dijalog pokazuje slobodne tezge.
+- Izabereš tezgu → otvara se mali UI gde **sam upišeš koliko sati** (1–5h).
+  UI odmah pokazuje ukupnu cenu (`$1.500` × broj sati).
+- Posle potvrde novac se skida i tezga je tvoja do isteka vremena.
+
+### Stavljanje robe na tezgu (vlasnik)
+- Priđeš svojoj tezgi → `E` → **odmah se otvara ox_inventory** (tvoj inventar
+  levo, tezga desno). Nema više posebnog panela.
+- **Prevučeš item na tezgu** → iskoči UI: upišeš cenu po komadu (i po želji
+  promeniš količinu) → item prelazi na tezgu.
+- Na tezgi item piše sa cenom, npr. **`Hleb - $150`**, a u opisu (tooltip)
+  stoji `Cena: $150 po komadu`.
+- Isti item sa različitim cenama stoji u posebnim slotovima.
+- Da skineš robu sa tezge, samo je prevučeš nazad u svoj inventar
+  (cena se automatski skida sa itema).
+
+### Kupovina (ostali igrači)
+- Priđeš tuđoj tezgi → `E` → otvara se ox_inventory tezge, vidiš robu sa cenama.
+- Prevučeš item u svoj inventar → iskoči UI za potvrdu (količina + ukupna
+  cena) → `Kupi`.
+- Novac ide prodavcu. Ako prodavac nije online, zarada mu se čuva i isplaćuje
+  čim se sledeći put uloguje (ili kad priđe NPC-u).
+- Kupac ne može da stavlja stvari na tuđu tezgu niti da je preslaguje.
+
+### Istek / otkazivanje najma
+- 10 minuta pre isteka vlasnik dobija upozorenje.
+- Kad najam istekne (ili ga otkažeš kod NPC-a — novac se ne vraća), sva roba
+  sa tezge se vraća vlasniku u inventar, bez cene.
+- Ako vlasnik nije online ili nema mesta, roba ide u njegov lični
+  **povrat magacin** — preuzima je kod NPC-a opcijom
+  "Želim da preuzmem robu koja mi je ostala". Niko drugi ne može da ga otvori.
+
+### Restart servera
+- Najmovi i neisplaćena zarada se čuvaju u `data.json` u folderu resursa, a
+  roba na tezgama u `ox_inventory` bazi — sve preživljava restart.
 
 ## Podešavanje (`config.lua`)
 
-- `Config.Npc` — model, koordinate (uključujući heading kao `w`), animacija.
-- `Config.Stalls` — lista tezgi, svaka sa `id`, `label` i `coords`. Dodaješ
-  nove tezge prostim dodavanjem novog reda u ovu listu.
-- `Config.MaxRentSeconds` — koliko traje najam (podrazumevano 5 sati).
-- `Config.StallSlots` / `Config.StallMaxWeight` — kapacitet magacina tezge.
-- `Config.Currency` — `'money'` (keš) ili `'bank'` (račun), i za kupovinu i
-  za isplatu prodavcu.
+- `Config.Npc` — model, koordinate, animacija.
+- `Config.Stalls` — lista tezgi (`id`, `label`, `coords`); nova tezga = novi red.
+- `Config.Rent` — `pricePerHour` (1500), `minHours` (1), `maxHours` (5),
+  `account` (`'money'` ili `'bank'`).
+- `Config.Sale` — `account` za kupovinu/isplatu, `minPrice`, `maxPrice`.
+- `Config.BlacklistedItems` — itemi koji ne mogu na tezgu (podrazumevano
+  `money`, `black_money`).
+- `Config.StallSlots` / `Config.StallMaxWeight` — kapacitet tezge.
+- `Config.ReturnSlots` / `Config.ReturnMaxWeight` — kapacitet povrat magacina.
 
-## Pretpostavke koje sam napravio (javi ako treba drugačije)
+## Tehničke napomene
 
-- **Najam je besplatan** — nisi pomenuo cenu za samo iznajmljivanje tezge,
-  pa trenutno igrač ništa ne plaća da je zauzme, samo je vremenski ograničena
-  na `Config.MaxRentSeconds`. Lako se doda naplata u `rentStall` handleru u
-  `server/main.lua` ako želiš.
-- **Nema perzistencije u bazi** — sve (ko iznajmljuje šta, cene, itd.) živi u
-  memoriji dok server radi; restart resursa/servera briše sva iznajmljivanja
-  (roba ostaje u `ox_inventory` magacinima jer to on sam čuva, ali vlasništvo
-  i cene se resetuju). Ako želiš da preživljava restart servera, treba dodati
-  `oxmysql` tabelu — javi pa dodam.
-- Cene se pamte **po nazivu itema** (ne po pojedinačnom slotu/metadata), što
-  znači da ako isti item ubaciš sa dve različite metadata vrednosti, i dalje
-  ima jednu zajedničku cenu.
-- Za "postavi cene" i "kupovinu" napravio sam mali NUI panel u istom vizuelnom
-  stilu kao `esx_notify`/`esx_keyprompt`/`flamingo_npcdialog` (tamne kartice,
-  Manrope font, plavi akcenat) — pošto to nije nešto što prirodno ide kroz
-  NPC dijalog ili keyprompt sam po sebi.
-- Taster za interakciju je `E` (control id 38), isti kao kod ostalih tvojih
-  resursa.
+- Prevlačenje se hvata preko `ox_inventory` hooka `swapItems`: potez se
+  otkaže, otvori se UI, i tek posle potvrde server sam premešta item
+  (sa proverom slota, količine, cene, novca, udaljenosti).
+- Ranija verzija je tezgu registrovala sa `owner = identifier`, zbog čega je
+  ox_inventory pravio poseban stash `tezga:identifier`, pa server nije video
+  robu koju je vlasnik ubacio (kupci su videli praznu tezgu). Sada je tezga
+  jedan zajednički stash, a pristup kontrolišu hookovi.

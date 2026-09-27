@@ -2,14 +2,15 @@
 --  flamingo_pijaca - client/main.lua
 -- ============================================================
 
-local KEY_INTERACT = 38 -- 'E' (isto dugme koje koristi esx_keyprompt/flamingo_npcdialog)
+local KEY_INTERACT = 38 -- 'E'
 
 local npcPed = nil
-local myStallId = nil        -- id tezge koju TRENUTNI igrac iznajmljuje, ili nil
-local stallOccupied = {}     -- [stallId] = true/false, sinhronizovano sa servera
+local stallStates = {} -- [stallId] = { occupied, mine, expiresAt (GetGameTimer) }
+local uiOpen = false
+local reopenStashId = nil -- stash koji se ponovo otvara kad se UI zatvori bez potvrde
 
 -- ------------------------------------------------------------
---  Generican RPC sistem ka serveru (radi na svakoj verziji ESX-a)
+--  Generican RPC sistem ka serveru
 -- ------------------------------------------------------------
 
 local callbackId = 0
@@ -17,9 +18,8 @@ local pendingCallbacks = {}
 
 local function TriggerCallback(eventName, cb, ...)
     callbackId = callbackId + 1
-    local id = callbackId
-    pendingCallbacks[id] = cb
-    TriggerServerEvent(eventName, id, ...)
+    pendingCallbacks[callbackId] = cb
+    TriggerServerEvent(eventName, callbackId, ...)
 end
 
 RegisterNetEvent('flamingo_pijaca:client:callback', function(id, ...)
@@ -31,72 +31,102 @@ RegisterNetEvent('flamingo_pijaca:client:callback', function(id, ...)
 end)
 
 -- ------------------------------------------------------------
---  Otvaranje NUI panela
+--  ox_inventory / NUI
 -- ------------------------------------------------------------
 
-local function OpenManagePanel(stallId)
-    TriggerCallback('flamingo_pijaca:server:requestManage', function(data)
-        if not data or data.error then
-            if data and data.error then
-                TriggerEvent('esx:showNotification', data.error, 'error')
-            end
-            return
-        end
-
-        SetNuiFocus(true, true)
-        SendNUIMessage({
-            action = 'open',
-            mode = 'manage',
-            stallId = data.stallId,
-            stallLabel = data.stallLabel,
-            remaining = data.remaining,
-            items = data.items,
-        })
-    end, stallId)
+local function OpenStash(stashId)
+    exports.ox_inventory:openInventory('stash', stashId)
 end
 
-local function OpenShopPanel(stallId)
-    TriggerCallback('flamingo_pijaca:server:requestShop', function(data)
-        if not data or data.error then
-            if data and data.error then
-                TriggerEvent('esx:showNotification', data.error, 'error')
-            end
-            return
-        end
+local function OpenUi(payload, stashToReopen)
+    -- sacekaj da ox_inventory zavrsi odgovor na (otkazano) prevlacenje, pa ga zatvori
+    Wait(100)
+    exports.ox_inventory:closeInventory()
 
-        SetNuiFocus(true, true)
-        SendNUIMessage({
-            action = 'open',
-            mode = 'shop',
-            stallId = data.stallId,
-            stallLabel = data.stallLabel,
-            items = data.items,
-        })
-    end, stallId)
+    uiOpen = true
+    reopenStashId = stashToReopen
+    SetNuiFocus(true, true)
+    SendNUIMessage(payload)
 end
+
+local function CloseUi(reopen)
+    uiOpen = false
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = 'close' })
+
+    local stashId = reopenStashId
+    reopenStashId = nil
+
+    if reopen and stashId then
+        Wait(50)
+        OpenStash(stashId)
+    end
+end
+
+RegisterNetEvent('flamingo_pijaca:client:openRent', function(data)
+    Wait(250) -- da se flamingo_npcdialog zatvori i pusti fokus
+    data.action = 'open'
+    data.mode = 'rent'
+    OpenUi(data, nil)
+end)
+
+RegisterNetEvent('flamingo_pijaca:client:askPrice', function(data)
+    data.action = 'open'
+    data.mode = 'price'
+    OpenUi(data, Config.StallStashId(data.stallId))
+end)
+
+RegisterNetEvent('flamingo_pijaca:client:askBuy', function(data)
+    data.action = 'open'
+    data.mode = 'buy'
+    OpenUi(data, Config.StallStashId(data.stallId))
+end)
+
+RegisterNetEvent('flamingo_pijaca:client:openStash', function(stashId)
+    if uiOpen then CloseUi(false) end
+    Wait(50)
+    OpenStash(stashId)
+end)
+
+RegisterNUICallback('close', function(_, cb)
+    cb('ok')
+    CloseUi(true)
+end)
+
+RegisterNUICallback('confirmRent', function(data, cb)
+    cb('ok')
+    CloseUi(false)
+    TriggerServerEvent('flamingo_pijaca:server:rentStall', data.stallId, data.hours)
+end)
+
+RegisterNUICallback('confirmPrice', function(data, cb)
+    cb('ok')
+    reopenStashId = nil -- server ponovo otvara tezgu kad zavrsi
+    CloseUi(false)
+    TriggerServerEvent('flamingo_pijaca:server:listItem', data.stallId, data.slot, data.name, data.count, data.price)
+end)
+
+RegisterNUICallback('confirmBuy', function(data, cb)
+    cb('ok')
+    reopenStashId = nil
+    CloseUi(false)
+    TriggerServerEvent('flamingo_pijaca:server:buyItem', data.stallId, data.slot, data.name, data.count, data.price)
+end)
 
 -- ------------------------------------------------------------
 --  Sinhronizacija stanja tezgi sa serverom
 -- ------------------------------------------------------------
 
 RegisterNetEvent('flamingo_pijaca:client:syncStalls', function(states)
+    local now = GetGameTimer()
+    stallStates = {}
     for _, s in ipairs(states) do
-        stallOccupied[s.id] = s.occupied
+        stallStates[s.id] = {
+            occupied = s.occupied,
+            mine = s.mine,
+            expiresAt = s.remaining and (now + s.remaining * 1000) or nil,
+        }
     end
-end)
-
-RegisterNetEvent('flamingo_pijaca:client:stallRented', function(stallId)
-    myStallId = stallId
-    stallOccupied[stallId] = true
-end)
-
-RegisterNetEvent('flamingo_pijaca:client:stallReleased', function()
-    myStallId = nil
-end)
-
-RegisterNetEvent('flamingo_pijaca:client:openStash', function(stashId)
-    SetNuiFocus(false, false)
-    exports.ox_inventory:openInventory('stash', stashId)
 end)
 
 CreateThread(function()
@@ -104,36 +134,10 @@ CreateThread(function()
     TriggerServerEvent('flamingo_pijaca:server:ready')
 end)
 
--- ------------------------------------------------------------
---  NUI callback-ovi
--- ------------------------------------------------------------
-
-RegisterNUICallback('close', function(_, cb)
-    SetNuiFocus(false, false)
-    cb('ok')
-end)
-
-RegisterNUICallback('savePrices', function(data, cb)
-    TriggerServerEvent('flamingo_pijaca:server:setPrices', data.stallId, data.prices)
-    cb('ok')
-end)
-
-RegisterNUICallback('openStash', function(data, cb)
-    SetNuiFocus(false, false)
-    TriggerServerEvent('flamingo_pijaca:server:openStashInventory', data.stallId)
-    cb('ok')
-end)
-
-RegisterNUICallback('releaseStall', function(_, cb)
-    SetNuiFocus(false, false)
-    TriggerServerEvent('flamingo_pijaca:server:releaseStall')
-    cb('ok')
-end)
-
-RegisterNUICallback('buyItem', function(data, cb)
-    TriggerServerEvent('flamingo_pijaca:server:buyItem', data.stallId, data.item, data.count)
-    cb('ok')
-end)
+local function FormatRemaining(expiresAt)
+    local seconds = math.max(0, math.floor((expiresAt - GetGameTimer()) / 1000))
+    return ('%dh %dmin'):format(math.floor(seconds / 3600), math.floor((seconds % 3600) / 60))
+end
 
 -- ------------------------------------------------------------
 --  Spawn NPC-a
@@ -172,21 +176,27 @@ AddEventHandler('onResourceStop', function(resourceName)
     if npcPed and DoesEntityExist(npcPed) then
         DeleteEntity(npcPed)
     end
+    if uiOpen then
+        SetNuiFocus(false, false)
+    end
 end)
 
 -- ------------------------------------------------------------
 --  Interakcija sa NPC-em (iznajmljivanje)
 -- ------------------------------------------------------------
 
+local function CanInteract()
+    return not uiOpen and not LocalPlayer.state.invOpen
+end
+
 CreateThread(function()
     local npcCoords = vector3(Config.Npc.coords.x, Config.Npc.coords.y, Config.Npc.coords.z)
 
     while true do
         local sleep = 800
-        local pcoords = GetEntityCoords(PlayerPedId())
-        local dist = #(pcoords - npcCoords)
+        local dist = #(GetEntityCoords(PlayerPedId()) - npcCoords)
 
-        if dist < Config.Npc.interactDistance then
+        if dist < Config.Npc.interactDistance and CanInteract() then
             sleep = 0
             TriggerEvent('esx:showHelpNotification', 'Pritisni ~INPUT_CONTEXT~ da razgovaras', true)
 
@@ -209,7 +219,7 @@ CreateThread(function()
 end)
 
 -- ------------------------------------------------------------
---  Interakcija sa tezgama (vlasnik / kupac)
+--  Interakcija sa tezgama - E otvara ox_inventory tezge
 -- ------------------------------------------------------------
 
 CreateThread(function()
@@ -219,25 +229,26 @@ CreateThread(function()
 
         for _, stall in ipairs(Config.Stalls) do
             local sc = vector3(stall.coords.x, stall.coords.y, stall.coords.z)
-            local dist = #(pcoords - sc)
 
-            if dist < Config.StallInteractDistance then
+            if #(pcoords - sc) < Config.StallInteractDistance and CanInteract() then
                 sleep = 0
+                local state = stallStates[stall.id]
 
-                if myStallId == stall.id then
-                    TriggerEvent('esx:showHelpNotification', ('Pritisni ~INPUT_CONTEXT~ da upravljas sa %s'):format(stall.label), true)
+                if state and state.mine then
+                    local left = state.expiresAt and (' (%s)'):format(FormatRemaining(state.expiresAt)) or ''
+                    TriggerEvent('esx:showHelpNotification', ('Pritisni ~INPUT_CONTEXT~ da otvoris svoju tezgu%s'):format(left), true)
 
                     if IsControlJustReleased(0, KEY_INTERACT) then
-                        OpenManagePanel(stall.id)
+                        OpenStash(Config.StallStashId(stall.id))
                     end
-                elseif stallOccupied[stall.id] then
+                elseif state and state.occupied then
                     TriggerEvent('esx:showHelpNotification', ('Pritisni ~INPUT_CONTEXT~ da pogledas ponudu (%s)'):format(stall.label), true)
 
                     if IsControlJustReleased(0, KEY_INTERACT) then
-                        OpenShopPanel(stall.id)
+                        OpenStash(Config.StallStashId(stall.id))
                     end
                 else
-                    TriggerEvent('esx:showHelpNotification', ('%s je slobodna - iznajmi je kod prodavca na pijaci.'):format(stall.label), true)
+                    TriggerEvent('esx:showHelpNotification', ('%s je slobodna - iznajmi je kod zakupca pijace.'):format(stall.label), true)
                 end
             end
         end

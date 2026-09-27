@@ -5,7 +5,7 @@ lua54 'yes'
 name 'flamingo_pijaca'
 author 'flamingo'
 description 'Pijaca - iznajmljivanje tezgi za igrace (ESX + ox_inventory)'
-version '1.0.0'
+version '2.0.0'
 
 shared_scripts {
     'config.lua'

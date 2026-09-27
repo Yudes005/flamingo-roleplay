@@ -16,14 +16,42 @@
                 <button class="icon-btn" id="btn-close" title="Zatvori">&#10005;</button>
             </div>
 
-            <div class="panel-sub" id="panel-sub"></div>
-
-            <div class="panel-body" id="panel-body">
-                <!-- redovi sa itemima se ubacuju preko JS-a -->
+            <div class="item-card hidden" id="item-card">
+                <img class="item-img" id="item-img" alt="" />
+                <div class="item-info">
+                    <div class="item-label" id="item-label"></div>
+                    <div class="item-sub" id="item-sub"></div>
+                </div>
             </div>
 
-            <div class="panel-footer" id="panel-footer">
-                <!-- dugmici zavise od moda (manage / shop) -->
+            <div class="panel-body">
+                <div class="field">
+                    <label class="field-label" id="qty-label" for="qty-input">Količina</label>
+                    <div class="stepper">
+                        <button class="step-btn" id="qty-minus" type="button">&minus;</button>
+                        <input class="field-input" id="qty-input" type="number" inputmode="numeric" />
+                        <button class="step-btn" id="qty-plus" type="button">+</button>
+                    </div>
+                    <div class="field-hint" id="qty-hint"></div>
+                </div>
+
+                <div class="field hidden" id="price-field">
+                    <label class="field-label" for="price-input">Cena po komadu ($)</label>
+                    <input class="field-input wide" id="price-input" type="number" inputmode="numeric" placeholder="Upiši cenu" />
+                    <div class="field-hint" id="price-hint"></div>
+                </div>
+
+                <div class="summary">
+                    <span id="summary-label">Ukupno</span>
+                    <span class="summary-value" id="summary-value">$0</span>
+                </div>
+
+                <div class="error-msg" id="error-msg"></div>
+            </div>
+
+            <div class="panel-footer">
+                <button class="action-btn neutral" id="btn-cancel" type="button">Otkaži</button>
+                <button class="action-btn primary" id="btn-confirm" type="button">Potvrdi</button>
             </div>
         </div>
     </div>

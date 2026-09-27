@@ -1,15 +1,26 @@
 const resourceName = (typeof GetParentResourceName === 'function') ? GetParentResourceName() : 'flamingo_pijaca';
 
-const panelEl = document.getElementById('panel');
-const eyebrowEl = document.getElementById('panel-eyebrow');
-const titleEl = document.getElementById('panel-title');
-const subEl = document.getElementById('panel-sub');
-const bodyEl = document.getElementById('panel-body');
-const footerEl = document.getElementById('panel-footer');
-const closeBtn = document.getElementById('btn-close');
+const el = (id) => document.getElementById(id);
 
-let currentMode = null;
-let currentStallId = null;
+const panelEl = el('panel');
+const eyebrowEl = el('panel-eyebrow');
+const titleEl = el('panel-title');
+const itemCardEl = el('item-card');
+const itemImgEl = el('item-img');
+const itemLabelEl = el('item-label');
+const itemSubEl = el('item-sub');
+const qtyLabelEl = el('qty-label');
+const qtyInput = el('qty-input');
+const qtyHintEl = el('qty-hint');
+const priceFieldEl = el('price-field');
+const priceInput = el('price-input');
+const priceHintEl = el('price-hint');
+const summaryLabelEl = el('summary-label');
+const summaryValueEl = el('summary-value');
+const errorEl = el('error-msg');
+const confirmBtn = el('btn-confirm');
+
+let state = null; // { mode, data, min, max }
 
 function post(name, data) {
     return fetch(`https://${resourceName}/${name}`, {
@@ -19,163 +30,180 @@ function post(name, data) {
     }).catch(() => {});
 }
 
-function closePanel() {
+function money(n) {
+    return '$' + Math.floor(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function toInt(value) {
+    const n = parseInt(value, 10);
+    return Number.isFinite(n) ? n : null;
+}
+
+function clamp(n, min, max) {
+    return Math.min(max, Math.max(min, n));
+}
+
+function hide() {
     panelEl.classList.add('hidden');
-    bodyEl.innerHTML = '';
-    footerEl.innerHTML = '';
-    currentMode = null;
-    currentStallId = null;
+    state = null;
+}
+
+function cancel() {
+    if (!state) return;
+    hide();
     post('close');
 }
 
-closeBtn.addEventListener('click', closePanel);
+function getQty() {
+    const n = toInt(qtyInput.value);
+    return n === null ? null : n;
+}
 
-document.addEventListener('keyup', (e) => {
-    if (e.key === 'Escape' && !panelEl.classList.contains('hidden')) {
-        closePanel();
+function update() {
+    if (!state) return;
+    const { mode, data } = state;
+    const qty = getQty();
+    let total = 0;
+    let error = '';
+
+    if (qty === null || qty < state.min || qty > state.max) {
+        error = mode === 'rent'
+            ? `Upiši broj sati od ${state.min} do ${state.max}.`
+            : `Količina mora biti od ${state.min} do ${state.max}.`;
+    }
+
+    if (mode === 'rent') {
+        total = (qty || 0) * data.pricePerHour;
+    } else if (mode === 'price') {
+        const price = toInt(priceInput.value);
+        if (!error && (price === null || price < data.minPrice || price > data.maxPrice)) {
+            error = priceInput.value === '' ? 'Upiši cenu po komadu.' : `Cena mora biti od ${money(data.minPrice)} do ${money(data.maxPrice)}.`;
+        }
+        total = (qty || 0) * (price || 0);
+    } else if (mode === 'buy') {
+        total = (qty || 0) * data.price;
+    }
+
+    summaryValueEl.textContent = money(total);
+    errorEl.textContent = error;
+    confirmBtn.disabled = error !== '';
+    return error === '';
+}
+
+function confirm() {
+    if (!state || !update()) return;
+    const { mode, data } = state;
+    const qty = getQty();
+    hide();
+
+    if (mode === 'rent') {
+        post('confirmRent', { stallId: data.stallId, hours: qty });
+    } else if (mode === 'price') {
+        post('confirmPrice', { stallId: data.stallId, slot: data.slot, name: data.name, count: qty, price: toInt(priceInput.value) });
+    } else if (mode === 'buy') {
+        post('confirmBuy', { stallId: data.stallId, slot: data.slot, name: data.name, count: qty, price: data.price });
+    }
+}
+
+function setItem(data) {
+    itemCardEl.classList.remove('hidden');
+    itemImgEl.style.visibility = 'visible';
+    itemImgEl.onerror = () => { itemImgEl.style.visibility = 'hidden'; };
+    itemImgEl.src = `nui://ox_inventory/web/images/${data.name}.png`;
+    itemLabelEl.textContent = data.label || data.name;
+}
+
+function open(data) {
+    const mode = data.mode;
+    state = { mode, data, min: 1, max: 1 };
+
+    itemCardEl.classList.add('hidden');
+    priceFieldEl.classList.add('hidden');
+    priceInput.value = '';
+    priceHintEl.textContent = '';
+
+    if (mode === 'rent') {
+        state.min = data.minHours;
+        state.max = data.maxHours;
+        eyebrowEl.textContent = 'Iznajmljivanje';
+        titleEl.textContent = data.stallLabel;
+        qtyLabelEl.textContent = 'Broj sati';
+        qtyInput.value = data.minHours;
+        qtyHintEl.textContent = `${money(data.pricePerHour)} po satu · od ${data.minHours} do ${data.maxHours}h`;
+        summaryLabelEl.textContent = 'Ukupno za najam';
+        confirmBtn.textContent = 'Iznajmi';
+    } else if (mode === 'price') {
+        state.max = data.max;
+        eyebrowEl.textContent = 'Stavi na tezgu';
+        titleEl.textContent = 'Postavi cenu';
+        setItem(data);
+        itemSubEl.textContent = `U inventaru: ${data.max}`;
+        qtyLabelEl.textContent = 'Količina za prodaju';
+        qtyInput.value = clamp(data.count, 1, data.max);
+        qtyHintEl.textContent = '';
+        priceFieldEl.classList.remove('hidden');
+        priceHintEl.textContent = 'Kupac će videti ovu cenu na itemu na tezgi.';
+        summaryLabelEl.textContent = 'Ukupna vrednost';
+        confirmBtn.textContent = 'Stavi na tezgu';
+    } else if (mode === 'buy') {
+        state.max = data.max;
+        eyebrowEl.textContent = data.seller ? `Prodavac: ${data.seller}` : 'Kupovina';
+        titleEl.textContent = 'Kupi sa tezge';
+        setItem(data);
+        itemSubEl.textContent = `${money(data.price)} po komadu · Na stanju: ${data.max}`;
+        qtyLabelEl.textContent = 'Količina';
+        qtyInput.value = clamp(data.count, 1, data.max);
+        qtyHintEl.textContent = '';
+        summaryLabelEl.textContent = 'Ukupno za plaćanje';
+        confirmBtn.textContent = 'Kupi';
+    } else {
+        state = null;
+        return;
+    }
+
+    qtyInput.min = state.min;
+    qtyInput.max = state.max;
+
+    panelEl.classList.remove('hidden');
+    update();
+
+    const focusEl = mode === 'price' ? priceInput : qtyInput;
+    setTimeout(() => { focusEl.focus(); focusEl.select(); }, 50);
+}
+
+function step(delta) {
+    if (!state) return;
+    const current = getQty() ?? state.min;
+    qtyInput.value = clamp(current + delta, state.min, state.max);
+    update();
+}
+
+el('qty-minus').addEventListener('click', () => step(-1));
+el('qty-plus').addEventListener('click', () => step(1));
+qtyInput.addEventListener('input', update);
+priceInput.addEventListener('input', update);
+el('btn-close').addEventListener('click', cancel);
+el('btn-cancel').addEventListener('click', cancel);
+confirmBtn.addEventListener('click', confirm);
+
+document.addEventListener('keydown', (e) => {
+    if (!state) return;
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        cancel();
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        confirm();
     }
 });
 
-function formatTime(seconds) {
-    seconds = Math.max(0, seconds | 0);
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    return `${h}h ${m}min preostalo`;
-}
-
-function renderManage(data) {
-    eyebrowEl.textContent = 'Vasa tezga';
-    titleEl.textContent = data.stallLabel;
-    subEl.textContent = formatTime(data.remaining);
-
-    bodyEl.innerHTML = '';
-
-    if (!data.items || data.items.length === 0) {
-        bodyEl.innerHTML = '<div class="empty-msg">Nemate robe na tezgi. Otvorite inventar tezge da dodate stvari.</div>';
-    } else {
-        for (const item of data.items) {
-            const row = document.createElement('div');
-            row.className = 'item-row';
-            row.innerHTML = `
-                <div class="item-info">
-                    <div class="item-label">${escapeHtml(item.label || item.name)}</div>
-                    <div class="item-count">Na stanju: ${item.count}</div>
-                </div>
-                <input class="item-input price-input" type="number" min="0" step="1" value="${item.price || 0}" data-item="${escapeHtml(item.name)}" />
-            `;
-            bodyEl.appendChild(row);
-        }
-    }
-
-    footerEl.innerHTML = `
-        <button class="action-btn neutral" id="btn-open-stash">Inventar tezge</button>
-        <button class="action-btn primary" id="btn-save-prices">Sacuvaj cene</button>
-        <button class="action-btn danger" id="btn-release" data-armed="0">Napusti tezgu</button>
-    `;
-
-    document.getElementById('btn-open-stash').addEventListener('click', () => {
-        post('openStash', { stallId: currentStallId });
-        closePanelSilent();
-    });
-
-    document.getElementById('btn-save-prices').addEventListener('click', () => {
-        const prices = {};
-        document.querySelectorAll('.price-input').forEach((input) => {
-            const val = parseInt(input.value, 10);
-            prices[input.dataset.item] = isNaN(val) ? 0 : val;
-        });
-        post('savePrices', { stallId: currentStallId, prices });
-    });
-
-    const releaseBtn = document.getElementById('btn-release');
-    releaseBtn.addEventListener('click', () => {
-        if (releaseBtn.dataset.armed === '1') {
-            post('releaseStall', { stallId: currentStallId });
-            closePanelSilent();
-        } else {
-            releaseBtn.dataset.armed = '1';
-            releaseBtn.textContent = 'Sigurni ste? Klikni opet';
-            setTimeout(() => {
-                releaseBtn.dataset.armed = '0';
-                releaseBtn.textContent = 'Napusti tezgu';
-            }, 3000);
-        }
-    });
-}
-
-function renderShop(data) {
-    eyebrowEl.textContent = 'Ponuda';
-    titleEl.textContent = data.stallLabel;
-    subEl.textContent = '';
-
-    bodyEl.innerHTML = '';
-
-    if (!data.items || data.items.length === 0) {
-        bodyEl.innerHTML = '<div class="empty-msg">Trenutno nema robe na ovoj tezgi.</div>';
-    } else {
-        for (const item of data.items) {
-            const row = document.createElement('div');
-            row.className = 'item-row';
-            row.innerHTML = `
-                <div class="item-info">
-                    <div class="item-label">${escapeHtml(item.label || item.name)}</div>
-                    <div class="item-count">Na stanju: ${item.count}</div>
-                </div>
-                <div class="item-price-tag">$${item.price}</div>
-                <input class="item-input qty-input" type="number" min="1" max="${item.count}" value="1" />
-                <button class="buy-btn" data-item="${escapeHtml(item.name)}">Kupi</button>
-            `;
-            bodyEl.appendChild(row);
-        }
-
-        bodyEl.querySelectorAll('.buy-btn').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                const row = btn.closest('.item-row');
-                const qtyInput = row.querySelector('.qty-input');
-                let qty = parseInt(qtyInput.value, 10);
-                const max = parseInt(qtyInput.max, 10);
-                if (isNaN(qty) || qty < 1) qty = 1;
-                if (qty > max) qty = max;
-
-                btn.disabled = true;
-                post('buyItem', { stallId: currentStallId, item: btn.dataset.item, count: qty }).then(() => {
-                    setTimeout(() => { btn.disabled = false; }, 600);
-                });
-            });
-        });
-    }
-
-    footerEl.innerHTML = `<button class="action-btn neutral" id="btn-shop-close">Zatvori</button>`;
-    document.getElementById('btn-shop-close').addEventListener('click', closePanel);
-}
-
-// Zatvara panel bez slanja "close" callback-a - koristi se kad neka druga
-// akcija (otvaranje inventara, napustanje tezge) vec preuzima NUI fokus/tok.
-function closePanelSilent() {
-    panelEl.classList.add('hidden');
-    bodyEl.innerHTML = '';
-    footerEl.innerHTML = '';
-    currentMode = null;
-    currentStallId = null;
-}
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = String(str);
-    return div.innerHTML;
-}
-
 window.addEventListener('message', (event) => {
     const data = event.data;
-    if (!data || data.action !== 'open') return;
+    if (!data) return;
 
-    currentMode = data.mode;
-    currentStallId = data.stallId;
-    panelEl.classList.remove('hidden');
-
-    if (data.mode === 'manage') {
-        renderManage(data);
-    } else if (data.mode === 'shop') {
-        renderShop(data);
+    if (data.action === 'open') {
+        open(data);
+    } else if (data.action === 'close') {
+        hide();
     }
 });

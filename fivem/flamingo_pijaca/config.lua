@@ -24,25 +24,49 @@ Config.Stalls = {
 }
 
 -- ============================================================
---  Podesavanja iznajmljivanja
+--  Iznajmljivanje
 -- ============================================================
-Config.MaxRentSeconds = 5 * 60 * 60 -- 5 sati, posle isteka tezga se automatski oslobadja
-Config.StallInteractDistance = 2.5   -- na kojoj udaljenosti od tezge radi keyprompt (vlasnik/kupci)
-Config.BuyMaxDistance = 5.0          -- server-side provera da igrac stvarno stoji blizu tezge kad kupuje
+Config.Rent = {
+    pricePerHour = 1500, -- cena za 1 sat najma
+    minHours = 1,        -- najmanje sati koje igrac moze da upise
+    maxHours = 5,        -- najvise sati koje igrac moze da upise
+    account = 'money',   -- odakle se placa najam: 'money' (kes) ili 'bank'
+}
+
+Config.StallInteractDistance = 2.5 -- na kojoj udaljenosti od tezge radi keyprompt (vlasnik/kupci)
+Config.ActionMaxDistance = 6.0     -- server-side provera da igrac stvarno stoji blizu tezge / NPC-a
+Config.ExpireWarningMinutes = 10   -- koliko minuta pre isteka najma vlasnik dobija upozorenje
 
 -- ============================================================
---  ox_inventory stash (magacin robe na tezgi)
+--  Prodaja
+-- ============================================================
+Config.Sale = {
+    account = 'money', -- kupac placa i prodavac dobija na: 'money' (kes) ili 'bank'
+    minPrice = 1,      -- najmanja cena po komadu
+    maxPrice = 1000000 -- najveca cena po komadu
+}
+
+-- Itemi koji ne mogu da se stave na tezgu
+Config.BlacklistedItems = {
+    money = true,
+    black_money = true,
+}
+
+-- ============================================================
+--  ox_inventory stash-evi
 -- ============================================================
 Config.StallSlots = 30
 Config.StallMaxWeight = 200000 -- u gramima (200kg)
 
--- ============================================================
---  Novac
--- ============================================================
--- 'money' = kes, 'bank' = racun u banci (ESX account)
-Config.Currency = 'money'
+-- Kad najam istekne a vlasnik nije online (ili nema mesta u inventaru),
+-- roba ide u njegov licni "povrat" magacin koji preuzima kod NPC-a.
+Config.ReturnSlots = 50
+Config.ReturnMaxWeight = 1000000
 
--- ============================================================
---  Ostalo
--- ============================================================
-Config.Locale = 'sr' -- samo informativno, svi tekstovi su vec na srpskom u kodu
+-- Prefiksi za ox_inventory stash id-jeve (ne menjaj dok server radi)
+Config.StallStashPrefix = 'flamingo_pijaca_tezga_'
+Config.ReturnStashPrefix = 'flamingo_pijaca_povrat_'
+
+function Config.StallStashId(stallId)
+    return Config.StallStashPrefix .. tostring(stallId)
+end
