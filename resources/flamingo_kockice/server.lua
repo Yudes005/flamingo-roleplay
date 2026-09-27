@@ -16,7 +16,7 @@ local ESX = exports['es_extended']:getSharedObject()
 math.randomseed(os.time())
 
 local busy        = {}   -- [serverId] = true dok traje ponuda/igra
-local lastRequest = {}   -- [serverId] = os.time() poslednje ponude
+local cooldownUntil = {} -- [serverId] = os.time() do kada igrac ne sme ponovo da igra
 
 local DISTANCE_TOLERANCE = 1.5 -- server vidi pozicije sa malim kasnjenjem
 
@@ -56,6 +56,40 @@ local function release(a, b)
     if b then busy[b] = nil end
 end
 
+local function sound(target, name)
+    TriggerClientEvent('flamingo_kockice:client:sound', target, name)
+end
+
+--- Cooldown se cuva na serveru (on odlucuje), a klijentu se javlja
+--- samo da ne bi ni otvarao prozor za unos dok traje.
+local function startCooldown(id)
+    if not id or not GetPlayerName(id) then return end
+
+    cooldownUntil[id] = os.time() + Config.Cooldown
+    TriggerClientEvent('flamingo_kockice:client:cooldown', id, Config.Cooldown)
+end
+
+local function cooldownLeft(id)
+    local untilTime = cooldownUntil[id]
+    if not untilTime then return 0 end
+
+    local left = untilTime - os.time()
+    if left <= 0 then
+        cooldownUntil[id] = nil
+        return 0
+    end
+
+    return left
+end
+
+--- Kraj partije (odigrane ili otkazane posle prihvatanja) - oba igraca
+--- dobijaju cooldown.
+local function finishGame(a, b)
+    release(a, b)
+    startCooldown(a)
+    startCooldown(b)
+end
+
 --- Rezultat vide i igraci u blizini (Config.AnnounceRadius).
 local function announceNearby(src, targetId, msg)
     if not Config.AnnounceRadius or Config.AnnounceRadius <= 0 then return end
@@ -87,14 +121,14 @@ local function rollDice(src, targetId, amount)
     local xTarget = ESX.GetPlayerFromId(targetId)
 
     if not xSender or not xTarget then
-        release(src, targetId)
+        finishGame(src, targetId)
         if xSender then notify(src, 'Igra je otkazana - protivnik je napustio server.', 'error') end
         if xTarget then notify(targetId, 'Igra je otkazana - protivnik je napustio server.', 'error') end
         return
     end
 
     if not isNear(src, targetId) then
-        release(src, targetId)
+        finishGame(src, targetId)
         notify(src, 'Igra je otkazana - previše ste udaljeni.', 'error')
         notify(targetId, 'Igra je otkazana - previše ste udaljeni.', 'error')
         return
@@ -102,14 +136,14 @@ local function rollDice(src, targetId, amount)
 
     -- Ponovna provera novca - moglo je da prodje vreme od ponude.
     if getBalance(xSender) < amount then
-        release(src, targetId)
+        finishGame(src, targetId)
         notify(src, 'Više nemaš dovoljno novca za taj ulog.', 'error')
         notify(targetId, ('Igrač %s više nema dovoljno novca. Igra je otkazana.'):format(tagOf(src)), 'error')
         return
     end
 
     if getBalance(xTarget) < amount then
-        release(src, targetId)
+        finishGame(src, targetId)
         notify(targetId, 'Nemaš dovoljno novca za taj ulog.', 'error')
         notify(src, ('Igrač %s nema dovoljno novca. Igra je otkazana.'):format(tagOf(targetId)), 'error')
         return
@@ -127,6 +161,8 @@ local function rollDice(src, targetId, amount)
 
         notify(src, msg, 'info', Config.ResultDuration)
         notify(targetId, msg, 'info', Config.ResultDuration)
+        sound(src, 'draw')
+        sound(targetId, 'draw')
         announceNearby(src, targetId, msg)
 
         print(('[flamingo_kockice] %s (%d) vs %s (%d) | ulog %s | %d:%d nereseno'):format(
@@ -147,13 +183,15 @@ local function rollDice(src, targetId, amount)
 
         notify(winnerId, ('%s Pobedio si i osvojio %s!'):format(base, formatMoney(amount)), 'success', Config.ResultDuration)
         notify(loserId, ('%s Izgubio si %s.'):format(base, formatMoney(amount)), 'error', Config.ResultDuration)
+        sound(winnerId, 'win')
+        sound(loserId, 'lose')
         announceNearby(src, targetId, msg)
 
         print(('[flamingo_kockice] %s (%d) vs %s (%d) | ulog %s | %d:%d | pobednik %s, gubitnik %s'):format(
             senderTag, src, targetTag, targetId, formatMoney(amount), rollSender, rollTarget, winnerTag, loserTag))
     end
 
-    release(src, targetId)
+    finishGame(src, targetId)
 end
 
 -- ============================================================
@@ -178,9 +216,11 @@ RegisterNetEvent('flamingo_kockice:server:request', function(amount, targetId)
         return notify(src, 'Već imaš aktivnu partiju kockica.', 'error')
     end
 
-    local now = os.time()
-    if lastRequest[src] and now - lastRequest[src] < Config.Cooldown then
-        return notify(src, ('Sačekaj još %d s pre nove ponude.'):format(Config.Cooldown - (now - lastRequest[src])), 'error')
+    local left = cooldownLeft(src)
+    if left > 0 then
+        sound(src, 'error')
+        TriggerClientEvent('flamingo_kockice:client:cooldown', src, left)
+        return notify(src, ('Sačekaj još %d s pre nove partije kockica.'):format(left), 'error')
     end
 
     if not targetId or targetId == src or not GetPlayerName(targetId) then
@@ -193,6 +233,11 @@ RegisterNetEvent('flamingo_kockice:server:request', function(amount, targetId)
 
     if busy[targetId] then
         return notify(src, 'Taj igrač je već u partiji kockica.', 'error')
+    end
+
+    local targetLeft = cooldownLeft(targetId)
+    if targetLeft > 0 then
+        return notify(src, ('Taj igrač je upravo igrao. Sačekaj još %d s.'):format(targetLeft), 'error')
     end
 
     if GetResourceState('flamingo_odbiprihvati') ~= 'started' then
@@ -208,7 +253,7 @@ RegisterNetEvent('flamingo_kockice:server:request', function(amount, targetId)
     end
 
     busy[src], busy[targetId] = true, true
-    lastRequest[src] = now
+    startCooldown(src)
 
     local senderTag = tagOf(src)
     local targetTag = tagOf(targetId)
@@ -230,7 +275,7 @@ RegisterNetEvent('flamingo_kockice:server:request', function(amount, targetId)
         end
 
         if not GetPlayerName(src) then
-            release(src, targetId)
+            finishGame(src, targetId)
             return notify(targetId, 'Igra je otkazana - protivnik je napustio server.', 'error')
         end
 
@@ -249,5 +294,5 @@ end)
 AddEventHandler('playerDropped', function()
     local src = source
     busy[src] = nil
-    lastRequest[src] = nil
+    cooldownUntil[src] = nil
 end)

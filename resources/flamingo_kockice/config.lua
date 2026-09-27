@@ -13,7 +13,8 @@ Config.MaxDistance = 3.0
 -- Koliko dugo (ms) protivnik ima da prihvati/odbije ponudu.
 Config.OfferTimeout = 15000
 
--- Pauza (sekunde) izmedju dve ponude istog igraca - protiv spama.
+-- Cooldown (sekunde): posle poslate ponude i posle svake odigrane
+-- partije (za oba igraca) mora da prodje ovoliko pre nove partije.
 Config.Cooldown = 10
 
 -- Broj strana kockice.
@@ -24,6 +25,22 @@ Config.RollDelay = 2000
 
 -- Animacija dok se bacaju kockice (nil = bez animacije).
 Config.RollAnim = { dict = 'mp_common', name = 'givetake1_a', duration = 1500 }
+
+-- ============================================================
+--  ZVUKOVI
+--  roll  = zvuk kockica koje se tresu i padaju na sto (pravi se u
+--          NUI-u, nije potreban nikakav fajl). Volume 0.0 - 1.0.
+--  win / lose / draw / error = GTA zvukovi (PlaySoundFrontend).
+--  Stavi nil na bilo koji da ga iskljucis.
+-- ============================================================
+Config.Sounds = {
+    enabled    = true,
+    rollVolume = 0.6,
+    win   = { name = 'LOCAL_PLYR_CASH_COUNTER_COMPLETE', set = 'DLC_HEISTS_GENERAL_FRONTEND_SOUNDS' },
+    lose  = { name = 'LOSER',                            set = 'HUD_AWARDS' },
+    draw  = { name = 'CHECKPOINT_NORMAL',                set = 'HUD_MINI_GAME_SOUNDSET' },
+    error = { name = 'ERROR',                            set = 'HUD_FRONTEND_DEFAULT_SOUNDSET' }
+}
 
 -- Igraci u ovom krugu (metri) oko kockara takodje vide rezultat.
 -- 0 = rezultat vide samo ta dvojica.

@@ -6,6 +6,13 @@ author 'Flamingo RP'
 description 'Flamingo - kockice 1v1 za novac (radial meni G -> Osnovne akcije -> Kockice)'
 version '1.0.0'
 
+ui_page 'html/index.html'
+
+files {
+    'html/index.html',
+    'html/script.js'
+}
+
 shared_scripts {
     'config.lua'
 }

@@ -46,5 +46,7 @@ G na drugog igrača → **Osnovne akcije** → **Kockice** (ili `/kockice`).
 3. Bacaju se kockice, rezultat stiže u `esx_notify`, npr.
    `#56866 je dobio 2, #67556 je dobio 2. Nerešeno!`
 4. Gubitnik plaća ulog pobedniku; kod nerešenog se novac ne menja
+5. Zvuk: kockice se tresu i padaju na sto dok traje bacanje, pa zvuk za pobedu/poraz/nerešeno
+6. Cooldown 10 s (`Config.Cooldown`): posle poslate ponude i posle svake partije, za oba igrača
 
 UUID igrača (`#12345`) se čita u `Config.GetUid` (`config.lua`) – prilagodi svom serveru.

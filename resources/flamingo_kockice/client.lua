@@ -22,6 +22,52 @@ end
 
 RegisterNetEvent('flamingo_kockice:client:notify', notify)
 
+-- ============================================================
+--  ZVUKOVI
+-- ============================================================
+
+local function playSound(name)
+    local sounds = Config.Sounds
+    if not sounds or not sounds.enabled then return end
+
+    if name == 'roll' then
+        if (sounds.rollVolume or 0) <= 0 then return end
+
+        SendNUIMessage({
+            action   = 'roll',
+            volume   = sounds.rollVolume,
+            duration = (Config.RollDelay or 2000) / 1000
+        })
+        return
+    end
+
+    local s = sounds[name]
+    if s then
+        PlaySoundFrontend(-1, s.name, s.set, true)
+    end
+end
+
+RegisterNetEvent('flamingo_kockice:client:sound', playSound)
+
+-- ============================================================
+--  COOLDOWN
+--  Server je taj koji odlucuje - ovde se samo pamti da se prozor
+--  za unos uopste ne otvara dok cooldown traje.
+-- ============================================================
+
+local cooldownEnd = 0
+
+RegisterNetEvent('flamingo_kockice:client:cooldown', function(seconds)
+    cooldownEnd = GetGameTimer() + (tonumber(seconds) or 0) * 1000
+end)
+
+local function cooldownLeft()
+    local left = cooldownEnd - GetGameTimer()
+    if left <= 0 then return 0 end
+
+    return math.ceil(left / 1000)
+end
+
 local function getClosestPlayer()
     local myPed    = PlayerPedId()
     local myCoords = GetEntityCoords(myPed)
@@ -51,6 +97,12 @@ local opening = false
 
 local function openDice()
     if opening then return end
+
+    local left = cooldownLeft()
+    if left > 0 then
+        playSound('error')
+        return notify(('Sačekaj još %d s pre nove partije kockica.'):format(left), 'error')
+    end
 
     if GetResourceState('flamingo_input') ~= 'started' then
         return notify('Sistem za unos trenutno nije dostupan.', 'error')
@@ -104,6 +156,8 @@ RegisterCommand('kockice', openDice, false)
 -- ============================================================
 
 RegisterNetEvent('flamingo_kockice:client:rolling', function()
+    playSound('roll')
+
     local anim = Config.RollAnim
     if not anim then return end
 
