@@ -92,6 +92,28 @@ const BANDE = ['GSF', 'Ballas', 'Vagos', 'Marabunta', 'Bloods'];
 export const PRIJAVE: VrstaPrijave[] = [
   // ------------------------------------------------ STAFF TIM
   {
+    id: 'tester',
+    grupa: 'tim',
+    naziv: 'Tester servera',
+    kratko: 'Pre otvaranja prolaziš kroz poslove, menije i sisteme i javljaš sve što ne radi kako treba.',
+    uslovi: ['Najmanje 16 godina', 'Strpljenje i pažnja na detalje', 'Discord i mikrofon', 'Bagove prijavljuješ, ne koristiš'],
+    otvorena: true,
+    ponovoPosleDana: 7,
+    jednom: true,
+    ulogaPriPrihvatanju: uloga('PRIJAVA_TESTER_ROLE_ID', ID.prijavaTester),
+    polja: [
+      ...osnovno,
+      vreme,
+      { id: 'iskustvo', tip: 'opis', pitanje: 'Da li si već testirao neki server ili igru? Gde i šta si radio?', min: 20, max: 1200, obavezno: true },
+      { id: 'racunar', tip: 'izbor', pitanje: 'Kako ti radi FiveM na računaru?', opcije: ['Bez problema, visok FPS', 'Dobro, ponekad zabode', 'Slabije, ali igrivo'], obavezno: true },
+      { id: 'bag', tip: 'opis', pitanje: 'Primetiš da ti jedan posao daje duplo više para nego što treba. Šta radiš, korak po korak?', min: 40, max: 1200, obavezno: true },
+      { id: 'prijava', tip: 'opis', pitanje: 'Kako bi opisao bag staffu da ga oni lako ponove? Napiši primer.', min: 40, max: 1500, obavezno: true },
+      { id: 'prvo', tip: 'opis', pitanje: 'Šta bi u gradu prvo testirao i zašto?', min: 20, max: 1000, obavezno: true },
+      { id: 'tajna', tip: 'potvrda', pitanje: 'Ono što vidim tokom testiranja ne delim van staffa, a bagove ne koristim za sebe.' },
+      pravila,
+    ],
+  },
+  {
     id: 'admin',
     grupa: 'tim',
     naziv: 'Admin',

@@ -55,6 +55,7 @@ export const ID = {
   prijavaDev: '1554106125987749958',
   prijavaLider: '',
   prijavaKreator: '',
+  prijavaTester: '',
 };
 
 // Glavni meni (redosled = redosled na sajtu)
