@@ -32,14 +32,14 @@ export const MENI = [
 
 export const DISCORD = {
   // ID Discord servera (desni klik na server -> Copy Server ID)
-  guildId: process.env.DISCORD_GUILD_ID || '',
+  guildId: env('DISCORD_GUILD_ID'),
 
   // kanal u koji bot javlja svaku novu prijavu (samo staff ga vidi). Prazno = ne javlja.
-  prijaveKanalId: process.env.DISCORD_PRIJAVE_KANAL_ID || '',
+  prijaveKanalId: env('DISCORD_PRIJAVE_KANAL_ID'),
   // kanal za reportove i bagove (prazno = ide u kanal za prijave)
-  reportKanalId: process.env.DISCORD_REPORT_KANAL_ID || process.env.DISCORD_PRIJAVE_KANAL_ID || '',
+  reportKanalId: env('DISCORD_REPORT_KANAL_ID') || env('DISCORD_PRIJAVE_KANAL_ID'),
   // javni kanal gde bot objavi novost kad staff štiklira "objavi i na Discordu"
-  novostiKanalId: process.env.DISCORD_NOVOSTI_KANAL_ID || '',
+  novostiKanalId: env('DISCORD_NOVOSTI_KANAL_ID'),
 };
 
 // Ko sme u staff panel (/panel)
@@ -55,13 +55,18 @@ export const PANEL = {
 // Strana "Tim": koje Discord uloge se prikazuju i kojim redom.
 // Popuni ID-jeve uloga. Uloga bez ID-ja se ne prikazuje.
 export const TIM: { naziv: string; opis: string; roleId: string }[] = [
-  { naziv: 'Vlasništvo', opis: 'Vode grad i odlučuju o pravcu servera.', roleId: process.env.TIM_VLASNIK_ROLE_ID || '' },
-  { naziv: 'Head admin', opis: 'Vode staff tim i rešavaju najteže slučajeve.', roleId: process.env.TIM_HEADADMIN_ROLE_ID || '' },
-  { naziv: 'Admini', opis: 'Prate grad, rešavaju reportove i paze na pravila.', roleId: process.env.TIM_ADMIN_ROLE_ID || '' },
-  { naziv: 'Supporteri', opis: 'Prvi kontakt za pitanja na Discordu i u gradu.', roleId: process.env.TIM_SUPPORT_ROLE_ID || '' },
-  { naziv: 'Developeri', opis: 'Prave skripte, mape i sve novo u gradu.', roleId: process.env.TIM_DEV_ROLE_ID || '' },
+  { naziv: 'Vlasništvo', opis: 'Vode grad i odlučuju o pravcu servera.', roleId: env('TIM_VLASNIK_ROLE_ID') },
+  { naziv: 'Head admin', opis: 'Vode staff tim i rešavaju najteže slučajeve.', roleId: env('TIM_HEADADMIN_ROLE_ID') },
+  { naziv: 'Admini', opis: 'Prate grad, rešavaju reportove i paze na pravila.', roleId: env('TIM_ADMIN_ROLE_ID') },
+  { naziv: 'Supporteri', opis: 'Prvi kontakt za pitanja na Discordu i u gradu.', roleId: env('TIM_SUPPORT_ROLE_ID') },
+  { naziv: 'Developeri', opis: 'Prave skripte, mape i sve novo u gradu.', roleId: env('TIM_DEV_ROLE_ID') },
 ];
 
+// ID-jevi iz Vercela bez slučajnih razmaka i navodnika
+export function env(ime: string) {
+  return (process.env[ime] || '').trim().replace(/^["']|["']$/g, '').trim();
+}
+
 function lista(v?: string) {
-  return (v || '').split(',').map(s => s.trim()).filter(Boolean);
+  return (v || '').replace(/["']/g, '').split(',').map(s => s.trim()).filter(Boolean);
 }

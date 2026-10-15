@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       httpOnly: true, secure: sigurnoKolacic(), sameSite: 'lax', path: '/', maxAge: 900,
     });
     const url = new URL(AUTHORIZE_URL);
-    url.searchParams.set('client_id', process.env.DISCORD_CLIENT_ID);
+    url.searchParams.set('client_id', process.env.DISCORD_CLIENT_ID.trim());
     url.searchParams.set('redirect_uri', redirectUri);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('scope', 'identify');

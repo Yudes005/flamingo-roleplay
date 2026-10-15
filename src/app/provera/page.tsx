@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { CircleCheck, CircleX, TriangleAlert } from 'lucide-react';
-import { DISCORD, PANEL, TIM } from '@/config/site';
+import { DISCORD, PANEL, TIM, env } from '@/config/site';
 import { bot } from '@/lib/discord';
 import { db, imaBazu } from '@/lib/db';
 import { statusServera } from '@/lib/status';
@@ -60,9 +60,9 @@ async function proveri(): Promise<{ naslov: string; stavke: Stavka[] }[]> {
         : { naziv: 'DISCORD_GUILD_ID', stanje: 'greska', poruka: `Bot ne vidi server (${g.poruka}). Proveri ID i da li je bot na serveru.` });
     }
     for (const [ime, id, obavezan] of [
-      ['DISCORD_PRIJAVE_KANAL_ID', process.env.DISCORD_PRIJAVE_KANAL_ID, true],
-      ['DISCORD_REPORT_KANAL_ID', process.env.DISCORD_REPORT_KANAL_ID, false],
-      ['DISCORD_NOVOSTI_KANAL_ID', process.env.DISCORD_NOVOSTI_KANAL_ID, false],
+      ['DISCORD_PRIJAVE_KANAL_ID', env('DISCORD_PRIJAVE_KANAL_ID'), true],
+      ['DISCORD_REPORT_KANAL_ID', env('DISCORD_REPORT_KANAL_ID'), false],
+      ['DISCORD_NOVOSTI_KANAL_ID', env('DISCORD_NOVOSTI_KANAL_ID'), false],
     ] as const) {
       if (!id) {
         discord.push({ naziv: ime, stanje: obavezan ? 'upozorenje' : 'upozorenje', poruka: ime === 'DISCORD_REPORT_KANAL_ID' ? 'Nije upisan, reportovi idu u kanal za prijave.' : 'Nije upisan, bot ne javlja u kanal.' });

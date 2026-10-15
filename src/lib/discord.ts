@@ -29,8 +29,8 @@ export async function zameniKod(code: string, redirectUri: string) {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: process.env.DISCORD_CLIENT_ID || '',
-      client_secret: process.env.DISCORD_CLIENT_SECRET || '',
+      client_id: (process.env.DISCORD_CLIENT_ID || '').trim(),
+      client_secret: (process.env.DISCORD_CLIENT_SECRET || '').trim(),
       grant_type: 'authorization_code',
       code,
       redirect_uri: redirectUri,
@@ -52,7 +52,7 @@ export async function korisnikIzTokena(accessToken: string): Promise<DiscordUser
 type Odgovor<T> = { ok: boolean; status: number; data?: T; poruka?: string };
 
 export async function bot<T = unknown>(method: string, path: string, body?: unknown): Promise<Odgovor<T>> {
-  const token = process.env.DISCORD_BOT_TOKEN;
+  const token = (process.env.DISCORD_BOT_TOKEN || '').trim().replace(/^Bot\s+/i, '');
   if (!token) return { ok: false, status: 0, poruka: 'DISCORD_BOT_TOKEN nije podešen' };
   for (let i = 0; i < 3; i++) {
     let r: Response;

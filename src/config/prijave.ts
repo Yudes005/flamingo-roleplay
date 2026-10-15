@@ -13,6 +13,12 @@
 //  'izbor' (padajuća lista), 'potvrda' (kvačica koja mora biti štiklirana)
 // ============================================================
 
+// uloga iz Vercela; prazno ili tekst koji nije ID = bot ne daje ulogu
+function uloga(ime: string) {
+  const v = (process.env[ime] || '').trim();
+  return /^\d{15,22}$/.test(v) ? v : undefined;
+}
+
 export type Polje =
   | { id: string; tip: 'tekst'; pitanje: string; pomoc?: string; min?: number; max?: number; obavezno?: boolean }
   | { id: string; tip: 'opis'; pitanje: string; pomoc?: string; min?: number; max?: number; obavezno?: boolean }
@@ -92,7 +98,7 @@ export const PRIJAVE: VrstaPrijave[] = [
     otvorena: true,
     ponovoPosleDana: 14,
     jednom: true,
-    ulogaPriPrihvatanju: process.env.PRIJAVA_ADMIN_ROLE_ID,
+    ulogaPriPrihvatanju: uloga('PRIJAVA_ADMIN_ROLE_ID'),
     polja: [
       ...osnovno,
       { id: 'iskustvo', tip: 'opis', pitanje: 'Da li si već bio staff na nekom serveru? Gde i koliko dugo?', min: 20, max: 1200, obavezno: true },
@@ -113,7 +119,7 @@ export const PRIJAVE: VrstaPrijave[] = [
     otvorena: true,
     ponovoPosleDana: 10,
     jednom: true,
-    ulogaPriPrihvatanju: process.env.PRIJAVA_SUPPORT_ROLE_ID,
+    ulogaPriPrihvatanju: uloga('PRIJAVA_SUPPORT_ROLE_ID'),
     polja: [
       ...osnovno,
       vreme,
@@ -132,7 +138,7 @@ export const PRIJAVE: VrstaPrijave[] = [
     otvorena: true,
     ponovoPosleDana: 14,
     jednom: true,
-    ulogaPriPrihvatanju: process.env.PRIJAVA_DEV_ROLE_ID,
+    ulogaPriPrihvatanju: uloga('PRIJAVA_DEV_ROLE_ID'),
     polja: [
       ...osnovno,
       { id: 'jezici', tip: 'opis', pitanje: 'Šta znaš? Jezici, frameworci, alati (Lua, JS, React, Vue, SQL...)', min: 20, max: 1000, obavezno: true },
@@ -171,7 +177,7 @@ export const PRIJAVE: VrstaPrijave[] = [
     otvorena: true,
     ponovoPosleDana: 14,
     jednom: true,
-    ulogaPriPrihvatanju: process.env.PRIJAVA_LIDER_ROLE_ID,
+    ulogaPriPrihvatanju: uloga('PRIJAVA_LIDER_ROLE_ID'),
     polja: [
       ...osnovno,
       { id: 'organizacija', tip: 'izbor', pitanje: 'Šta želiš da vodiš?', opcije: [...ORGANIZACIJE, ...BANDE], obavezno: true },
@@ -191,7 +197,7 @@ export const PRIJAVE: VrstaPrijave[] = [
     otvorena: true,
     ponovoPosleDana: 14,
     jednom: true,
-    ulogaPriPrihvatanju: process.env.PRIJAVA_KREATOR_ROLE_ID,
+    ulogaPriPrihvatanju: uloga('PRIJAVA_KREATOR_ROLE_ID'),
     polja: [
       { id: 'ingame', tip: 'tekst', pitanje: 'Ime i prezime tvog lika u gradu', max: 60, obavezno: true },
       { id: 'platforma', tip: 'izbor', pitanje: 'Gde objavljuješ najviše?', opcije: ['TikTok', 'YouTube', 'Twitch', 'Kick', 'Instagram'], obavezno: true },
