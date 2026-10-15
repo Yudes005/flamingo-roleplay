@@ -37,7 +37,7 @@ export async function zameniKod(code: string, redirectUri: string) {
     }),
     cache: 'no-store',
   });
-  if (!r.ok) throw new Error(`Discord token ${r.status}`);
+  if (!r.ok) throw Object.assign(new Error(`Discord token ${r.status}`), { status: r.status });
   const d = await r.json();
   return String(d.access_token);
 }
@@ -51,7 +51,7 @@ export async function korisnikIzTokena(accessToken: string): Promise<DiscordUser
 // ---------------- BOT ----------------
 type Odgovor<T> = { ok: boolean; status: number; data?: T; poruka?: string };
 
-async function bot<T = unknown>(method: string, path: string, body?: unknown): Promise<Odgovor<T>> {
+export async function bot<T = unknown>(method: string, path: string, body?: unknown): Promise<Odgovor<T>> {
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) return { ok: false, status: 0, poruka: 'DISCORD_BOT_TOKEN nije podešen' };
   for (let i = 0; i < 3; i++) {

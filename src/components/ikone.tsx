@@ -1,3 +1,7 @@
+import {
+  BadgeCheck, CarFront, Fingerprint, Gift, GitBranch, HeartPulse, Landmark, Megaphone, Shield, Spade, Store, Swords, Truck,
+} from 'lucide-react';
+
 // Ikone brendova (lucide nema logotipe)
 export function DiscordIkona({ className = 'size-5' }: { className?: string }) {
   return (
@@ -13,4 +17,15 @@ export function TikTokIkona({ className = 'size-5' }: { className?: string }) {
       <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.6 2.6 0 0 1-2.6-2.6 2.6 2.6 0 0 1 3.36-2.49V9.66a5.74 5.74 0 0 0-.76-.05A5.69 5.69 0 0 0 4.17 15.3a5.69 5.69 0 0 0 5.69 5.7 5.69 5.69 0 0 0 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38v-3.1a4.3 4.3 0 0 1-3.25-1.47Z" />
     </svg>
   );
+}
+
+// Ikone sistema grada (organizacije i "još u gradu")
+const SISTEMI = {
+  policija: Shield, serif: BadgeCheck, fib: Fingerprint, vojska: Swords, bolnica: HeartPulse, vlada: Landmark, oglasi: Megaphone,
+  kazino: Spade, pijaca: Store, auto: CarFront, nagrade: Gift, vestine: GitBranch, kamion: Truck,
+} as const;
+
+export function SistemIkona({ ime, className = 'size-6' }: { ime: keyof typeof SISTEMI; className?: string }) {
+  const I = SISTEMI[ime];
+  return <I className={className} strokeWidth={1.6} aria-hidden="true" />;
 }

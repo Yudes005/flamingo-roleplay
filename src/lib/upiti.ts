@@ -1,24 +1,34 @@
 import 'server-only';
 import { db, type PrijavaRed } from './db';
-import { nadjiPrijavu } from '@/config/prijave';
+import type { VrstaPrijave } from '@/config/prijave';
 
-// poslednja prijava korisnika po vrsti (za dugmad na /prijave)
-export async function poslednjePoVrsti(korisnikId: string): Promise<Record<string, PrijavaRed>> {
+export type InfoVrste = { naCekanju: number; poslednjaOdlucena?: PrijavaRed };
+
+// za svaku vrstu: koliko čeka i poslednja odlučena (za dugmad na /prijave)
+export async function stanjePrijava(korisnikId: string): Promise<Record<string, InfoVrste>> {
   const sql = await db();
-  const redovi = await sql<PrijavaRed[]>`
-    SELECT DISTINCT ON (vrsta) * FROM prijave WHERE korisnik_id = ${korisnikId}
-    ORDER BY vrsta, napravljena DESC`;
-  return Object.fromEntries(redovi.map(r => [r.vrsta, r]));
+  const [cekaju, odlucene] = await Promise.all([
+    sql<{ vrsta: string; n: number }[]>`
+      SELECT vrsta, count(*)::int AS n FROM prijave WHERE korisnik_id = ${korisnikId} AND status = 'na_cekanju' GROUP BY vrsta`,
+    sql<PrijavaRed[]>`
+      SELECT DISTINCT ON (vrsta) * FROM prijave WHERE korisnik_id = ${korisnikId} AND status <> 'na_cekanju'
+      ORDER BY vrsta, odluceno DESC NULLS LAST`,
+  ]);
+  const out: Record<string, InfoVrste> = {};
+  for (const c of cekaju) out[c.vrsta] = { naCekanju: c.n };
+  for (const o of odlucene) out[o.vrsta] = { naCekanju: out[o.vrsta]?.naCekanju || 0, poslednjaOdlucena: o };
+  return out;
 }
 
-export function stanjeZaVrstu(vrstaId: string, poslednja?: PrijavaRed):
-  { tip: 'moze' } | { tip: 'ceka'; id: number } | { tip: 'prihvacena' } | { tip: 'pauza'; dana: number } {
-  if (!poslednja) return { tip: 'moze' };
-  if (poslednja.status === 'na_cekanju') return { tip: 'ceka', id: poslednja.id };
-  if (poslednja.status === 'prihvacena' && vrstaId !== 'zalba') return { tip: 'prihvacena' };
-  if (poslednja.status === 'odbijena' && poslednja.odluceno) {
-    const vrsta = nadjiPrijavu(vrstaId);
-    const moze = poslednja.odluceno.getTime() + (vrsta?.ponovoPosleDana || 0) * 86400000;
+export type Stanje = { tip: 'moze' } | { tip: 'ceka'; n: number } | { tip: 'prihvacena' } | { tip: 'pauza'; dana: number };
+
+export function stanjeZaVrstu(vrsta: VrstaPrijave, info?: InfoVrste): Stanje {
+  if (!info) return { tip: 'moze' };
+  if (info.naCekanju >= (vrsta.naCekanjuMax || 1)) return { tip: 'ceka', n: info.naCekanju };
+  const p = info.poslednjaOdlucena;
+  if (vrsta.jednom && p?.status === 'prihvacena') return { tip: 'prihvacena' };
+  if (vrsta.ponovoPosleDana > 0 && p?.status === 'odbijena' && p.odluceno) {
+    const moze = p.odluceno.getTime() + vrsta.ponovoPosleDana * 86400000;
     if (moze > Date.now()) return { tip: 'pauza', dana: Math.ceil((moze - Date.now()) / 86400000) };
   }
   return { tip: 'moze' };

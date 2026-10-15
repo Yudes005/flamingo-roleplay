@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from 'next';
-import '@fontsource-variable/unbounded';
+import '@fontsource-variable/big-shoulders-display';
 import '@fontsource-variable/onest';
 import './globals.css';
 import { SITE } from '@/config/site';
 import { Navigacija } from '@/components/Navigacija';
 import { Podnozje } from '@/components/Podnozje';
+import { Otkrivanje } from '@/components/Otkrivanje';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL || 'https://flamingo-roleplay.vercel.app'),
@@ -13,18 +14,23 @@ export const metadata: Metadata = {
   openGraph: { title: SITE.ime, description: SITE.opis, images: ['/img/hero.webp'], locale: 'sr_RS', type: 'website' },
 };
 
-export const viewport: Viewport = { themeColor: '#150d1c' };
+export const viewport: Viewport = { themeColor: '#000000' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="sr">
+    <html lang="sr" suppressHydrationWarning>
+      <head>
+        {/* označi da JS radi - tek tada se slike skrivaju za filmsko otkrivanje */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body>
-        <a href="#sadrzaj" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-flamingo focus:px-4 focus:py-2">
+        <a href="#sadrzaj" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-flamingo focus:px-4 focus:py-2">
           Preskoči na sadržaj
         </a>
         <Navigacija />
         <main id="sadrzaj">{children}</main>
         <Podnozje />
+        <Otkrivanje />
       </body>
     </html>
   );

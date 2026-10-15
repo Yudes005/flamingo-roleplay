@@ -11,7 +11,7 @@
 export const SITE = {
   ime: 'Flamingo Roleplay',
   grad: 'Flamingo City',
-  opis: 'GTA V roleplay server na FiveM-u. Posao, organizacije, bande i grad koji živi i kad nisi tu.',
+  opis: 'GTA V roleplay server na FiveM-u. Poslovi sa stablima veština, organizacije, pet bandi, aukcije kuća i biznisa i eventi svaki dan.',
 
   // adresa servera (IP:port) - za dugme "Uđi u grad" i F8 komandu
   server: '185.195.237.205:20025',
@@ -20,19 +20,33 @@ export const SITE = {
   tiktok: 'https://www.tiktok.com/@flamingo_rp_',
 };
 
+// Glavni meni (redosled = redosled na sajtu)
+export const MENI = [
+  { href: '/vodic', tekst: 'Vodič' },
+  { href: '/pravila', tekst: 'Pravila' },
+  { href: '/novosti', tekst: 'Novosti' },
+  { href: '/prijave', tekst: 'Prijave' },
+  { href: '/predlozi', tekst: 'Predlozi' },
+  { href: '/tim', tekst: 'Tim' },
+];
+
 export const DISCORD = {
   // ID Discord servera (desni klik na server -> Copy Server ID)
   guildId: process.env.DISCORD_GUILD_ID || '',
 
   // kanal u koji bot javlja svaku novu prijavu (samo staff ga vidi). Prazno = ne javlja.
   prijaveKanalId: process.env.DISCORD_PRIJAVE_KANAL_ID || '',
+  // kanal za reportove i bagove (prazno = ide u kanal za prijave)
+  reportKanalId: process.env.DISCORD_REPORT_KANAL_ID || process.env.DISCORD_PRIJAVE_KANAL_ID || '',
+  // javni kanal gde bot objavi novost kad staff štiklira "objavi i na Discordu"
+  novostiKanalId: process.env.DISCORD_NOVOSTI_KANAL_ID || '',
 };
 
 // Ko sme u staff panel (/panel)
 export const PANEL = {
   // mogu da čitaju prijave, glasaju i pišu interne komentare
   citanjeUloge: lista(process.env.PANEL_ROLE_IDS),
-  // mogu i da prihvate / odbiju prijavu
+  // mogu i da prihvate / odbiju prijavu, pišu novosti i odgovaraju na predloge
   odlukaUloge: lista(process.env.PANEL_ODLUKA_ROLE_IDS),
   // Discord ID-jevi koji uvek imaju sve (npr. vlasnik) - desni klik na sebe -> Copy User ID
   vlasnici: lista(process.env.VLASNIK_DISCORD_IDS),

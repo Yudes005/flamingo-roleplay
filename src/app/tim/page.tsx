@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 import { TIM, SITE } from '@/config/site';
 import { avatarUrl, sviClanovi } from '@/lib/discord';
 import { DiscordIkona } from '@/components/ikone';
@@ -9,7 +10,7 @@ export const revalidate = 600;
 
 export default async function Tim() {
   const grupe = TIM.filter(g => g.roleId);
-  const clanovi = grupe.length ? await sviClanovi() : [];
+  const clanovi = grupe.length ? await sviClanovi().catch(() => []) : [];
   const vidjeni = new Set<string>();
 
   // svako se prikazuje samo u svojoj najvišoj grupi
@@ -29,40 +30,43 @@ export default async function Tim() {
   }).filter(g => g.ljudi.length);
 
   return (
-    <div className="sadrzaj pb-10 pt-[120px] md:pt-[140px]">
-      <header className="max-w-2xl">
-        <h1 className="text-[clamp(34px,5vw,56px)] font-bold">Ljudi iza grada</h1>
-        <p className="mt-4 text-[17px] text-sivo">
-          Staff i developeri Flamingo Roleplaya. Za pitanja piši na Discordu, a za probleme u gradu koristi /report.
+    <div className="zrno relative isolate min-h-screen overflow-hidden bg-black">
+      <div className="sadrzaj pb-28 pt-[150px] text-center md:pt-[190px]">
+        <p className="pojava text-[15px] text-sivo">{SITE.ime} predstavlja</p>
+        <h1 className="plakat naslov-strane mt-2 overflow-hidden pb-[.04em] pt-[.16em]"><span className="uzlet [animation-delay:.15s]">Ljudi iza grada</span></h1>
+        <p className="pojava mx-auto mt-6 max-w-[48ch] text-[17px] text-white/80 [animation-delay:.4s]">
+          Staff i developeri Flamingo Roleplaya. Za pitanja piši na Discordu, a za probleme u gradu koristi report.
         </p>
-      </header>
 
-      {popunjeno.length === 0 ? (
-        <div className="povrsina mt-12 max-w-xl p-8">
-          <h2 className="font-sans text-[19px] font-semibold tracking-normal">Spisak tima se puni sa Discorda</h2>
-          <p className="mt-2 text-[15.5px] text-sivo">Uskoro ovde. Do tada nas nađi na Discordu.</p>
-          <a href={SITE.discord} target="_blank" rel="noopener" className="dugme dugme-discord mt-6"><DiscordIkona /> Discord</a>
+        {popunjeno.length === 0 ? (
+          <div className="mx-auto mt-20 max-w-md">
+            <p className="text-[17px] text-sivo">Spisak tima se puni sa Discorda čim se podese uloge.</p>
+            <a href={SITE.discord} target="_blank" rel="noopener" className="dugme dugme-discord mt-6"><DiscordIkona /> Upoznaj nas na Discordu</a>
+          </div>
+        ) : (
+          <div className="mt-24 space-y-24">
+            {popunjeno.map(g => (
+              <section key={g.naziv} className="otkrij-tekst">
+                <h2 className="text-[15px] font-medium text-flamingo-2">{g.naziv}</h2>
+                <p className="mx-auto mt-1 max-w-[44ch] text-[14.5px] text-sivo-2">{g.opis}</p>
+                <ul className="mx-auto mt-8 flex max-w-4xl flex-wrap justify-center gap-x-10 gap-y-6">
+                  {g.ljudi.map(c => (
+                    <li key={c.id} className="flex items-center gap-3">
+                      <Image src={c.avatar} alt="" unoptimized width={44} height={44} className="size-11 shrink-0 rounded-full bg-noc-3 grayscale transition-[filter] duration-500 hover:grayscale-0" />
+                      <span className="plakat text-[clamp(30px,3.4vw,44px)]">{c.ime}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-32">
+          <p className="text-[15px] text-sivo">I ti možeš biti ovde.</p>
+          <Link href="/prijave" className="dugme dugme-obicno mt-5">Prijavi se za staff</Link>
         </div>
-      ) : (
-        <div className="mt-14 space-y-14">
-          {popunjeno.map(g => (
-            <section key={g.naziv}>
-              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/[.08] pb-4">
-                <h2 className="text-[clamp(22px,2.6vw,28px)] font-bold">{g.naziv}</h2>
-                <p className="text-[15px] text-sivo">{g.opis}</p>
-              </div>
-              <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                {g.ljudi.map(c => (
-                  <li key={c.id} className="flex items-center gap-3 rounded-2xl bg-noc-2 p-3">
-                    <Image src={c.avatar} alt="" unoptimized width={48} height={48} className="size-12 shrink-0 rounded-full bg-noc-3" />
-                    <span className="min-w-0 truncate font-medium">{c.ime}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
