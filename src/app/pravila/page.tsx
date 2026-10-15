@@ -1,12 +1,34 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { IZMENE, KAZNE, PRAVILA, PRAVILA_IZMENA } from '@/config/pravila';
+import { SITE } from '@/config/site';
+import { IZMENE, KAZNE, PRAVILA, PRAVILA_IZMENA, PRAVILA_OBJAVLJENA } from '@/config/pravila';
 import { PravilaPretraga } from '@/components/PravilaPretraga';
 import { ZaglavljeStrane } from '@/components/ZaglavljeStrane';
+import { DiscordIkona } from '@/components/ikone';
 
-export const metadata: Metadata = { title: 'Pravila', description: 'Pravila servera Flamingo Roleplay i tabela kazni.' };
+export const metadata: Metadata = { title: 'Pravila', description: 'Pravila servera Flamingo Roleplay.' };
 
 export default function Pravila() {
+  // dok pravila nisu gotova, strana kaže "Uskoro" (prekidač je u src/config/pravila.ts)
+  if (!PRAVILA_OBJAVLJENA) {
+    return (
+      <>
+        <ZaglavljeStrane naslov="Pravila grada" slika="/img/hero.webp" pozicija="66% 45%">
+          Pravila servera pišemo upravo sada.
+        </ZaglavljeStrane>
+        <section className="sadrzaj grid min-h-[46vh] place-items-center py-20 text-center">
+          <div>
+            <p className="plakat text-[clamp(64px,12vw,160px)] text-flamingo">Uskoro</p>
+            <p className="mx-auto mt-5 max-w-[46ch] text-[17px] text-sivo">
+              Pravila izlaze pre otvaranja grada, ovde i na Discordu. Uđi na Discord da ti ne promakne kad budu objavljena.
+            </p>
+            <a href={SITE.discord} target="_blank" rel="noopener" className="dugme dugme-discord mt-8"><DiscordIkona /> Uđi na Discord</a>
+          </div>
+        </section>
+      </>
+    );
+  }
+
   return (
     <>
       <ZaglavljeStrane naslov="Pravila grada" slika="/img/hero.webp" pozicija="66% 45%">

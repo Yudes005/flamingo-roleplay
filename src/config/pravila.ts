@@ -5,6 +5,10 @@
 //  Kad nešto promeniš, dodaj red u IZMENE (najnovije gore).
 // ============================================================
 
+// false = na sajtu piše "Uskoro" (pravila i tabela kazni se ne prikazuju).
+// Kad pravila budu gotova, upiši ih ispod i stavi true.
+export const PRAVILA_OBJAVLJENA = false;
+
 export const PRAVILA_IZMENA = '15. oktobar 2026.';
 
 export const IZMENE = [

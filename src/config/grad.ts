@@ -101,7 +101,7 @@ export const TASTERI = [
 // ---------- Česta pitanja ----------
 export const FAQ = [
   { p: 'Da li mi treba originalna GTA V?', o: 'Da. FiveM radi samo sa legalnom kopijom sa Steama, Epica ili Rockstar launchera.' },
-  { p: 'Šta treba da uradim pre prvog ulaska?', o: 'Pročitaj pravila i uđi na Discord. Staff se poziva na pravila po broju, a sve novosti prvo izlaze na Discordu.' },
+  { p: 'Šta treba da uradim pre prvog ulaska?', o: 'Uđi na Discord. Tu prvo izlaze novosti, a uskoro i pravila servera.' },
   { p: 'Kako da zaradim prvi novac?', o: 'Uzmi jedan od legalnih poslova. Rudar i drvoseča su dobri za početak, a uz posao raste i stablo veština.' },
   { p: 'Kako da dobijem kuću ili biznis?', o: 'Samo na aukciji, u tabletu (taster J). Aukcije se zatvaraju svako veče u 21:30. Kuća i biznis se plaćaju dnevno, najviše 14 dana unapred.' },
   { p: 'Mogu li da uđem u policiju ili bolnicu?', o: 'Možeš. Pošalji prijavu za posao u organizaciji na ovom sajtu, a lider te zove na razgovor u gradu.' },

@@ -77,7 +77,7 @@ const vreme: Polje = { id: 'vreme', tip: 'izbor', pitanje: 'Koliko vremena dnevn
 const pravila: Polje = {
   id: 'pravila',
   tip: 'potvrda',
-  pitanje: 'Pročitao sam pravila servera i slažem se da prijava može biti odbijena bez obrazloženja.',
+  pitanje: 'Slažem se da prijava može biti odbijena bez obrazloženja.',
 };
 
 const iskreno: Polje = {
@@ -179,7 +179,7 @@ export const PRIJAVE: VrstaPrijave[] = [
     grupa: 'grad',
     naziv: 'Posao u organizaciji',
     kratko: 'Policija, šerif, FIB, vojska, bolnica, vlada ili Lifeinvader.',
-    uslovi: ['Najmanje 16 godina', 'Mikrofon', 'Znaš pravila servera'],
+    uslovi: ['Najmanje 16 godina', 'Mikrofon', 'Iskustvo u roleplayu'],
     otvorena: true,
     ponovoPosleDana: 7,
     polja: [
@@ -238,7 +238,7 @@ export const PRIJAVE: VrstaPrijave[] = [
     grupa: 'report',
     naziv: 'Report igrača',
     kratko: 'Neko je prekršio pravila, a za to imaš snimak ili sliku.',
-    uslovi: ['Dokaz (snimak ili slika)', 'Broj pravila koje je prekršeno', 'Bez vređanja'],
+    uslovi: ['Dokaz (snimak ili slika)', 'Šta je tačno prekršeno', 'Bez vređanja'],
     otvorena: true,
     ponovoPosleDana: 0,
     naCekanjuMax: 3,
@@ -246,7 +246,7 @@ export const PRIJAVE: VrstaPrijave[] = [
       { id: 'ingame', tip: 'tekst', pitanje: 'Ime i prezime tvog lika', max: 60, obavezno: true },
       { id: 'prijavljeni', tip: 'tekst', pitanje: 'Koga prijavljuješ? Ime lika ili ID u gradu', max: 80, obavezno: true },
       { id: 'kada', tip: 'tekst', pitanje: 'Kada se to desilo? (datum i otprilike vreme)', max: 60, obavezno: true },
-      { id: 'pravilo', tip: 'tekst', pitanje: 'Koje pravilo je prekršeno?', pomoc: 'Broj i naziv sa strane Pravila, npr. 2.1 RDM.', max: 80, obavezno: true },
+      { id: 'pravilo', tip: 'tekst', pitanje: 'Šta je prekršeno?', pomoc: 'Npr. RDM, VDM, metagaming ili vređanje.', max: 80, obavezno: true },
       { id: 'prica', tip: 'opis', pitanje: 'Šta se tačno desilo?', min: 40, max: 2500, obavezno: true },
       { id: 'dokaz', tip: 'link', pitanje: 'Link na snimak ili sliku', pomoc: 'YouTube, Streamable, Medal, Imgur ili slično. Bez dokaza report se retko rešava.', max: 300, obavezno: true },
       iskreno,

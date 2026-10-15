@@ -18,7 +18,7 @@ export default function Vodic() {
       akcija: <a className="dugme dugme-obrub dugme-malo" href="https://fivem.net/" target="_blank" rel="noopener">Preuzmi FiveM <ArrowUpRight className="size-4" /></a> },
     { naslov: 'Uđi na Discord', tekst: 'Tu izlaze novosti, eventi i obaveštenja, a staff odgovara na pitanja.',
       akcija: <a className="dugme dugme-discord dugme-malo" href={SITE.discord} target="_blank" rel="noopener"><DiscordIkona className="size-4" /> Discord</a> },
-    { naslov: 'Pročitaj pravila', tekst: 'Pet minuta čitanja štedi te kazne. Staff se u gradu poziva na pravila po broju.',
+    { naslov: 'Prati pravila', tekst: 'Pravila izlaze uskoro, na sajtu i na Discordu. Pročitaj ih čim izađu, staff se na njih poziva.',
       akcija: <Link className="dugme dugme-obrub dugme-malo" href="/pravila">Pravila</Link> },
     { naslov: 'Uđi u grad', tekst: 'Klikni dugme ili otvori FiveM, pritisni F8 i nalepi komandu.',
       akcija: <span className="flex flex-wrap items-center gap-3"><a className="dugme dugme-glavno dugme-malo" href={connect}>Uđi u grad</a><KopirajKomandu server={SITE.server} svetlo /></span> },
