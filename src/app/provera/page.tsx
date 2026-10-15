@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { CircleCheck, CircleX, TriangleAlert } from 'lucide-react';
-import { DISCORD, PANEL, TIM, env } from '@/config/site';
+import { DISCORD, PANEL, TIM, adresaSajta } from '@/config/site';
 import { bot } from '@/lib/discord';
 import { db, imaBazu } from '@/lib/db';
 import { statusServera } from '@/lib/status';
@@ -12,13 +12,11 @@ type Stavka = { naziv: string; stanje: 'ok' | 'upozorenje' | 'greska'; poruka: s
 
 // Proverava podešavanja sajta. Ne prikazuje nijednu tajnu vrednost, samo da li postoji i da li radi.
 async function proveri(): Promise<{ naslov: string; stavke: Stavka[] }[]> {
-  const site = process.env.SITE_URL || '';
+  const site = adresaSajta();
   const sesija = process.env.SESSION_SECRET || '';
 
   const login: Stavka[] = [
-    site
-      ? { naziv: 'SITE_URL', stanje: site.startsWith('https://') ? 'ok' : 'upozorenje', poruka: site.startsWith('https://') ? site : 'Mora da počinje sa https://' }
-      : { naziv: 'SITE_URL', stanje: 'upozorenje', poruka: 'Nije upisan. Upiši adresu sajta, npr. https://flamingo-roleplay.vercel.app' },
+    { naziv: 'Adresa sajta', stanje: site.startsWith('https://') ? 'ok' : 'upozorenje', poruka: site.startsWith('https://') ? site : 'Mora da počinje sa https://' },
     sesija.length >= 32
       ? { naziv: 'SESSION_SECRET', stanje: 'ok', poruka: `Upisan (${sesija.length} znakova)` }
       : { naziv: 'SESSION_SECRET', stanje: 'greska', poruka: sesija ? `Prekratak (${sesija.length} znakova, treba bar 32)` : 'Nije upisan. Bez njega login ne radi.' },
@@ -45,7 +43,7 @@ async function proveri(): Promise<{ naslov: string; stavke: Stavka[] }[]> {
 
   const discord: Stavka[] = [];
   if (!process.env.DISCORD_BOT_TOKEN) {
-    discord.push({ naziv: 'DISCORD_BOT_TOKEN', stanje: 'greska', poruka: 'Nije upisan. Bez bota nema poruka, uloga, panela ni strane Tim.' });
+    discord.push({ naziv: 'DISCORD_BOT_TOKEN', stanje: 'greska', poruka: 'Nije upisan u Vercel. Bez bota nema poruka, uloga, panela ni strane Tim.' });
   } else {
     const ja = await bot<{ username: string }>('GET', '/users/@me');
     discord.push(ja.ok
@@ -56,16 +54,16 @@ async function proveri(): Promise<{ naslov: string; stavke: Stavka[] }[]> {
     } else if (ja.ok) {
       const g = await bot<{ name: string }>('GET', `/guilds/${DISCORD.guildId}`);
       discord.push(g.ok
-        ? { naziv: 'DISCORD_GUILD_ID', stanje: 'ok', poruka: `Server: ${g.data?.name}` }
-        : { naziv: 'DISCORD_GUILD_ID', stanje: 'greska', poruka: `Bot ne vidi server (${g.poruka}). Proveri ID i da li je bot na serveru.` });
+        ? { naziv: 'Discord server', stanje: 'ok', poruka: `Server: ${g.data?.name}` }
+        : { naziv: 'Discord server', stanje: 'greska', poruka: `Bot ne vidi server (${g.poruka}). Proveri ID i da li je bot na serveru.` });
     }
     for (const [ime, id, obavezan] of [
-      ['DISCORD_PRIJAVE_KANAL_ID', env('DISCORD_PRIJAVE_KANAL_ID'), true],
-      ['DISCORD_REPORT_KANAL_ID', env('DISCORD_REPORT_KANAL_ID'), false],
-      ['DISCORD_NOVOSTI_KANAL_ID', env('DISCORD_NOVOSTI_KANAL_ID'), false],
+      ['Kanal za prijave', DISCORD.prijaveKanalId, true],
+      ['Kanal za reportove', DISCORD.reportKanalId, false],
+      ['Kanal za novosti', DISCORD.novostiKanalId, false],
     ] as const) {
       if (!id) {
-        discord.push({ naziv: ime, stanje: obavezan ? 'upozorenje' : 'upozorenje', poruka: ime === 'DISCORD_REPORT_KANAL_ID' ? 'Nije upisan, reportovi idu u kanal za prijave.' : 'Nije upisan, bot ne javlja u kanal.' });
+        discord.push({ naziv: ime, stanje: obavezan ? 'upozorenje' : 'upozorenje', poruka: ime === 'Kanal za reportove' ? 'Nije upisan, reportovi idu u kanal za prijave.' : 'Nije upisan, bot ne javlja u kanal.' });
       } else if (ja.ok) {
         const c = await bot<{ name: string }>('GET', `/channels/${id}`);
         discord.push(c.ok
@@ -103,7 +101,7 @@ async function proveri(): Promise<{ naslov: string; stavke: Stavka[] }[]> {
 
 export default async function Provera() {
   const grupe = await proveri();
-  const sajt = (process.env.SITE_URL || 'https://flamingo-roleplay.vercel.app').replace(/\/+$/, '');
+  const sajt = adresaSajta();
   const greske = grupe.flatMap(g => g.stavke).filter(s => s.stanje === 'greska').length;
 
   return (

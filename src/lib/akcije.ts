@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { nadjiPrijavu, odlukeZa, type Polje } from '@/config/prijave';
-import { DISCORD, PANEL, SITE } from '@/config/site';
+import { DISCORD, PANEL, SITE, adresaSajta } from '@/config/site';
 import { KATEGORIJE_NOVOSTI, KATEGORIJE_PREDLOGA, PREDLOGA_DNEVNO, STATUSI_PREDLOGA, kategorijaNovosti, statusPredloga } from '@/config/zajednica';
 import { db, type PrijavaRed, type PredlogRed } from './db';
 import { trenutniKorisnik } from './session';
@@ -16,7 +16,7 @@ const CRVENA = 0xef4b55;
 const ZLATO = 0xffb547;
 
 function siteUrl() {
-  return (process.env.SITE_URL || '').replace(/\/+$/, '');
+  return adresaSajta();
 }
 
 function bazaGreska(e: unknown) {

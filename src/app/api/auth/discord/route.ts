@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { AUTHORIZE_URL, avatarUrl, korisnikIzTokena, zameniKod } from '@/lib/discord';
 import { napraviSesiju, sigurnoKolacic } from '@/lib/session';
+import { adresaSajta } from '@/config/site';
 
 // ============================================================
 //  Login preko Discorda. Ista adresa kao na starom sajtu
@@ -13,8 +14,8 @@ import { napraviSesiju, sigurnoKolacic } from '@/lib/session';
 
 const STATE_COOKIE = 'fl_oauth';
 
-function baseUrl(req: NextRequest) {
-  return (process.env.SITE_URL || req.nextUrl.origin).replace(/\/+$/, '');
+function baseUrl(_req: NextRequest) {
+  return adresaSajta();
 }
 
 function sigurnaPutanja(p: string | null) {

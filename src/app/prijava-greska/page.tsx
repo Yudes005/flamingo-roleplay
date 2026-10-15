@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DiscordIkona } from '@/components/ikone';
+import { adresaSajta } from '@/config/site';
 
 export const metadata: Metadata = { title: 'Prijava nije uspela', robots: { index: false } };
 
@@ -11,14 +12,14 @@ const PORUKE: Record<string, { igrac: string; vlasnik?: string }> = {
   'client-id': { igrac: 'Prijava preko Discorda još nije podešena.', vlasnik: 'U Vercelu fali DISCORD_CLIENT_ID (Settings, pa Environment Variables). Posle dodavanja uradi Redeploy.' },
   'client-secret': { igrac: 'Prijava preko Discorda još nije podešena.', vlasnik: 'DISCORD_CLIENT_SECRET fali ili je pogrešan. Kopiraj ga iz Discord Developer Portala (OAuth2, pa Reset Secret), upiši u Vercel i uradi Redeploy.' },
   sesija: { igrac: 'Prijava preko Discorda još nije podešena.', vlasnik: 'SESSION_SECRET fali ili je kraći od 32 znaka. Upiši dugačak nasumičan tekst u Vercel i uradi Redeploy.' },
-  redirect: { igrac: 'Discord nije prihvatio prijavu.', vlasnik: 'Redirect URL u Discord Developer Portalu (OAuth2, pa Redirects) mora biti tačno SITE_URL + /api/auth/discord. Proveri i SITE_URL u Vercelu.' },
+  redirect: { igrac: 'Discord nije prihvatio prijavu.', vlasnik: 'Redirect URL u Discord Developer Portalu (OAuth2, pa Redirects) mora biti tačno adresa ispod. Adresa sajta se menja u src/config/site.ts (ADRESA).' },
   discord: { igrac: 'Discord nije potvrdio prijavu. Probaj ponovo, a ako se ponavlja, javi staffu.' },
 };
 
 export default async function PrijavaGreska({ searchParams }: { searchParams: Promise<{ razlog?: string }> }) {
   const { razlog } = await searchParams;
   const p = PORUKE[razlog || ''] || PORUKE.discord;
-  const sajt = (process.env.SITE_URL || 'https://flamingo-roleplay.vercel.app').replace(/\/+$/, '');
+  const sajt = adresaSajta();
   return (
     <div className="sadrzaj grid min-h-[86vh] place-items-center pb-16 pt-[110px]">
       <div className="max-w-lg text-center">

@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from 'next';
 import '@fontsource-variable/big-shoulders-display';
 import '@fontsource-variable/onest';
 import './globals.css';
-import { SITE } from '@/config/site';
+import { SITE, adresaSajta } from '@/config/site';
 import { Navigacija } from '@/components/Navigacija';
 import { Podnozje } from '@/components/Podnozje';
 import { Otkrivanje } from '@/components/Otkrivanje';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL || 'https://flamingo-roleplay.vercel.app'),
+  metadataBase: new URL(adresaSajta()),
   title: { default: `${SITE.ime} - GTA V roleplay server`, template: `%s | ${SITE.ime}` },
   description: SITE.opis,
   openGraph: { title: SITE.ime, description: SITE.opis, images: ['/img/hero.webp'], locale: 'sr_RS', type: 'website' },

@@ -1,6 +1,7 @@
 import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { adresaSajta } from '@/config/site';
 
 // ============================================================
 //  SESIJA: potpisan kolačić (JWT). Bez SESSION_SECRET-a niko ne
@@ -20,7 +21,7 @@ function kljuc() {
 }
 
 export function sigurnoKolacic() {
-  return (process.env.SITE_URL || '').startsWith('https://');
+  return adresaSajta().startsWith('https://');
 }
 
 export async function napraviSesiju(k: Korisnik) {
