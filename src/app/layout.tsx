@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next';
-import '@fontsource-variable/big-shoulders-display';
-import '@fontsource-variable/onest';
+import '@fontsource-variable/montserrat';
 import './globals.css';
 import { SITE, adresaSajta } from '@/config/site';
 import { Navigacija } from '@/components/Navigacija';
 import { Podnozje } from '@/components/Podnozje';
 import { Otkrivanje } from '@/components/Otkrivanje';
+import { BezNaPocetnoj } from '@/components/BezNaPocetnoj';
 
 export const metadata: Metadata = {
   metadataBase: new URL(adresaSajta()),
@@ -24,12 +24,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body>
-        <a href="#sadrzaj" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-flamingo focus:px-4 focus:py-2">
+        <a href="#sadrzaj" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-xl focus:bg-flamingo focus:px-4 focus:py-2">
           Preskoči na sadržaj
         </a>
         <Navigacija />
         <main id="sadrzaj">{children}</main>
-        <Podnozje />
+        <BezNaPocetnoj><Podnozje /></BezNaPocetnoj>
         <Otkrivanje />
       </body>
     </html>

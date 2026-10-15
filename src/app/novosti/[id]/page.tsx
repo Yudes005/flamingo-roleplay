@@ -49,7 +49,7 @@ export default async function Novost({ params }: Props) {
             <span>{datum(n.napravljena)}</span>
             {!n.objavljena && <span className="rounded-full bg-zlato/20 px-2.5 py-0.5 text-[13px] text-zlato">Nacrt</span>}
           </p>
-          <h1 className="plakat mt-4 max-w-[18ch] text-[clamp(52px,8vw,112px)]">{n.naslov}</h1>
+          <h1 className="plakat mt-4 max-w-[22ch] text-[clamp(34px,5vw,68px)]">{n.naslov}</h1>
           <p className="mt-6 max-w-[56ch] text-[clamp(17px,1.5vw,20px)] text-white/85">{n.kratko}</p>
         </div>
       </header>

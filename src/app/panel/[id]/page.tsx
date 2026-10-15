@@ -90,10 +90,10 @@ export default async function PanelPrijava({ params }: { params: Promise<{ id: s
               <p><b>{p.status === 'prihvacena' ? t.da : t.ne}:</b> {p.odlucio_ime}, {datumVreme(p.odluceno)}</p>
               {p.razlog && <p className="mt-1"><b>Poruka igraču:</b> {p.razlog}</p>}
               <ul className="mt-3 space-y-1 text-[14.5px]">
-                {p.uloga_dodeljena === true && <li className="text-[#0f8a62]">Discord uloga je dodeljena automatski.</li>}
-                {p.uloga_dodeljena === false && <li className="text-[#a11f2f]">Discord uloga NIJE dodeljena (proveri dozvole bota). Dodaj je ručno.</li>}
-                {p.dm_poslat === true && <li className="text-[#0f8a62]">Igrač je dobio poruku na Discordu.</li>}
-                {p.dm_poslat === false && <li className="text-[#a11f2f]">Poruka na Discordu nije stigla (zatvoreni DM-ovi). Igrač ishod vidi na sajtu.</li>}
+                {p.uloga_dodeljena === true && <li className="text-[#4fd8a8]">Discord uloga je dodeljena automatski.</li>}
+                {p.uloga_dodeljena === false && <li className="text-[#ff8a8e]">Discord uloga NIJE dodeljena (proveri dozvole bota). Dodaj je ručno.</li>}
+                {p.dm_poslat === true && <li className="text-[#4fd8a8]">Igrač je dobio poruku na Discordu.</li>}
+                {p.dm_poslat === false && <li className="text-[#ff8a8e]">Poruka na Discordu nije stigla (zatvoreni DM-ovi). Igrač ishod vidi na sajtu.</li>}
               </ul>
             </div>
           )}

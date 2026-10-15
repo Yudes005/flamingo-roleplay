@@ -55,7 +55,7 @@ export default async function Formular({ params }: Props) {
         <div className="min-w-0">
           {!korisnik ? (
             <div className="povrsina p-8 md:p-12">
-              <h1 className="plakat text-[clamp(48px,7vw,80px)]">{vrsta.naziv}</h1>
+              <h1 className="plakat text-[clamp(32px,4.4vw,54px)]">{vrsta.naziv}</h1>
               <p className="mt-4 max-w-[50ch] text-[16.5px] text-sivo">
                 Prijavi se preko Discorda da bi popunio formular. Tako znamo ko je poslao i kome da javimo odluku.
               </p>

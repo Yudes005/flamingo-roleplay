@@ -38,7 +38,7 @@ export default function Vodic() {
           <ol className="mt-14 grid grid-cols-1 gap-x-12 md:grid-cols-2">
             {koraci.map((k, i) => (
               <li key={k.naslov} className="grid grid-cols-[64px_minmax(0,1fr)] gap-x-4 border-t border-mastilo/15 py-8 md:grid-cols-[80px_minmax(0,1fr)]">
-                <span className="plakat text-[64px] leading-[.8] text-flamingo-3 tabular-nums md:text-[76px]">{i + 1}</span>
+                <span className="plakat text-[48px] leading-[.9] text-flamingo tabular-nums md:text-[56px]">{i + 1}</span>
                 <div>
                   <h3 className="text-[21px] font-semibold">{k.naslov}</h3>
                   <p className="mt-1.5 max-w-[46ch] text-[15.5px] text-mastilo/70">{k.tekst}</p>

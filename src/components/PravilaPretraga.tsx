@@ -62,7 +62,7 @@ export function PravilaPretraga({ poglavlja }: { poglavlja: Poglavlje[] }) {
         <div className="space-y-16">
           {filtrirano.map(p => (
             <section key={p.id} id={p.id} className="scroll-mt-[100px]">
-              <h2 className="plakat flex items-baseline gap-4 text-[clamp(40px,4.4vw,60px)]">
+              <h2 className="plakat flex items-baseline gap-4 text-[clamp(26px,2.8vw,38px)]">
                 <span className="text-flamingo-3 tabular-nums">{p.broj}</span>{p.naslov}
               </h2>
               {p.uvod && !q && <p className="mt-3 max-w-[62ch] text-[16.5px] text-mastilo/70">{p.uvod}</p>}

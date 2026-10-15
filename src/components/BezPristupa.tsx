@@ -5,7 +5,7 @@ export function BezPristupa({ prijavljen, poruka }: { prijavljen: boolean; poruk
   return (
     <div className="sadrzaj grid min-h-[80vh] place-items-center pt-[100px]">
       <div className="povrsina max-w-md p-8 text-center md:p-10">
-        <h1 className="plakat text-[56px]">Staff panel</h1>
+        <h1 className="plakat text-[38px]">Staff panel</h1>
         <p className="mt-3 text-sivo">
           {poruka || (prijavljen ? 'Tvoj Discord nalog nema staff ulogu potrebnu za panel.' : 'Prijavi se preko Discorda da bi otvorio panel.')}
         </p>

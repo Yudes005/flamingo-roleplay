@@ -10,7 +10,7 @@ export function DokumentZaglavlje({ naslov, podnaslov, oznaka = 'Prijava br.', b
     <header>
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-mastilo">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-flamingo">
             <Image src="/img/logo-mark.png" alt="" width={184} height={335} className="h-7 w-auto" />
           </span>
           <div className="leading-tight">
@@ -25,7 +25,7 @@ export function DokumentZaglavlje({ naslov, podnaslov, oznaka = 'Prijava br.', b
       </div>
       <div className="mt-8">
         <p className="text-[14px] text-mastilo/70">{podnaslov}</p>
-        <h1 className="plakat mt-1 text-[clamp(44px,7vw,72px)]">{naslov}</h1>
+        <h1 className="plakat mt-2 text-[clamp(30px,4.4vw,48px)]">{naslov}</h1>
       </div>
       <dl className="mt-7 grid gap-4 border-y-2 border-mastilo/80 py-4 text-[15px] sm:grid-cols-2">
         <div className="flex items-center gap-3">

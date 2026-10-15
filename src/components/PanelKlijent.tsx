@@ -99,7 +99,7 @@ export function OdlukaForma({ prijavaId, imaUlogu, da, ne }: { prijavaId: number
         <textarea id="razlog" name="razlog" rows={3} maxLength={1000} className="polje mt-1.5 resize-y text-[15px]" />
       </div>
       <label className="flex items-center gap-2.5 text-[14.5px]">
-        <input type="checkbox" name="javi" defaultChecked className="size-4 accent-[#ff4d8d]" />
+        <input type="checkbox" name="javi" defaultChecked className="size-4 accent-[#ff1f6d]" />
         Pošalji igraču poruku na Discordu
       </label>
       {imaUlogu && izbor === 'prihvacena' && (

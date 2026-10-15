@@ -7,7 +7,7 @@ import { posaljiPrijavu, type StanjeForme } from '@/lib/akcije';
 function Brojac({ duzina, min, max }: { duzina: number; min?: number; max?: number }) {
   const malo = min && duzina < min;
   return (
-    <span className={`text-[12.5px] tabular-nums ${malo ? 'text-mastilo/55' : 'text-[#0f8a62]'}`}>
+    <span className={`text-[12.5px] tabular-nums ${malo ? 'text-mastilo/55' : 'text-[#4fd8a8]'}`}>
       {duzina}{max ? ` / ${max}` : ''}{malo ? ` (još ${min - duzina})` : ''}
     </span>
   );
@@ -39,10 +39,10 @@ export function PrijavaForma({ vrstaId, polja, ime, dugme = 'Pošalji prijavu' }
             return (
               <li key={p.id} className="list-none">
                 <label className="flex cursor-pointer items-start gap-3 rounded-lg border-[1.5px] border-dashed border-mastilo/25 p-4">
-                  <input type="checkbox" name={p.id} onChange={() => ispravi(p.id)} className="mt-1 size-5 shrink-0 accent-[#ff4d8d]" aria-invalid={!!g} aria-describedby={opis} defaultChecked={!!vrednosti[p.id]} />
+                  <input type="checkbox" name={p.id} onChange={() => ispravi(p.id)} className="mt-1 size-5 shrink-0 accent-[#ff1f6d]" aria-invalid={!!g} aria-describedby={opis} defaultChecked={!!vrednosti[p.id]} />
                   <span className="text-[15.5px]">{p.pitanje}</span>
                 </label>
-                {g && <p id={idG} className="mt-1.5 text-[14px] font-medium text-[#c4283a]">{g}</p>}
+                {g && <p id={idG} className="mt-1.5 text-[14px] font-medium text-[#ff8a8e]">{g}</p>}
               </li>
             );
           }
@@ -79,7 +79,7 @@ export function PrijavaForma({ vrstaId, polja, ime, dugme = 'Pošalji prijavu' }
                       className={`papir-polje ${p.tip === 'broj' ? 'max-w-[180px]' : ''}`} aria-invalid={!!g} aria-describedby={opis} />
                   )}
                 </div>
-                {g && <p id={idG} className="mt-1.5 text-[14px] font-medium text-[#c4283a]">{g}</p>}
+                {g && <p id={idG} className="mt-1.5 text-[14px] font-medium text-[#ff8a8e]">{g}</p>}
               </div>
             </li>
           );
@@ -87,7 +87,7 @@ export function PrijavaForma({ vrstaId, polja, ime, dugme = 'Pošalji prijavu' }
       </ol>
 
       {stanje.greska && (
-        <p className="mt-8 rounded-lg bg-[#c4283a]/10 px-4 py-3 text-[15px] font-medium text-[#a11f2f]" role="alert">{stanje.greska}</p>
+        <p className="mt-8 rounded-lg bg-[#ff8a8e]/10 px-4 py-3 text-[15px] font-medium text-[#ff8a8e]" role="alert">{stanje.greska}</p>
       )}
 
       <div className="mt-10 flex flex-col-reverse gap-6 border-t-2 border-mastilo/80 pt-6 sm:flex-row sm:items-end sm:justify-between">

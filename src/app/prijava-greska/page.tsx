@@ -23,7 +23,7 @@ export default async function PrijavaGreska({ searchParams }: { searchParams: Pr
   return (
     <div className="sadrzaj grid min-h-[86vh] place-items-center pb-16 pt-[110px]">
       <div className="max-w-lg text-center">
-        <h1 className="plakat text-[clamp(56px,9vw,96px)]">Prijava nije uspela</h1>
+        <h1 className="plakat text-[clamp(34px,5vw,60px)]">Prijava nije uspela</h1>
         <p className="mx-auto mt-5 max-w-[44ch] text-[17px] text-sivo">{p.igrac}</p>
         {p.vlasnik && (
           <div className="mt-8 rounded-2xl border border-zlato/30 bg-zlato/[.07] p-5 text-left text-[15px]">

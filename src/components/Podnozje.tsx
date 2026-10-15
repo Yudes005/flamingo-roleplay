@@ -22,7 +22,7 @@ const KOLONE = [
 export function Podnozje() {
   return (
     <footer className="border-t border-white/[.07] bg-black">
-      <div className="sadrzaj grid gap-12 py-16 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="sadrzaj grid grid-cols-1 gap-12 py-16 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
         <div className="max-w-sm">
           <Logo mali />
           <p className="mt-5 text-[15px] text-sivo">{SITE.opis}</p>
@@ -30,14 +30,14 @@ export function Podnozje() {
         </div>
         {KOLONE.map(k => (
           <div key={k.naslov}>
-            <h2 className="text-[14px] font-semibold text-sivo-2">{k.naslov}</h2>
+            <h2 className="oznaka text-flamingo-2">{k.naslov}</h2>
             <ul className="mt-4 space-y-2.5 text-[15px]">
               {k.linkovi.map(l => <li key={l.href}><Link className="transition-colors hover:text-flamingo-2" href={l.href}>{l.tekst}</Link></li>)}
             </ul>
           </div>
         ))}
         <div>
-          <h2 className="text-[14px] font-semibold text-sivo-2">Zajednica</h2>
+          <h2 className="oznaka text-flamingo-2">Zajednica</h2>
           <ul className="mt-4 space-y-2.5 text-[15px]">
             <li><a className="inline-flex items-center gap-2 transition-colors hover:text-flamingo-2" href={SITE.discord} target="_blank" rel="noopener"><DiscordIkona className="size-4" /> Discord</a></li>
             <li><a className="inline-flex items-center gap-2 transition-colors hover:text-flamingo-2" href={SITE.tiktok} target="_blank" rel="noopener"><TikTokIkona className="size-4" /> TikTok</a></li>

@@ -41,9 +41,9 @@ export function NavLinkovi({ linkovi }: { linkovi: L[] }) {
         const a = aktivan(put, l.href);
         return (
           <Link key={l.href} href={l.href} aria-current={a ? 'page' : undefined}
-            className={`relative px-3 py-2 text-[15px] font-medium transition-colors ${a ? 'text-tekst' : 'text-sivo hover:text-tekst'}`}>
+            className={`relative px-3 py-2 text-[13px] font-bold uppercase tracking-[.05em] transition-colors ${a ? 'text-tekst' : 'text-tekst/70 hover:text-tekst'}`}>
             {l.tekst}
-            <span className={`absolute inset-x-3 -bottom-0.5 h-[2px] origin-left bg-flamingo transition-transform duration-300 ${a ? 'scale-x-100' : 'scale-x-0'}`} />
+            <span className={`absolute inset-x-3 -bottom-0.5 h-[3px] origin-left rounded-full bg-flamingo transition-transform duration-300 ${a ? 'scale-x-100' : 'scale-x-0'}`} />
           </Link>
         );
       })}
@@ -65,10 +65,10 @@ export function KorisnikMeni({ ime, avatar, staff }: { ime: string; avatar: stri
   return (
     <div className="relative hidden md:block" ref={ref}>
       <button type="button" onClick={() => setOtvoren(o => !o)} aria-expanded={otvoren} aria-haspopup="menu"
-        className="flex items-center gap-2 rounded-full border border-white/12 bg-black/20 py-1 pl-1 pr-3 transition-colors hover:border-white/30">
+        className="flex items-center gap-2 rounded-xl border border-white/12 bg-black/30 py-1 pl-1 pr-3 transition-colors hover:border-white/30">
         {avatar
-          ? <Image src={avatar} alt="" unoptimized width={32} height={32} className="size-8 rounded-full" />
-          : <span className="size-8 rounded-full bg-noc-3" />}
+          ? <Image src={avatar} alt="" unoptimized width={32} height={32} className="size-8 rounded-lg" />
+          : <span className="size-8 rounded-lg bg-noc-3" />}
         <span className="max-w-[140px] truncate text-[14.5px] font-medium">{ime}</span>
         <ChevronDown className={`size-4 text-sivo transition-transform ${otvoren ? 'rotate-180' : ''}`} />
       </button>
@@ -117,7 +117,7 @@ export function MobilniMeni({ linkovi, prijavljen, staff }: { linkovi: L[]; prij
   return (
     <>
       <button type="button" onClick={() => setOtvoren(o => !o)} aria-expanded={otvoren} aria-controls="mobilni-meni"
-        className="grid size-11 place-items-center rounded-full border border-white/15 bg-black/20 lg:hidden" aria-label={otvoren ? 'Zatvori meni' : 'Otvori meni'}>
+        className="grid size-11 place-items-center rounded-xl border border-white/15 bg-black/30 lg:hidden" aria-label={otvoren ? 'Zatvori meni' : 'Otvori meni'}>
         {otvoren ? <X className="size-5" /> : <Menu className="size-5" />}
       </button>
       {otvoren && spreman && createPortal(
@@ -125,7 +125,7 @@ export function MobilniMeni({ linkovi, prijavljen, staff }: { linkovi: L[]; prij
           <nav className="flex flex-col" aria-label="Meni">
             {sve.map((l, i) => (
               <Link key={l.href} href={l.href} style={{ animationDelay: `${i * 45}ms` }}
-                className={`pojava plakat border-b border-white/[.07] py-3.5 text-[44px] ${put === l.href ? 'text-flamingo' : ''}`}>
+                className={`pojava plakat border-b border-white/[.07] py-4 text-[30px] ${put === l.href ? 'text-flamingo' : ''}`}>
                 {l.tekst}
               </Link>
             ))}
@@ -136,7 +136,7 @@ export function MobilniMeni({ linkovi, prijavljen, staff }: { linkovi: L[]; prij
                 <button type="submit" className="dugme dugme-obicno w-full"><LogOut className="size-4" /> Odjavi se</button>
               </form>
             ) : (
-              <a href="/api/auth/discord" className="dugme dugme-discord w-full"><DiscordIkona /> Prijavi se preko Discorda</a>
+              <a href="/api/auth/discord" className="dugme dugme-glavno w-full"><DiscordIkona /> Prijavi se preko Discorda</a>
             )}
           </div>
         </div>,

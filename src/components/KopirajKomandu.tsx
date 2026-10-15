@@ -19,15 +19,15 @@ export function KopirajKomandu({ server, svetlo = false }: { server: string; sve
     <button
       type="button"
       onClick={kopiraj}
-      className={`group inline-flex max-w-full items-center gap-3 rounded-full border py-2 pl-4 pr-3 text-left text-[14px] transition-colors ${svetlo
-        ? 'border-mastilo/15 bg-white hover:border-mastilo/40'
-        : 'border-white/15 bg-white/[.04] hover:border-white/30'}`}
+      className={`group inline-flex max-w-full items-center gap-3 rounded-xl border py-2 pl-4 pr-2 text-left text-[14px] transition-colors ${svetlo
+        ? 'border-white/15 bg-noc hover:border-white/30'
+        : 'border-white/15 bg-black/40 backdrop-blur-md hover:border-white/30'}`}
       aria-label={`Kopiraj komandu ${komanda}`}
     >
-      <span className={`truncate font-medium tabular-nums ${svetlo ? 'text-mastilo' : 'text-tekst/90'}`}>{komanda}</span>
-      <span className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-medium transition-colors ${kopirano
+      <span className={`truncate font-bold tabular-nums text-tekst/90`}>{komanda}</span>
+      <span className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-[12px] font-extrabold uppercase tracking-[.04em] transition-colors ${kopirano
         ? 'bg-zelena/15 text-zelena'
-        : svetlo ? 'bg-mastilo/[.06] text-mastilo/70 group-hover:text-mastilo' : 'bg-white/[.07] text-sivo group-hover:text-tekst'}`}>
+        : 'bg-white/[.07] text-sivo group-hover:text-tekst'}`}>
         {kopirano ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
         {kopirano ? 'Kopirano' : 'Kopiraj'}
       </span>

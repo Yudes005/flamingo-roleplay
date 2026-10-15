@@ -11,7 +11,7 @@ export function PanelZaglavlje({ aktivno, nivo, children }: { aktivno: (typeof T
     <header>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="plakat text-[clamp(52px,7vw,88px)]">Staff panel</h1>
+          <h1 className="plakat text-[clamp(34px,4.4vw,58px)]">Staff panel</h1>
           <p className="mt-2 text-[15.5px] text-sivo">
             {nivo === 'odluka' ? 'Možeš da glasaš, komentarišeš, odlučuješ i pišeš novosti.' : 'Možeš da čitaš, glasaš i komentarišeš. Odluke donosi head staff.'}
           </p>

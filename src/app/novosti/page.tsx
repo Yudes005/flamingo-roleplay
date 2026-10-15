@@ -48,7 +48,7 @@ export default async function Novosti({ searchParams }: { searchParams: Promise<
               </div>
               <div>
                 <Oznaka kategorija={prva.kategorija} kad={prva.napravljena} />
-                <h2 className="plakat mt-3 text-[clamp(44px,5vw,72px)] transition-colors group-hover:text-flamingo-2">{prva.naslov}</h2>
+                <h2 className="plakat mt-3 text-[clamp(28px,3.4vw,46px)] transition-colors group-hover:text-flamingo-2">{prva.naslov}</h2>
                 <p className="mt-4 text-[17px] text-sivo">{prva.kratko}</p>
               </div>
             </Link>

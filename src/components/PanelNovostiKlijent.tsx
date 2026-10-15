@@ -51,11 +51,11 @@ export function NovostForma({ id, kategorije, imaKanal, pocetno }: {
             {g.slika && <p className="mt-1 text-[13.5px] text-[#ff8a8e]">{g.slika}</p>}
           </div>
           <label className="flex items-center gap-2.5 text-[15px]">
-            <input type="checkbox" name="objavljena" defaultChecked={pocetno ? pocetno.objavljena : true} className="size-4 accent-[#ff4d8d]" />
+            <input type="checkbox" name="objavljena" defaultChecked={pocetno ? pocetno.objavljena : true} className="size-4 accent-[#ff1f6d]" />
             Objavljeno (skini kvačicu za nacrt)
           </label>
           <label className={`flex items-start gap-2.5 text-[15px] ${imaKanal ? '' : 'opacity-50'}`}>
-            <input type="checkbox" name="discord" disabled={!imaKanal} defaultChecked={!id && imaKanal} className="mt-1 size-4 accent-[#ff4d8d]" />
+            <input type="checkbox" name="discord" disabled={!imaKanal} defaultChecked={!id && imaKanal} className="mt-1 size-4 accent-[#ff1f6d]" />
             <span>Objavi i na Discordu{!imaKanal && <span className="block text-[13px] text-sivo-2">Dodaj DISCORD_NOVOSTI_KANAL_ID u Vercel da bi ovo radilo.</span>}</span>
           </label>
         </div>

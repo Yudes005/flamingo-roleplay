@@ -53,7 +53,7 @@ export default async function Tim() {
                   {g.ljudi.map(c => (
                     <li key={c.id} className="flex items-center gap-3">
                       <Image src={c.avatar} alt="" unoptimized width={44} height={44} className="size-11 shrink-0 rounded-full bg-noc-3 grayscale transition-[filter] duration-500 hover:grayscale-0" />
-                      <span className="plakat text-[clamp(30px,3.4vw,44px)]">{c.ime}</span>
+                      <span className="plakat text-[clamp(20px,2.2vw,28px)]">{c.ime}</span>
                     </li>
                   ))}
                 </ul>

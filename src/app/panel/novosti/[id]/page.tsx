@@ -33,7 +33,7 @@ export default async function UrediNovost({ params }: { params: Promise<{ id: st
       <Link href="/panel/novosti" className="inline-flex items-center gap-1.5 rounded-lg py-2 text-[15px] text-sivo hover:text-tekst">
         <ChevronLeft className="size-4" /> Sve novosti
       </Link>
-      <h1 className="plakat mt-4 text-[clamp(48px,6vw,76px)]">{novost ? 'Izmeni novost' : 'Nova novost'}</h1>
+      <h1 className="plakat mt-4 text-[clamp(32px,4.2vw,50px)]">{novost ? 'Izmeni novost' : 'Nova novost'}</h1>
       <NovostForma
         id={novost?.id ?? null}
         kategorije={KATEGORIJE_NOVOSTI.map(k => ({ id: k.id, naziv: k.naziv }))}

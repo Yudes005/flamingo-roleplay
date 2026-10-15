@@ -57,7 +57,7 @@ export default async function MojePrijave({ searchParams }: { searchParams: Prom
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-[13.5px] text-mastilo/65">{report ? 'Predmet' : 'Prijava'} br. {String(p.id).padStart(4, '0')}, {datum(p.napravljena)}</p>
-                    <h2 className="plakat mt-1 text-[34px]">{vrsta?.naziv || p.vrsta}</h2>
+                    <h2 className="plakat mt-1.5 text-[24px]">{vrsta?.naziv || p.vrsta}</h2>
                   </div>
                   <div className="shrink-0 pt-1">
                     {p.id === novaId && p.status === 'na_cekanju'
