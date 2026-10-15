@@ -28,7 +28,7 @@ export default function Vodic() {
 
   return (
     <>
-      <ZaglavljeStrane naslov="Vodič" slika="/img/poslovi/farmer.webp" pozicija="50% 40%">
+      <ZaglavljeStrane naslov="Vodič" slika="/img/hero.webp" pozicija="48% 30%">
         Sve što ti treba za prvi ulazak u Flamingo City: šta da instaliraš, koji tasteri šta rade i odgovori na pitanja koja svi postave prvog dana.
       </ZaglavljeStrane>
 

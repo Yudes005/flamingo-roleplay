@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Pravila', description: 'Pravila serv
 export default function Pravila() {
   return (
     <>
-      <ZaglavljeStrane naslov="Pravila grada" slika="/img/poslovi/taksista.webp" pozicija="50% 60%">
+      <ZaglavljeStrane naslov="Pravila grada" slika="/img/hero.webp" pozicija="66% 45%">
         Kratko i jasno. Svako pravilo ima broj, pa u reportu ili žalbi napišeš npr. „pravilo 2.1”.
         <span className="mt-3 block text-[14.5px] text-white/60">Poslednja izmena: {PRAVILA_IZMENA}</span>
       </ZaglavljeStrane>

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(adresaSajta()),
   title: { default: `${SITE.ime} - GTA V roleplay server`, template: `%s | ${SITE.ime}` },
   description: SITE.opis,
-  openGraph: { title: SITE.ime, description: SITE.opis, images: ['/img/hero.webp'], locale: 'sr_RS', type: 'website' },
+  openGraph: { title: SITE.ime, description: SITE.opis, images: ['/img/hero-noc.webp'], locale: 'sr_RS', type: 'website' },
 };
 
 export const viewport: Viewport = { themeColor: '#000000' };

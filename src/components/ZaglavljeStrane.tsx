@@ -9,9 +9,9 @@ export function ZaglavljeStrane({ naslov, slika, pozicija = '50% 50%', children 
       {slika && (
         <>
           <div className="ken-burns absolute inset-0 -z-20">
-            <Image src={slika} alt="" fill priority sizes="100vw" className="object-cover opacity-55" style={{ objectPosition: pozicija }} />
+            <Image src={slika} alt="" fill priority sizes="100vw" className="object-cover opacity-80" style={{ objectPosition: pozicija }} />
           </div>
-          <div className="absolute inset-0 -z-10 bg-[linear-gradient(0deg,var(--color-noc)_0%,rgb(20_16_18/.55)_45%,rgb(0_0_0/.6)_100%)]" />
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(0deg,var(--color-noc)_0%,rgb(11_10_13/.4)_50%,rgb(11_10_13/.55)_100%),linear-gradient(90deg,rgb(11_10_13/.75)_0%,rgb(11_10_13/0)_60%)]" />
         </>
       )}
       <div className="sadrzaj">

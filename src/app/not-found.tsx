@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function NijePronadjeno() {
   return (
     <div className="zrno relative isolate grid min-h-[100svh] place-items-center overflow-hidden bg-black px-4 text-center">
-      <Image src="/img/poslovi/autobus.webp" alt="" fill sizes="100vw" className="-z-20 object-cover opacity-35" />
+      <Image src="/img/hero.webp" alt="" fill sizes="100vw" className="-z-20 object-cover opacity-35" />
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgb(0_0_0/.2),#000_75%)]" />
       <div>
         <p className="plakat text-[clamp(110px,20vw,230px)] text-flamingo">404</p>

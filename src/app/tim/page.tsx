@@ -31,6 +31,10 @@ export default async function Tim() {
 
   return (
     <div className="zrno relative isolate min-h-screen overflow-hidden bg-black">
+      <div className="absolute inset-x-0 top-0 -z-10 h-[620px]">
+        <Image src="/img/hero.webp" alt="" fill priority sizes="100vw" className="object-cover object-[50%_30%] opacity-60" />
+        <div className="absolute inset-0 bg-[linear-gradient(0deg,#000_0%,rgb(0_0_0/.55)_55%,rgb(0_0_0/.7)_100%)]" />
+      </div>
       <div className="sadrzaj pb-28 pt-[150px] text-center md:pt-[190px]">
         <p className="pojava text-[15px] text-sivo">{SITE.ime} predstavlja</p>
         <h1 className="plakat naslov-strane mt-2 overflow-hidden pb-[.04em] pt-[.16em]"><span className="uzlet [animation-delay:.15s]">Ljudi iza grada</span></h1>

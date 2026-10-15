@@ -19,7 +19,7 @@ export default async function Prijave() {
 
   return (
     <>
-      <ZaglavljeStrane naslov="Prijave" slika="/img/poslovi/elektricar.webp" pozicija="50% 35%">
+      <ZaglavljeStrane naslov="Prijave" slika="/img/hero.webp" pozicija="22% 36%">
         Staff, organizacije, bande, reportovi i žalbe na jednom mestu. Prijaviš se Discordom, popuniš formular, a odluku dobiješ u poruci.
         {!korisnik && (
           <span className="mt-7 block">

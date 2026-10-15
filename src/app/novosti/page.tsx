@@ -19,7 +19,7 @@ export default async function Novosti({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <ZaglavljeStrane naslov="Novosti" slika="/img/prodavnice.webp" pozicija="70% 50%">
+      <ZaglavljeStrane naslov="Novosti" slika="/img/hero.webp" pozicija="88% 55%">
         Update-i, eventi i obaveštenja iz grada. Sve važno izlazi i na Discordu.
       </ZaglavljeStrane>
 
@@ -58,7 +58,7 @@ export default async function Novosti({ searchParams }: { searchParams: Promise<
                   <li key={n.id}>
                     <Link href={`/novosti/${n.id}`} className="group block">
                       <div className="relative aspect-[16/10] overflow-hidden rounded-md bg-noc-3">
-                        <Image src={n.slika || '/img/zivot.webp'} alt="" fill sizes="(max-width:640px) 100vw, 400px" unoptimized={!!n.slika?.startsWith('http')}
+                        <Image src={n.slika || '/img/hero.webp'} alt="" fill sizes="(max-width:640px) 100vw, 400px" unoptimized={!!n.slika?.startsWith('http')}
                           className="object-cover transition-transform duration-[1.2s] ease-[var(--ease-izlaz)] group-hover:scale-[1.05]" />
                       </div>
                       <div className="mt-4"><Oznaka kategorija={n.kategorija} kad={n.napravljena} /></div>

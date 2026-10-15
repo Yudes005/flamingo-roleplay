@@ -37,7 +37,7 @@ export default async function Predlozi({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <ZaglavljeStrane naslov="Predlozi" slika="/img/poslovi/elektricar.webp" pozicija="40% 30%">
+      <ZaglavljeStrane naslov="Predlozi" slika="/img/hero.webp" pozicija="72% 24%">
         Šta fali gradu? Predloži, glasaj za tuđe ideje i prati šta staff odluči. Najpopularniji predlozi prvi dolaze na red.
       </ZaglavljeStrane>
 
