@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+/* ============================================================
+   FLAMINGO CITY - dizajn sistem
+   Noć iznad grada (ljubičasta iz hero slike), jedna Flamingo roze,
+   zalazak (narandžasta) i palme (tirkizna) kao funkcionalni akcenti,
+   papir + mastilo za gradske dokumente (prijave).
+   ============================================================ */
+@theme {
+  --color-noc: #150d1c;
+  --color-noc-2: #1d1326;
+  --color-noc-3: #2a1c36;
+  --color-noc-4: #3a2849;
+  --color-tekst: #f6eff8;
+  --color-sivo: #b9abc4;
+  --color-sivo-2: #8a7b96;
+  --color-flamingo: #f23c77;
+  --color-flamingo-2: #ff7aa6;
+  --color-zalazak: #ffa05c;
+  --color-palma: #2dd4b0;
+  --color-crvena: #e5484d;
+  --color-papir: #f4ede4;
+  --color-papir-2: #e8dfd3;
+  --color-mastilo: #241a2c;
+
+  --font-display: "Unbounded Variable", "Unbounded", system-ui, sans-serif;
+  --font-sans: "Onest Variable", "Onest", system-ui, sans-serif;
+}
+
+@layer base {
+  html { background: var(--color-noc); color-scheme: dark; }
+  body {
+    background: var(--color-noc);
+    color: var(--color-tekst);
+    font-family: var(--font-sans);
+    font-size: 16.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  ::selection { background: var(--color-flamingo); color: #fff; }
+  :focus-visible { outline: 2px solid var(--color-flamingo-2); outline-offset: 3px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+}
+
+@layer components {
+  .sadrzaj { width: 100%; max-width: 1200px; margin-inline: auto; padding-inline: 20px; }
+  @media (min-width: 768px) { .sadrzaj { padding-inline: 32px; } }
+
+  /* ---------- dugmad ---------- */
+  .dugme {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 48px; padding: 0 22px; border-radius: 12px;
+    font-weight: 600; font-size: 15.5px; white-space: nowrap;
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+  }
+  .dugme:active { transform: translateY(1px); }
+  .dugme-glavno { background: var(--color-flamingo); color: #fff; }
+  .dugme-glavno:hover { background: #ff4f86; }
+  .dugme-obicno { background: rgb(255 255 255 / .06); color: var(--color-tekst); border: 1px solid rgb(255 255 255 / .14); }
+  .dugme-obicno:hover { background: rgb(255 255 255 / .11); border-color: rgb(255 255 255 / .24); }
+  .dugme-discord { background: #5865f2; color: #fff; }
+  .dugme-discord:hover { background: #6b77f5; }
+  .dugme[aria-disabled="true"], .dugme:disabled { opacity: .45; pointer-events: none; }
+
+  /* ---------- gradska tabla (status) ---------- */
+  .tabla {
+    position: relative; background: var(--color-flamingo); color: #fff;
+    border-radius: 18px; padding: 8px;
+    box-shadow: 0 30px 60px -20px rgb(242 60 119 / .45), 0 0 0 1px rgb(0 0 0 / .2);
+  }
+  .tabla-unutra { border: 2.5px solid rgb(255 255 255 / .92); border-radius: 12px; padding: 18px 22px 20px; }
+  .tabla.ugasena { background: var(--color-noc-4); box-shadow: 0 30px 60px -24px rgb(0 0 0 / .6); }
+  .tabla-stub { position: absolute; top: 100%; width: 10px; height: 46px; background: linear-gradient(90deg, #5d5166, #8d8196, #5d5166); }
+
+  /* ---------- papir (gradski dokument) ---------- */
+  .papir {
+    position: relative; background: var(--color-papir); color: var(--color-mastilo);
+    border-radius: 6px;
+    box-shadow: 0 1px 0 rgb(255 255 255 / .6) inset, 0 40px 80px -30px rgb(0 0 0 / .7), 0 2px 6px rgb(0 0 0 / .25);
+    background-image:
+      linear-gradient(rgb(36 26 44 / .045) 1px, transparent 1px);
+    background-size: 100% 32px;
+  }
+  .papir-polje {
+    width: 100%; background: rgb(255 255 255 / .55); color: var(--color-mastilo);
+    border: 1.5px solid rgb(36 26 44 / .18); border-radius: 8px; padding: 11px 13px;
+    font: inherit; font-size: 16px; line-height: 1.5;
+    transition: border-color .15s ease, background-color .15s ease;
+  }
+  .papir-polje:focus { outline: none; border-color: var(--color-flamingo); background: #fff; }
+  .papir-polje[aria-invalid="true"] { border-color: var(--color-crvena); }
+
+  /* ---------- pečat ---------- */
+  .pecat {
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 8px 16px; border: 3px solid currentColor; border-radius: 10px;
+    font-family: var(--font-display); font-weight: 800; letter-spacing: .06em; line-height: 1;
+    transform: rotate(-8deg); mix-blend-mode: multiply; opacity: .88;
+    -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 60%, rgb(0 0 0 / .78) 61%, #000 75%);
+            mask-image: radial-gradient(circle at 30% 40%, #000 60%, rgb(0 0 0 / .78) 61%, #000 75%);
+  }
+  .pecat small { font-family: var(--font-sans); font-weight: 600; font-size: 10px; letter-spacing: .04em; margin-top: 5px; }
+  .pecat-zeleni { color: #0f8a72; }
+  .pecat-crveni { color: #c4283a; }
+  .pecat-plavi { color: #3c3fb5; }
+  .pecat-udari { animation: pecat-udar .55s cubic-bezier(.2, 1.6, .4, 1) both; }
+  @keyframes pecat-udar {
+    0% { transform: rotate(-8deg) scale(2.4); opacity: 0; }
+    60% { transform: rotate(-8deg) scale(.94); opacity: .95; }
+    100% { transform: rotate(-8deg) scale(1); opacity: .88; }
+  }
+
+  /* ---------- tamna površina (panel, liste) ---------- */
+  .povrsina { background: var(--color-noc-2); border: 1px solid rgb(255 255 255 / .07); border-radius: 16px; }
+  .polje {
+    width: 100%; background: var(--color-noc); color: var(--color-tekst);
+    border: 1px solid rgb(255 255 255 / .12); border-radius: 10px; padding: 10px 12px; font: inherit;
+  }
+  .polje:focus { outline: none; border-color: var(--color-flamingo-2); }
+
+  .tacka-uzivo { width: 8px; height: 8px; border-radius: 50%; background: var(--color-palma); box-shadow: 0 0 0 0 rgb(45 212 176 / .6); animation: puls 2.4s ease-out infinite; }
+  @keyframes puls { 0% { box-shadow: 0 0 0 0 rgb(45 212 176 / .55); } 70%, 100% { box-shadow: 0 0 0 8px rgb(45 212 176 / 0); } }
+
+  .traka-skrol { scrollbar-width: thin; scrollbar-color: var(--color-noc-4) transparent; }
+}
