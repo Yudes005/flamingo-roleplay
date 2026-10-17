@@ -16,7 +16,7 @@ export const SITE = {
   // adresa servera (IP:port) - za dugme "Uđi u grad" i F8 komandu
   server: '185.195.237.205:20025',
 
-  discord: 'https://discord.gg/flamingorp',
+  discord: 'https://discord.gg/gta5flamingorp',
   tiktok: 'https://www.tiktok.com/@flamingo_rp_',
 };
 
