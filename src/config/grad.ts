@@ -104,7 +104,7 @@ export const FAQ = [
   { p: 'Šta treba da uradim pre prvog ulaska?', o: 'Uđi na Discord. Tu prvo izlaze novosti, a uskoro i pravila servera.' },
   { p: 'Kako da zaradim prvi novac?', o: 'Uzmi jedan od legalnih poslova. Rudar i drvoseča su dobri za početak, a uz posao raste i stablo veština.' },
   { p: 'Kako da dobijem kuću ili biznis?', o: 'Samo na aukciji, u tabletu (taster J). Aukcije se zatvaraju svako veče u 21:30. Kuća i biznis se plaćaju dnevno, najviše 14 dana unapred.' },
-  { p: 'Mogu li da uđem u policiju ili bolnicu?', o: 'Možeš. Pošalji prijavu za posao u organizaciji na ovom sajtu, a lider te zove na razgovor u gradu.' },
+  { p: 'Mogu li da uđem u policiju ili bolnicu?', o: 'Možeš. Organizacije primaju ljude u gradu, preko svog vođe. Prati Discord za otvorene prijeme.' },
   { p: 'Kako da uđem u bandu?', o: 'Bande primaju ljude kroz roleplay u gradu. Za vođu bande se šalje prijava na sajtu.' },
   { p: 'Neko mi je prekršio pravila. Šta da radim?', o: 'U gradu koristi report u meniju (M, pa Pomoć). Ako treba dokaz ili je stvar ozbiljnija, pošalji Report igrača na sajtu sa snimkom.' },
   { p: 'Dobio sam ban. Kako da se žalim?', o: 'Preko Prijave, pa Žalba na kaznu. Jedna žalba po kazni, iskreno i bez vređanja.' },

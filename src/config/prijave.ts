@@ -47,8 +47,8 @@ export type VrstaPrijave = {
 };
 
 export const GRUPE: { id: Grupa; naziv: string; opis: string }[] = [
-  { id: 'tim', naziv: 'Staff tim', opis: 'Ljudi koji vode grad, pomažu igračima i prave nove stvari.' },
-  { id: 'grad', naziv: 'Organizacije, bande i kreatori', opis: 'Posao u uniformi, mesto vođe ili snimanje grada za društvene mreže.' },
+  { id: 'tim', naziv: 'Staff tim', opis: 'Ljudi koji vode grad, pomažu igračima i testiraju sve pre nego što izađe.' },
+  { id: 'grad', naziv: 'Organizacije, bande i kreatori', opis: 'Mesto vođe organizacije ili bande i snimanje grada za društvene mreže.' },
   { id: 'report', naziv: 'Reportovi i žalbe', opis: 'Kad nešto nije u redu: prekršaj, kazna koju smatraš nepravednom ili bag.' },
 ];
 
@@ -153,51 +153,14 @@ export const PRIJAVE: VrstaPrijave[] = [
       pravila,
     ],
   },
-  {
-    id: 'developer',
-    grupa: 'tim',
-    naziv: 'Developer',
-    kratko: 'Praviš skripte, interfejse i mape za grad zajedno sa ostatkom tima.',
-    uslovi: ['Lua i JavaScript', 'Iskustvo sa ESX-om ili ox bibliotekama', 'Primeri svog rada'],
-    otvorena: true,
-    ponovoPosleDana: 14,
-    jednom: true,
-    ulogaPriPrihvatanju: uloga('PRIJAVA_DEV_ROLE_ID', ID.prijavaDev),
-    polja: [
-      ...osnovno,
-      { id: 'jezici', tip: 'opis', pitanje: 'Šta znaš? Jezici, frameworci, alati (Lua, JS, React, Vue, SQL...)', min: 20, max: 1000, obavezno: true },
-      { id: 'radovi', tip: 'link', pitanje: 'Link na tvoj rad (GitHub, video, portfolio)', max: 300, obavezno: true },
-      { id: 'iskustvo', tip: 'opis', pitanje: 'Na kojim serverima si radio i šta si napravio?', min: 40, max: 1500, obavezno: true },
-      vreme,
-      pravila,
-    ],
-  },
 
   // ------------------------------------------------ ORGANIZACIJE, BANDE, KREATORI
-  {
-    id: 'posao',
-    grupa: 'grad',
-    naziv: 'Posao u organizaciji',
-    kratko: 'Policija, šerif, FIB, vojska, bolnica, vlada ili Lifeinvader.',
-    uslovi: ['Najmanje 16 godina', 'Mikrofon', 'Iskustvo u roleplayu'],
-    otvorena: true,
-    ponovoPosleDana: 7,
-    polja: [
-      ...osnovno,
-      { id: 'organizacija', tip: 'izbor', pitanje: 'Gde želiš da radiš?', opcije: ORGANIZACIJE, obavezno: true },
-      vreme,
-      { id: 'iskustvo', tip: 'opis', pitanje: 'Da li si već radio u toj organizaciji, ovde ili na drugom serveru?', min: 20, max: 1200, obavezno: true },
-      { id: 'situacija', tip: 'opis', pitanje: 'Opiši jednu RP situaciju u kojoj si bio i kako si je odigrao.', min: 60, max: 1500, obavezno: true },
-      { id: 'zasto', tip: 'opis', pitanje: 'Zašto baš ova organizacija?', min: 40, max: 1200, obavezno: true },
-      pravila,
-    ],
-  },
   {
     id: 'lider',
     grupa: 'grad',
     naziv: 'Lider organizacije ili bande',
-    kratko: 'Vodiš organizaciju ili jednu od pet bandi i brineš o svojim ljudima.',
-    uslovi: ['Najmanje 16 godina', 'Iskustvo u roleplayu', 'Plan za organizaciju', 'Aktivnost svaki dan'],
+    kratko: 'Vodiš organizaciju ili jednu od pet bandi. Moraš da imaš bar 5 ljudi spremnih da krenu sa tobom.',
+    uslovi: ['Najmanje 5 ljudi za organizaciju', 'Najmanje 16 godina', 'Iskustvo u roleplayu', 'Plan za organizaciju', 'Aktivnost svaki dan'],
     otvorena: true,
     ponovoPosleDana: 14,
     jednom: true,
@@ -207,7 +170,8 @@ export const PRIJAVE: VrstaPrijave[] = [
       { id: 'organizacija', tip: 'izbor', pitanje: 'Šta želiš da vodiš?', opcije: [...ORGANIZACIJE, ...BANDE], obavezno: true },
       { id: 'iskustvo', tip: 'opis', pitanje: 'Da li si već vodio organizaciju? Gde, koliko dugo i kako je išlo?', min: 40, max: 1500, obavezno: true },
       { id: 'plan', tip: 'opis', pitanje: 'Kako bi vodio organizaciju? Pravila, činovi, aktivnosti, roleplay ideje.', min: 120, max: 2500, obavezno: true },
-      { id: 'clanovi', tip: 'opis', pitanje: 'Imaš li već ljude koji bi bili sa tobom? Ako da, koliko?', min: 10, max: 1000, obavezno: true },
+      { id: 'brojClanova', tip: 'broj', pitanje: 'Koliko ljudi ima tvoja ekipa za ovu organizaciju?', pomoc: 'Najmanje 5. Bez 5 ljudi prijava ne može da se pošalje.', min: 5, max: 200, obavezno: true },
+      { id: 'clanovi', tip: 'opis', pitanje: 'Napiši Discord imena tih ljudi', pomoc: 'Jedno ime po redu, najmanje 5.', min: 20, max: 1500, obavezno: true },
       { id: 'sukob', tip: 'opis', pitanje: 'Dva tvoja člana se posvađaju i jedan hoće da ode. Šta radiš?', min: 40, max: 1200, obavezno: true },
       pravila,
     ],
